@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "jobs_source_external_id_unique" ON "jobs" USING btree ("source","source_external_id");

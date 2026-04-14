@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, text, timestamp, jsonb, integer, numeric,
-  boolean, smallint, bigint, char, vector,
+  boolean, smallint, bigint, char, vector, uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const profile = pgTable("profile", {
@@ -30,28 +30,34 @@ export const companies = pgTable("companies", {
   expiresAt: timestamp("expires_at", { withTimezone: true }),
 });
 
-export const jobs = pgTable("jobs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  companyId: uuid("company_id").references(() => companies.id, { onDelete: "set null" }),
-  source: text("source").notNull(),
-  sourceUrl: text("source_url").notNull(),
-  sourceExternalId: text("source_external_id"),
-  title: text("title").notNull(),
-  jdText: text("jd_text").notNull(),
-  jdEmbedding: vector("jd_embedding", { dimensions: 512 }),
-  location: text("location"),
-  dutchRequired: boolean("dutch_required").notNull().default(false),
-  seniority: text("seniority"),
-  postedAt: timestamp("posted_at", { withTimezone: true }),
-  discoveredAt: timestamp("discovered_at", { withTimezone: true }).defaultNow().notNull(),
-  dedupeHash: text("dedupe_hash").notNull(),
-  canonicalJobId: uuid("canonical_job_id"),
-  fitScore: numeric("fit_score", { precision: 4, scale: 1 }),
-  fitBreakdown: jsonb("fit_breakdown").$type<unknown>(),
-  gapAnalysis: jsonb("gap_analysis").$type<unknown>(),
-  tier: smallint("tier"),
-  hardFilterReason: text("hard_filter_reason"),
-});
+export const jobs = pgTable(
+  "jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: uuid("company_id").references(() => companies.id, { onDelete: "set null" }),
+    source: text("source").notNull(),
+    sourceUrl: text("source_url").notNull(),
+    sourceExternalId: text("source_external_id"),
+    title: text("title").notNull(),
+    jdText: text("jd_text").notNull(),
+    jdEmbedding: vector("jd_embedding", { dimensions: 512 }),
+    location: text("location"),
+    dutchRequired: boolean("dutch_required").notNull().default(false),
+    seniority: text("seniority"),
+    postedAt: timestamp("posted_at", { withTimezone: true }),
+    discoveredAt: timestamp("discovered_at", { withTimezone: true }).defaultNow().notNull(),
+    dedupeHash: text("dedupe_hash").notNull(),
+    canonicalJobId: uuid("canonical_job_id"),
+    fitScore: numeric("fit_score", { precision: 4, scale: 1 }),
+    fitBreakdown: jsonb("fit_breakdown").$type<unknown>(),
+    gapAnalysis: jsonb("gap_analysis").$type<unknown>(),
+    tier: smallint("tier"),
+    hardFilterReason: text("hard_filter_reason"),
+  },
+  (table) => ({
+    uniqSource: uniqueIndex("jobs_source_external_id_unique").on(table.source, table.sourceExternalId),
+  }),
+);
 
 export const applications = pgTable("applications", {
   id: uuid("id").primaryKey().defaultRandom(),
