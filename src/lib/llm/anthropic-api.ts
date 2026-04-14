@@ -46,7 +46,12 @@ export class AnthropicAPIAdapter implements LLMAdapter {
 
   constructor() {
     const env = loadLlmEnv();
-    this.anth = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+    // maxRetries bumped from SDK default (2) → 8 to survive ITPM rate-limit
+    // bursts. SDK uses exponential backoff + honors the retry-after header
+    // from 429 responses. Under p-limit(3) orchestrator concurrency with
+    // ~3.5K input tokens per call, bursts past 50K ITPM used to fail ~13%
+    // of rank calls; 8 retries brings us to ~100% success.
+    this.anth = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 8 });
   }
 
   async complete(req: CompleteRequest): Promise<CompleteResponse> {
