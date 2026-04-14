@@ -9,5 +9,9 @@ dist/
 build/
 *.log
 
+# Next.js generated files
+next-env.d.ts
+tsconfig.tsbuildinfo
+
 # Worktrees from unrelated projects living in this directory tree
 .claude/worktrees/
