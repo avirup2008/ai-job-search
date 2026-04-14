@@ -2,14 +2,14 @@
 
 **Last updated:** 2026-04-14
 **Current milestone:** v1 (1-month job search)
-**Current phase:** Pre-Phase-1 — ready for `/gsd-plan-phase 1`
+**Current phase:** Phase 2 — LLM Platform + Budget Gateway (starting)
 
 ## Progress
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1 Infrastructure & Data Model | not started | ← next |
-| 2 LLM Platform + Budget | not started | |
+| 1 Infrastructure & Data Model | ✅ complete | 4 commits + Vercel + Neon EU live; see phase-01/VERIFICATION.md |
+| 2 LLM Platform + Budget | in progress | ← next |
 | 3 Discovery Sources | not started | |
 | 4 Pipeline Logic | not started | |
 | 5 Orchestration + Admin + Cron | not started | |
