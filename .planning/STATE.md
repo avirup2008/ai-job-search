@@ -2,15 +2,15 @@
 
 **Last updated:** 2026-04-14
 **Current milestone:** v1 (1-month job search)
-**Current phase:** Phase 2 — LLM Platform + Budget Gateway (starting)
+**Current phase:** Phase 3 — Discovery Sources (starting, blocked on Adzuna+Jooble free-tier keys)
 
 ## Progress
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1 Infrastructure & Data Model | ✅ complete | 4 commits + Vercel + Neon EU live; see phase-01/VERIFICATION.md |
-| 2 LLM Platform + Budget | in progress | ← next |
-| 3 Discovery Sources | not started | |
+| 1 Infrastructure & Data Model | ✅ complete | Neon EU + 12 tables; see phase-01/VERIFICATION.md |
+| 2 LLM Platform + Budget | ✅ complete | 4 commits; Haiku-fit replaces embeddings; see phase-02/VERIFICATION.md |
+| 3 Discovery Sources | in progress | ← needs Adzuna + Jooble keys |
 | 4 Pipeline Logic | not started | |
 | 5 Orchestration + Admin + Cron | not started | |
 | 6 Week-1 Deploy & Acceptance | not started | |
