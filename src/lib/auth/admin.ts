@@ -1,15 +1,15 @@
 import { cookies } from "next/headers";
-import { loadEnv } from "@/lib/env";
+import { loadAdminEnv } from "@/lib/env";
 
 const COOKIE = "aijs_admin";
 
 export async function isAdmin(): Promise<boolean> {
   const jar = await cookies();
-  return jar.get(COOKIE)?.value === loadEnv().ADMIN_SECRET;
+  return jar.get(COOKIE)?.value === loadAdminEnv().ADMIN_SECRET;
 }
 
 export async function setAdminCookie(secret: string): Promise<boolean> {
-  if (secret !== loadEnv().ADMIN_SECRET) return false;
+  if (secret !== loadAdminEnv().ADMIN_SECRET) return false;
   const jar = await cookies();
   jar.set(COOKIE, secret, {
     httpOnly: true,

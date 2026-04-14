@@ -1,32 +1,49 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 
-describe("env validation", () => {
-  it("throws when DATABASE_URL is missing", async () => {
+describe("env per-feature loaders", () => {
+  beforeEach(async () => {
+    const mod = await import("@/lib/env");
+    mod._clearEnvCache();
+  });
+
+  it("loadDbEnv throws when DATABASE_URL missing", async () => {
     const prev = process.env.DATABASE_URL;
     delete process.env.DATABASE_URL;
-    const { loadEnv } = await import("@/lib/env");
-    expect(() => loadEnv()).toThrow(/DATABASE_URL/);
+    const { loadDbEnv } = await import("@/lib/env");
+    expect(() => loadDbEnv()).toThrow(/DATABASE_URL/);
     if (prev) process.env.DATABASE_URL = prev;
   });
 
-  it("returns parsed env when all required fields present", async () => {
+  it("loadDbEnv returns DATABASE_URL when set", async () => {
     process.env.DATABASE_URL = "postgres://x";
+    const { loadDbEnv } = await import("@/lib/env");
+    expect(loadDbEnv().DATABASE_URL).toBe("postgres://x");
+  });
+
+  it("loadSourcesEnv requires Adzuna + Jooble keys", async () => {
+    delete process.env.ADZUNA_APP_ID;
+    const { loadSourcesEnv } = await import("@/lib/env");
+    expect(() => loadSourcesEnv()).toThrow(/ADZUNA_APP_ID/);
+  });
+
+  it("loadLlmEnv defaults MONTHLY_LLM_CAP_EUR to 20", async () => {
     process.env.ANTHROPIC_API_KEY = "sk-x";
-    process.env.OPENAI_API_KEY = "sk-x";
-    process.env.ADZUNA_APP_ID = "a";
-    process.env.ADZUNA_APP_KEY = "b";
-    process.env.JOOBLE_API_KEY = "c";
-    process.env.RESEND_API_KEY = "re-x";
-    process.env.RESEND_FROM = "x@x.com";
-    process.env.ADMIN_EMAIL = "admin@x.com";
-    process.env.CANDIDATE_EMAIL = "cand@x.com";
-    process.env.ADMIN_SECRET = "x".repeat(32);
-    process.env.CRON_SECRET = "y".repeat(32);
-    process.env.MONTHLY_LLM_CAP_EUR = "20";
-    process.env.BLOB_READ_WRITE_TOKEN = "t";
-    const { loadEnv } = await import("@/lib/env");
-    const env = loadEnv();
-    expect(env.DATABASE_URL).toBe("postgres://x");
-    expect(env.MONTHLY_LLM_CAP_EUR).toBe(20);
+    delete process.env.MONTHLY_LLM_CAP_EUR;
+    const { loadLlmEnv } = await import("@/lib/env");
+    expect(loadLlmEnv().MONTHLY_LLM_CAP_EUR).toBe(20);
+  });
+
+  it("loadAdminEnv enforces 32-char minimum", async () => {
+    process.env.ADMIN_SECRET = "tooshort";
+    const { loadAdminEnv } = await import("@/lib/env");
+    expect(() => loadAdminEnv()).toThrow(/at least 32 characters/);
+  });
+
+  it("loaders cache results — second call does not re-validate", async () => {
+    process.env.DATABASE_URL = "postgres://first";
+    const { loadDbEnv } = await import("@/lib/env");
+    expect(loadDbEnv().DATABASE_URL).toBe("postgres://first");
+    process.env.DATABASE_URL = "postgres://second";
+    expect(loadDbEnv().DATABASE_URL).toBe("postgres://first"); // cached
   });
 });

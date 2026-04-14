@@ -11,8 +11,7 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/env", () => ({
-  loadEnv: () => ({ ADMIN_SECRET: "x".repeat(32) }),
-  tryLoadEnv: () => ({ ADMIN_SECRET: "x".repeat(32) }),
+  loadAdminEnv: () => ({ ADMIN_SECRET: "x".repeat(32) }),
 }));
 
 describe("admin auth", () => {

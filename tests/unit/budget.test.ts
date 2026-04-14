@@ -10,8 +10,7 @@ vi.mock("@/lib/llm/budget", () => ({
   currentPeriod: () => "2026-04",
 }));
 vi.mock("@/lib/env", () => ({
-  loadEnv: () => ({ MONTHLY_LLM_CAP_EUR: 20 }),
-  tryLoadEnv: () => ({ MONTHLY_LLM_CAP_EUR: 20 }),
+  loadLlmEnv: () => ({ MONTHLY_LLM_CAP_EUR: 20 }),
 }));
 
 function mkAdapter(overrides: Partial<LLMAdapter> = {}, log?: string[]): LLMAdapter {

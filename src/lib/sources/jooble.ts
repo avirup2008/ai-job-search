@@ -1,4 +1,4 @@
-import { loadEnv } from "@/lib/env";
+import { loadSourcesEnv } from "@/lib/env";
 import type { JobSource, RawJob } from "./types";
 
 interface JoobleApiJob {
@@ -48,7 +48,7 @@ export class JoobleSource implements JobSource {
   readonly name = "jooble";
 
   async fetch(): Promise<RawJob[]> {
-    const env = loadEnv();
+    const env = loadSourcesEnv();
     const out: RawJob[] = [];
     const seen = new Set<string>();
 

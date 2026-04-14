@@ -1,4 +1,4 @@
-import { loadEnv } from "@/lib/env";
+import { loadLlmEnv } from "@/lib/env";
 import type {
   LLMAdapter, CompleteRequest, CompleteResponse,
   StructuredRequest, StructuredResponse, Model,
@@ -24,7 +24,7 @@ export class BudgetGateway implements LLMAdapter {
   constructor(private inner: LLMAdapter) {}
 
   async complete(req: CompleteRequest): Promise<CompleteResponse> {
-    const cap = loadEnv().MONTHLY_LLM_CAP_EUR;
+    const cap = loadLlmEnv().MONTHLY_LLM_CAP_EUR;
     const state = await getBudget(cap);
     const d = decide(req.model, state.utilization);
     if (d.action === "block") throw new BudgetExceededError(state.period, state.eurSpent, state.capEur);
@@ -35,7 +35,7 @@ export class BudgetGateway implements LLMAdapter {
   }
 
   async structured<T>(req: StructuredRequest<T>): Promise<StructuredResponse<T>> {
-    const cap = loadEnv().MONTHLY_LLM_CAP_EUR;
+    const cap = loadLlmEnv().MONTHLY_LLM_CAP_EUR;
     const state = await getBudget(cap);
     const d = decide(req.model, state.utilization);
     if (d.action === "block") throw new BudgetExceededError(state.period, state.eurSpent, state.capEur);

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodToJsonSchema as zodToJson } from "zod-to-json-schema";
 import { z } from "zod";
-import { loadEnv } from "@/lib/env";
+import { loadLlmEnv } from "@/lib/env";
 import type {
   LLMAdapter,
   CompleteRequest,
@@ -45,7 +45,7 @@ export class AnthropicAPIAdapter implements LLMAdapter {
   private anth: Anthropic;
 
   constructor() {
-    const env = loadEnv();
+    const env = loadLlmEnv();
     this.anth = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   }
 
