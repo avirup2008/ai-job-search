@@ -2,15 +2,16 @@
 
 **Last updated:** 2026-04-14
 **Current milestone:** v1 (1-month job search)
-**Current phase:** Phase 3 — Discovery Sources (starting, blocked on Adzuna+Jooble free-tier keys)
+**Current phase:** Phase 4 — Pipeline Logic (starting)
 
 ## Progress
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1 Infrastructure & Data Model | ✅ complete | Neon EU + 12 tables; see phase-01/VERIFICATION.md |
-| 2 LLM Platform + Budget | ✅ complete | 4 commits; Haiku-fit replaces embeddings; see phase-02/VERIFICATION.md |
-| 3 Discovery Sources | in progress | ← needs Adzuna + Jooble keys |
+| 1 Infrastructure & Data Model | ✅ complete | Neon EU + 12 tables |
+| 2 LLM Platform + Budget | ✅ complete | Haiku-fit replaces embeddings |
+| 3 Discovery Sources | ✅ complete | 4 sources, 452 jobs/night live; Werk.nl replaced with Magnet.me |
+| 4 Pipeline Logic | in progress | ← filters, dedupe, tier, profile embedder |
 | 4 Pipeline Logic | not started | |
 | 5 Orchestration + Admin + Cron | not started | |
 | 6 Week-1 Deploy & Acceptance | not started | |
