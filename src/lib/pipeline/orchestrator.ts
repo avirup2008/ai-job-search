@@ -25,7 +25,11 @@ export interface RunSummary {
   elapsedMs: number;
 }
 
-const RANK_CONCURRENCY = 10;
+// Anthropic ITPM rate limits on Tier 1 accounts cap burst throughput.
+// At p-limit(3) with ~3.5K input tokens each, ~10K ITPM per burst — safely
+// under the common 50K ITPM limit. Observed run at 10 concurrent had 73%
+// silent failure rate due to rate limits; 3 keeps ~100% success.
+const RANK_CONCURRENCY = 3;
 
 interface ClassifiedJob {
   j: RawJob;
@@ -49,6 +53,22 @@ export async function runNightly(): Promise<RunSummary> {
   const runId = run.id;
 
   try {
+    // 0. Clean up rank-failed rows from previous runs so they get re-attempted.
+    //    A row is "rank-failed" if it has no tier, no hard_filter_reason, and no
+    //    fit_score — meaning the LLM call crashed and we wrote a placeholder row.
+    //    Applications are cascade-deleted (tier was null → no app row existed anyway).
+    const deletedFailed = await db.execute(sql`
+      DELETE FROM jobs
+      WHERE tier IS NULL
+        AND hard_filter_reason IS NULL
+        AND fit_score IS NULL
+      RETURNING id
+    `);
+    const retryCount = Array.isArray(deletedFailed) ? deletedFailed.length : (deletedFailed as { rowCount?: number }).rowCount ?? 0;
+    if (retryCount > 0) {
+      console.log(`[orchestrator] cleaned ${retryCount} rank-failed rows from prior runs — will re-attempt`);
+    }
+
     // 1. Discover + cluster + load profile
     const disc = await discover();
     const clusters = clusterJobs(disc.jobs);
@@ -154,7 +174,9 @@ export async function runNightly(): Promise<RunSummary> {
           let rank;
           try {
             rank = await assessJob({ jdText: e.j.jdText, jobTitle: e.j.title, profile });
-          } catch {
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            console.error(`[rank-failed] ${e.j.source}/${e.j.sourceExternalId} "${e.j.title.slice(0, 50)}": ${msg.slice(0, 200)}`);
             // Budget exhausted or rank failure — record without tier/fit, keep iterating
             await db.insert(schema.jobs).values({
               companyId: e.companyId,
