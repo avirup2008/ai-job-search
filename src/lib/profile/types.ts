@@ -33,14 +33,23 @@ export interface Profile {
     dutchLevel?: string;
     sponsorNeeded?: boolean;
     commuteMaxKm?: number;
+    commuteMaxMinutesCar?: number;
+    commuteMaxMinutesTrain?: number;
+    availability?: string;
   };
   preferences: {
-    salaryFloorEur?: number;
+    salaryFloorEur?: number | null;
     vetoCompanies?: string[];
     roleFamilies?: string[];
+    workModes?: Array<"hybrid" | "remote" | "onsite">;
+    languagesAccepted?: string[];
+    companyStagePreference?: string[];
+    industryAntiPreference?: string[];
   };
   portfolioUrl?: string;
-  linkedinUrl?: string;
+  linkedinUrl?: string | null;
+  contactEmail?: string;
+  phone?: string;
 }
 
 export function profileToCompactText(p: Profile): string {
