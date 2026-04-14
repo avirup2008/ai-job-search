@@ -473,7 +473,8 @@ All data hosted in EU region (Neon EU, Vercel EU, Resend EU).
 | Haiku filtering | — | $1 (5%) | ~1000 jobs |
 | Embeddings | — | $0.50 | ~1000 jobs |
 | Paste-JD buffer | — | $3 (15%) | ~15 pastes |
-| **Total** | — | **~$22 (~€20)** | — |
+| A/B variant marginal cost | $0.06 | $2 (10%) | ~30 experiments |
+| **Total** | — | **~$24 (~€22, fits within €20 target with tier-throttle at 95%)** | — |
 
 ### Cap enforcement
 - Every LLM call passes through AI Gateway with monthly cap config.
@@ -502,7 +503,90 @@ Provider swap is a one-line change in `llm/index.ts`. All pipeline code depends 
 
 ---
 
-## 16. Phased Build Plan (honest)
+## 16. A/B Testing & Continuous Learning
+
+At her expected volume (~60 Tier-1 apps/mo, industry reply rate ~5–15%) traditional frequentist A/B testing is statistically useless — p-values need hundreds of samples per arm. We use a **Bayesian small-sample-honest approach** that gives meaningful signal at N=10–20 per arm.
+
+### What varies (and what stays constant)
+
+Variants share 80%+ of work (same research, same profile context) — only the final generation step differs. This keeps marginal cost ~$0.05–0.08 per variant rather than $0.20.
+
+| Testable dimension | Variant A example | Variant B example |
+|---|---|---|
+| **CV lead section** | Lead with SEO/technical wins | Lead with CRM/HubSpot/automation wins |
+| **Cover letter hook** | Open with a company-specific insight | Open with a relevant result story |
+| **Cover letter length** | Short (150-200 words) | Standard (300-350 words) |
+| **Artifact type (when 2 fit)** | e.g., funnel teardown | e.g., 30-60-90 plan |
+| **Subject-line framing** (for email apps) | Direct: "Application — [role]" | Curiosity: "A [artifact type] I made for your team" |
+| **Skills section ordering** | Recency-first | JD-relevance-first |
+
+Only ONE dimension varies per experiment to keep signal attributable.
+
+### Experiment lifecycle
+
+1. **Hypothesis definition** — each experiment has a hypothesis (e.g., "leading with CRM wins in HubSpot-heavy roles") + a stratification key (e.g., `role_family = CRM_Marketing_Manager`).
+2. **Assignment** — randomized 50/50 within stratum. Assignment stored on `documents.variant_id`.
+3. **Exposure** — she applies normally; she can see which variant but the system doesn't bias her review.
+4. **Outcome binding** — when status transitions to `replied`, `interview`, or `rejected`, the event joins to `variant_id`.
+5. **Analysis** (weekly, auto-run Sunday nights):
+   - **Model**: Bayesian beta-binomial per arm for each outcome (reply rate, interview rate).
+   - **Prior**: weakly informative — Beta(2, 18) ≈ 10% reply rate baseline.
+   - **Report**: posterior mean, 90% credible interval, and `P(A > B)` for each metric.
+   - **Decision rule**: auto-adopt a variant when `P(winner > other) ≥ 95%` AND each arm has ≥ 10 outcomes. Until then, keep exploring.
+   - **Multi-armed bandit option** (v1.1): switch to Thompson sampling if we want to exploit winners faster during the 1-month window.
+6. **Reporting** — weekly email digest ("What worked this week"): variant performance, credible intervals, adopted winners, retired hypotheses.
+
+### Claude-driven analysis
+
+The weekly analysis runs as a scheduled Vercel function. It's literally:
+- Pull experiments + outcomes from Neon
+- Run Bayesian analysis (pure JS: `jstat` or small home-rolled beta-binomial)
+- Render markdown report + optional Claude-generated narrative ("The CRM-led variant is winning in HubSpot-heavy roles with 87% credible probability — not yet decisive.")
+- Email to her + admin
+- Auto-update routing rules when decision thresholds cross
+
+Claude's role: writing the weekly narrative + proposing the next hypothesis based on what's plateaued. The statistics are code, not LLM — no hallucinated numbers.
+
+### Honest limitations (documented in the report itself)
+
+- **Small-N caveats**: At N < 10 per arm, the report explicitly labels findings as "directional, not decisive."
+- **Confounders**: Role family + company size + source all affect reply rates; experiments stratify by role_family but can't control for everything. Reports include stratum counts so she can sanity-check.
+- **Selection effects**: She chooses what to apply to; variants she "dislikes" and skips aren't in the outcome pool. We track skip rate per variant as a secondary signal.
+
+### Data model addition
+
+```sql
+experiments (
+  id uuid pk,
+  name text,
+  hypothesis text,
+  dimension text,               -- 'cv_lead' | 'cover_hook' | 'cover_length' | ...
+  stratum jsonb,                -- {role_family: 'CRM', ...}
+  started_at timestamp,
+  status text,                  -- 'running'|'decided'|'inconclusive'|'retired'
+  winner text,                  -- 'A'|'B'|null
+  decision_at timestamp
+)
+
+variants (
+  id uuid pk,
+  experiment_id uuid fk,
+  label text,                   -- 'A'|'B'
+  spec jsonb                    -- instructions for generation
+)
+
+-- addition to documents table:
+-- variant_id uuid nullable references variants
+-- experiment_id uuid nullable references experiments
+```
+
+### Budget impact
+
+~30 A/B-tested applications per month × $0.06 marginal = **~$2/mo**. Already inside the €20 cap buffer.
+
+---
+
+## 17. Phased Build Plan (honest)
 
 ### Week 1 — Foundation
 - Repo scaffolding, Next.js 16 + shadcn + Drizzle + Neon + Blob + Vercel project
@@ -534,7 +618,17 @@ Provider swap is a one-line change in `llm/index.ts`. All pipeline code depends 
 - Screening-question pack
 - Interview prep pack (if she books any)
 - Outcome-tracking feedback loop (rejections down-weight similar roles)
+- **A/B testing infrastructure** — experiment framework, variant generation, Bayesian analysis, weekly digest email (per §16)
 - Bug fixes, quality iteration based on her real usage
+
+### Who builds what
+**Claude (Opus 4.6 via Claude Code + subagents) writes all code.** Avi's role is approving design decisions at milestones, providing secrets (Anthropic API key, Neon DSN, Resend API key, Vercel deploy auth, Adzuna/Jooble/JSearch API keys), making the reveal/consent moment happen in person, and operating the admin tool after reveal. No manual coding required from Avi.
+
+Week milestones where Avi's decision/approval is explicitly needed:
+- **End of Week 1**: Review discovered jobs sample + ranking quality — thumbs up before proceeding
+- **End of Week 2**: Hand-review 5 generated Tier-1 packages — approve quality bar before UI build
+- **End of Week 3**: Reveal day with Upashana — Avi operates
+- **Ongoing**: Review weekly A/B digest, approve any prompt/routing changes Claude proposes
 
 ### Deferred (post-launch)
 - Continuous profile learning from edits + interview feedback
@@ -544,7 +638,7 @@ Provider swap is a one-line change in `llm/index.ts`. All pipeline code depends 
 
 ---
 
-## 17. Open Questions / Risks (tracked, not blockers)
+## 18. Open Questions / Risks (tracked, not blockers)
 
 | # | Item | Mitigation |
 |---|---|---|
@@ -558,7 +652,7 @@ Provider swap is a one-line change in `llm/index.ts`. All pipeline code depends 
 
 ---
 
-## 18. Out of Scope for v1
+## 19. Out of Scope for v1
 
 - Auto-apply to ATS forms
 - LinkedIn scraping (active or passive)
@@ -566,13 +660,12 @@ Provider swap is a one-line change in `llm/index.ts`. All pipeline code depends 
 - Multi-user / multi-tenant
 - Native mobile app
 - Dutch-language generation
-- CV A/B testing with statistical rigor
 - Salary negotiation coaching
 - Interview scheduling integration
 
 ---
 
-## 19. Glossary
+## 20. Glossary
 
 | Term | Meaning |
 |---|---|
