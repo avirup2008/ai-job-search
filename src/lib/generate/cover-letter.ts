@@ -4,7 +4,7 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { getCompanyDossier } from "@/lib/research";
 import { profileToCompactText, type Profile } from "@/lib/profile/types";
-import { findViolations, formatViolationsForRetry, type Violation } from "./anti-ai";
+import { findViolations, formatViolationsForRetry, mapStrings, sanitizeMechanicalTells, type Violation } from "./anti-ai";
 
 const CoverLetterSchema = z.object({
   subject: z.string().describe("Email subject line / letter title (under 90 chars)"),
@@ -193,9 +193,12 @@ export async function generateCoverLetter(input: GenerationInput): Promise<Gener
 
   if (!res) throw new Error("cover letter generation failed — no response");
 
+  // Final mechanical sanitisation — catches em-dashes that slip past all 5 retries
+  const sanitised = mapStrings(res.data, sanitizeMechanicalTells);
+
   return {
-    cover: res.data,
-    markdown: toMarkdown(res.data),
+    cover: sanitised,
+    markdown: toMarkdown(sanitised),
     tokens: accumulatedTokens,
     costEur: accumulatedCost,
   };

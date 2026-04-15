@@ -17,3 +17,5 @@ tsconfig.tsbuildinfo
 .claude/worktrees/
 .vercel
 .env*.local
+
+.tmp/

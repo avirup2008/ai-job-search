@@ -3,7 +3,7 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { getCompanyDossier } from "@/lib/research";
 import { profileToCompactText, type Profile } from "@/lib/profile/types";
-import { findViolations, formatViolationsForRetry, type Violation } from "./anti-ai";
+import { findViolations, formatViolationsForRetry, mapStrings, sanitizeMechanicalTells, type Violation } from "./anti-ai";
 import { z } from "zod";
 import { CvSchema, cvNarrativeText } from "./cv-types";
 import type { CvStruct } from "./cv-types";
@@ -137,8 +137,11 @@ export async function generateCV(jobId: string): Promise<CvGenerationResult> {
 
   if (!res) throw new Error("CV generation failed — no response");
 
+  // Final mechanical sanitisation — catches em-dashes that slip past all 5 retries
+  const sanitised = mapStrings(res.data as CvStruct, sanitizeMechanicalTells);
+
   return {
-    cv: res.data,
+    cv: sanitised,
     tokens: accumulatedTokens,
     costEur: accumulatedCost,
     attempts: finalAttempt,
