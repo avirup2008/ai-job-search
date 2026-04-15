@@ -2,6 +2,47 @@ import { put } from "@vercel/blob";
 import { db, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
 
+export async function storeArtifact(params: {
+  applicationId: string;
+  artifactType: string;
+  html: string;
+  tokenCostEur: number;
+  tier: number | null;
+}): Promise<{ id: string; htmlUrl: string; publicSlug: string; version: number }> {
+  const existing = await db
+    .select({ version: schema.documents.version })
+    .from(schema.documents)
+    .where(and(
+      eq(schema.documents.applicationId, params.applicationId),
+      eq(schema.documents.kind, "artifact"),
+      eq(schema.documents.artifactType, params.artifactType),
+    ));
+  const nextVersion = existing.length === 0 ? 1 : Math.max(...existing.map((r) => r.version)) + 1;
+  const slug = `${params.artifactType}-${params.applicationId.slice(0, 8)}-v${nextVersion}-${Date.now().toString(36)}`;
+
+  const blob = await put(
+    `artifacts/${slug}.html`,
+    params.html,
+    { access: "public", contentType: "text/html; charset=utf-8", addRandomSuffix: false },
+  );
+
+  const [row] = await db
+    .insert(schema.documents)
+    .values({
+      applicationId: params.applicationId,
+      kind: "artifact",
+      artifactType: params.artifactType,
+      version: nextVersion,
+      blobUrlDocx: null,
+      blobUrlPdf: null,
+      publicSlug: slug,
+      generatedByTier: params.tier,
+      tokenCost: String(params.tokenCostEur),
+    })
+    .returning({ id: schema.documents.id });
+  return { id: row.id, htmlUrl: blob.url, publicSlug: slug, version: nextVersion };
+}
+
 /**
  * Persist a generated CV. Uploads DOCX to Vercel Blob,
  * writes a `documents` row. PDF deferred to a later phase.
