@@ -4,6 +4,7 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { getCompanyDossier } from "@/lib/research";
 import { profileToCompactText, type Profile } from "@/lib/profile/types";
+import { findViolations, formatViolationsForRetry, type Violation } from "./anti-ai";
 
 const CoverLetterSchema = z.object({
   subject: z.string().describe("Email subject line / letter title (under 90 chars)"),
@@ -100,88 +101,6 @@ function bodyText(c: CoverLetterStruct): string {
   return [c.subject, c.greeting, ...c.paragraphs, c.closing].join("\n");
 }
 
-interface Violation { pattern: string; sample: string }
-
-const FORBIDDEN_REGEX: Array<{ re: RegExp; label: string }> = [
-  // Em-dash (any form)
-  { re: /—/g, label: "em-dash (—)" },
-  // "maps X to" variants: maps to, maps directly to, maps closely to, maps neatly to, maps cleanly to, mapped to
-  { re: /\bmaps?\s+(\w+\s+)?to\b/gi, label: "maps [X] to (any variant)" },
-  { re: /\bmapped\s+(\w+\s+)?to\b/gi, label: "mapped [X] to" },
-  { re: /\bmapping\s+(\w+\s+)?to\b/gi, label: "mapping [X] to" },
-  // Negative parallelisms
-  { re: /\bnot\s+just\b/gi, label: "not just" },
-  { re: /\bnot\s+only\b/gi, label: "not only" },
-  { re: /\bnot\s+merely\b/gi, label: "not merely" },
-  { re: /\bmore\s+than\s+just\b/gi, label: "more than just" },
-  { re: /\brather\s+than\s+\w+ing\b/gi, label: "rather than X-ing" },
-];
-
-const FORBIDDEN_SUBSTRINGS: string[] = [
-  "at the intersection of",
-  "sits at the heart of",
-  "in the heart of",
-  "stands as",
-  "serves as",
-  "delve",
-  "pivotal",
-  "crucial",
-  "seamless",
-  "seamlessly",
-  "tapestry",
-  "intricate",
-  "enduring",
-  "vibrant",
-  "robust",
-  "robustly",
-  "leverage",
-  "leveraging",
-  "foster",
-  "fostering",
-  "transformative",
-  "ever-evolving",
-  "paving the way",
-  "shaping the future",
-  "ultimately",
-  "in today's",
-  "additionally",
-  "moreover",
-  "furthermore",
-  "it is worth noting",
-  "it's worth noting",
-  "it is important to note",
-  "underscore",
-  "underscores",
-  "mirrors",
-  "mirroring",
-  "translates to",
-  "speaks to",
-  "ties into",
-];
-
-function findViolations(text: string): Violation[] {
-  const hits: Violation[] = [];
-  // Regex-based patterns first (catches variants like "maps closely to")
-  for (const { re, label } of FORBIDDEN_REGEX) {
-    re.lastIndex = 0;
-    const match = re.exec(text);
-    if (!match) continue;
-    const idx = match.index;
-    const start = Math.max(0, idx - 25);
-    const end = Math.min(text.length, idx + match[0].length + 35);
-    hits.push({ pattern: label, sample: text.slice(start, end).replace(/\s+/g, " ").trim() });
-  }
-  // Literal substring patterns
-  const lower = text.toLowerCase();
-  for (const needle of FORBIDDEN_SUBSTRINGS) {
-    const idx = lower.indexOf(needle.toLowerCase());
-    if (idx === -1) continue;
-    const start = Math.max(0, idx - 25);
-    const end = Math.min(text.length, idx + needle.length + 35);
-    hits.push({ pattern: needle, sample: text.slice(start, end).replace(/\s+/g, " ").trim() });
-  }
-  return hits;
-}
 
 export async function generateCoverLetter(input: GenerationInput): Promise<GenerationResult> {
   // Load job + company
@@ -245,17 +164,7 @@ export async function generateCoverLetter(input: GenerationInput): Promise<Gener
   let lastViolations: Violation[] = [];
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const retryFeedback = attempt === 1
-      ? ""
-      : [
-          "",
-          `===RETRY FEEDBACK — attempt ${attempt} of ${MAX_ATTEMPTS}===`,
-          "Your previous draft violated these anti-AI rules. Rewrite the letter WITHOUT any of these patterns:",
-          ...lastViolations.map((v) => `  • "${v.pattern}" found in: "${v.sample}"`),
-          "Rewrite cleanly. Same content, zero banned tokens.",
-          "===END RETRY FEEDBACK===",
-          "",
-        ].join("\n");
+    const retryFeedback = attempt === 1 ? "" : formatViolationsForRetry(lastViolations);
 
     const thisRes = await llm.structured({
       model: "sonnet",

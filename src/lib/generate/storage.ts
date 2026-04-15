@@ -3,6 +3,76 @@ import { db, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
 
 /**
+ * Persist a generated CV. Uploads DOCX + PDF to Vercel Blob,
+ * writes a `documents` row with both URLs. Returns the new document record.
+ */
+export async function storeCv(params: {
+  applicationId: string;
+  docxBuffer: Buffer;
+  pdfBuffer: Buffer;
+  tokenCostEur: number;
+  tier: number | null;
+}): Promise<{ id: string; docxUrl: string; pdfUrl: string; publicSlug: string; version: number }> {
+  // Determine next version for this application+kind
+  const existing = await db
+    .select({ version: schema.documents.version })
+    .from(schema.documents)
+    .where(
+      and(
+        eq(schema.documents.applicationId, params.applicationId),
+        eq(schema.documents.kind, "cv"),
+      ),
+    );
+  const nextVersion = existing.length === 0 ? 1 : Math.max(...existing.map((r) => r.version)) + 1;
+  const slug = `cv-${params.applicationId.slice(0, 8)}-v${nextVersion}-${Date.now().toString(36)}`;
+
+  // Upload DOCX and PDF to Blob in parallel
+  const [docxBlob, pdfBlob] = await Promise.all([
+    put(
+      `cvs/${slug}.docx`,
+      params.docxBuffer,
+      {
+        access: "public",
+        contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        addRandomSuffix: false,
+      },
+    ),
+    put(
+      `cvs/${slug}.pdf`,
+      params.pdfBuffer,
+      {
+        access: "public",
+        contentType: "application/pdf",
+        addRandomSuffix: false,
+      },
+    ),
+  ]);
+
+  // Insert documents row with both URLs
+  const [row] = await db
+    .insert(schema.documents)
+    .values({
+      applicationId: params.applicationId,
+      kind: "cv",
+      version: nextVersion,
+      blobUrlDocx: docxBlob.url,
+      blobUrlPdf: pdfBlob.url,
+      publicSlug: slug,
+      generatedByTier: params.tier,
+      tokenCost: String(params.tokenCostEur),
+    })
+    .returning({ id: schema.documents.id });
+
+  return {
+    id: row.id,
+    docxUrl: docxBlob.url,
+    pdfUrl: pdfBlob.url,
+    publicSlug: slug,
+    version: nextVersion,
+  };
+}
+
+/**
  * Persist a generated cover letter. Uploads markdown to Vercel Blob,
  * writes a `documents` row. Returns the new document record.
  */
