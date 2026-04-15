@@ -53,10 +53,10 @@
 .inbox-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--s-3);
+  gap: var(--s-5);
 }
 @media (min-width: 1100px) {
-  .inbox-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-4); }
+  .inbox-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-5); }
 }
 
 /* Job card — new hierarchy */
@@ -87,46 +87,57 @@
 .job-card[data-band="weak"]   .job-card-rail { background: var(--border-h); }
 
 .job-card-body {
-  padding: 20px 22px;
+  padding: 22px 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .job-card-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 .job-card-company {
   font-size: 11px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 600;
   color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 .job-card-score {
-  font-size: 26px;
+  font-family: var(--font-mono);
+  font-size: 22px;
   font-weight: 500;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   color: var(--text-2);
-  letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 .job-card-score[data-band="strong"] { color: var(--match-strong); }
 .job-card-score[data-band="medium"] { color: var(--match-medium); }
 .job-card-score[data-band="weak"]   { color: var(--text-2); }
 
 .job-card-title {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-size: 22px;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   color: var(--text-1);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .job-card-strength {
@@ -163,7 +174,7 @@
   color: var(--text-3);
   margin-right: 8px;
 }
-.meta-chip-source { color: var(--text-3); margin-left: auto; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
+.meta-chip-source { color: var(--text-3); margin-left: auto; font-size: 11px; text-transform: capitalize; }
 .meta-chip-source::before { display: none !important; }
 
 .inbox-empty {

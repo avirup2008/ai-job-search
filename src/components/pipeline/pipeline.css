@@ -1,13 +1,13 @@
-/* Pipeline kanban */
+/* Pipeline kanban — unified with Inbox card system */
 
 .kanban {
   display: grid;
-  grid-template-columns: repeat(6, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, minmax(240px, 1fr));
   gap: var(--s-4);
   overflow-x: auto;
   padding-bottom: var(--s-4);
 }
-@media (max-width: 1400px) { .kanban { grid-template-columns: repeat(6, 240px); } }
+@media (max-width: 1400px) { .kanban { grid-template-columns: repeat(6, 260px); } }
 
 .kanban-col {
   background: var(--surface-2);
@@ -21,87 +21,107 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--s-3) var(--s-4);
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
 }
 .kanban-col-title {
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 600;
   color: var(--text-2);
 }
 .kanban-col-count {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-2);
   background: var(--surface);
   padding: 2px 8px;
   border-radius: 10px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .kanban-list {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
-  padding: var(--s-3);
+  gap: 10px;
+  padding: 12px;
   min-height: 40px;
 }
 
 .pipe-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  overflow: hidden;
   transition: border-color var(--dur-150) var(--ease-io), box-shadow var(--dur-150) var(--ease-io);
 }
 .pipe-card:hover { border-color: var(--border-h); box-shadow: var(--shadow-sm); }
 
-.pipe-card-head {
-  display: grid;
-  grid-template-columns: 28px 1fr;
+.pipe-card-rail {
+  background: var(--border);
+  transition: background var(--dur-150) var(--ease-io);
+}
+.pipe-card[data-band="strong"] .pipe-card-rail { background: var(--accent); }
+.pipe-card[data-band="medium"] .pipe-card-rail { background: var(--warning); }
+.pipe-card[data-band="weak"]   .pipe-card-rail { background: var(--border-h); }
+
+.pipe-card-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
+  min-width: 0;
 }
-.pipe-card-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+
+.pipe-card-top {
   display: grid;
-  place-items: center;
-  color: #fff;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 15px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
 }
-.pipe-card-title {
-  font-size: 13px;
+.pipe-card-company {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   font-weight: 600;
   color: var(--text-1);
-  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.pipe-card-score {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-2);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.pipe-card-score[data-band="strong"] { color: var(--match-strong); }
+.pipe-card-score[data-band="medium"] { color: var(--match-medium); }
+.pipe-card-score[data-band="weak"]   { color: var(--text-2); }
+
+.pipe-card-title {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-.pipe-card-sub {
-  font-size: 11px;
-  color: var(--text-2);
-}
-.pipe-card-score {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  align-self: flex-start;
-}
-.pipe-card-score[data-band="strong"] { background: var(--match-strong-bg); color: var(--match-strong); }
-.pipe-card-score[data-band="medium"] { background: var(--match-medium-bg); color: var(--match-medium); }
-.pipe-card-score[data-band="weak"]   { background: var(--match-weak-bg);   color: var(--match-weak); }
+.pipe-card-title:hover { color: var(--accent); }
 
 .pipe-card-foot {
   display: flex;
@@ -109,18 +129,27 @@
   justify-content: space-between;
   gap: 8px;
   margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }
-.pipe-card-date { font-size: 11px; color: var(--text-3); }
+.pipe-card-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
 
 .pipe-select {
   font-size: 11px;
+  font-family: var(--font-body);
   color: var(--text-2);
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 3px 6px;
   cursor: pointer;
-  transition: border-color var(--dur-150) var(--ease-io);
+  transition: border-color var(--dur-150) var(--ease-io), color var(--dur-150) var(--ease-io);
 }
 .pipe-select:hover { border-color: var(--border-h); color: var(--text-1); }
 .pipe-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
