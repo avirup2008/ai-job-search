@@ -3,7 +3,7 @@ import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth/admin";
 import { PipelineCard, type PipelineCardData } from "@/components/pipeline/PipelineCard";
-import { PIPELINE_STAGES, type PipelineStage } from "./actions";
+import { PIPELINE_STAGES, type PipelineStage } from "./stages";
 import "@/components/pipeline/pipeline.css";
 
 const STAGE_LABEL: Record<PipelineStage, string> = {
@@ -64,7 +64,7 @@ export default async function PipelinePage() {
           <h1>Pipeline</h1>
         </div>
         <div className="app-header-meta">
-          {apps.length} application{apps.length === 1 ? "" : "s"}. Drag a card's menu to move stage.
+          {apps.length} application{apps.length === 1 ? "" : "s"}. Use the stage selector on a card to move it.
         </div>
       </header>
 

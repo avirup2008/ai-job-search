@@ -3,9 +3,7 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { isAdmin } from "@/lib/auth/admin";
 import { revalidatePath } from "next/cache";
-
-export const PIPELINE_STAGES = ["new", "saved", "applied", "interview", "offer", "rejected"] as const;
-export type PipelineStage = (typeof PIPELINE_STAGES)[number];
+import { PIPELINE_STAGES, type PipelineStage } from "./stages";
 
 export async function updateApplicationStatus(applicationId: string, status: PipelineStage) {
   if (!(await isAdmin())) throw new Error("forbidden");

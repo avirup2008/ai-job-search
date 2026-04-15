@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useTransition } from "react";
 import { companyAvatar, matchBand } from "@/lib/ui/avatar";
-import { updateApplicationStatus, PIPELINE_STAGES, type PipelineStage } from "@/app/(app)/pipeline/actions";
+import { updateApplicationStatus } from "@/app/(app)/pipeline/actions";
+import { PIPELINE_STAGES, type PipelineStage } from "@/app/(app)/pipeline/stages";
 
 export interface PipelineCardData {
   applicationId: string;

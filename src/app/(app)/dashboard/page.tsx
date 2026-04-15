@@ -1,8 +1,8 @@
 import { db, schema } from "@/db";
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { eq, gte, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth/admin";
-import { PIPELINE_STAGES, type PipelineStage } from "@/app/(app)/pipeline/actions";
+import { PIPELINE_STAGES, type PipelineStage } from "@/app/(app)/pipeline/stages";
 import "@/components/dashboard/dashboard.css";
 
 const STAGE_LABEL: Record<PipelineStage, string> = {
