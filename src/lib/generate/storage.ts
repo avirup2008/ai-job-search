@@ -149,3 +149,53 @@ export async function storeCoverLetter(params: {
 
   return { id: row.id, blobUrl: blob.url, publicSlug: slug, version: nextVersion };
 }
+
+/**
+ * Persist a generated screening Q&A pack. Uploads markdown to Vercel Blob,
+ * writes a `documents` row with kind="screening".
+ */
+export async function storeScreeningQA(params: {
+  applicationId: string;
+  markdown: string;
+  tokenCostEur: number;
+  tier: number | null;
+}): Promise<{ id: string; blobUrl: string; publicSlug: string; version: number }> {
+  const existing = await db
+    .select({ version: schema.documents.version })
+    .from(schema.documents)
+    .where(
+      and(
+        eq(schema.documents.applicationId, params.applicationId),
+        eq(schema.documents.kind, "screening"),
+      ),
+    );
+  const nextVersion = existing.length === 0 ? 1 : Math.max(...existing.map((r) => r.version)) + 1;
+  const slug = `screening-qa-${params.applicationId.slice(0, 8)}-v${nextVersion}-${Date.now().toString(36)}`;
+
+  const blob = await put(
+    `screening-qa/${slug}.md`,
+    params.markdown,
+    {
+      access: "public",
+      contentType: "text/markdown; charset=utf-8",
+      addRandomSuffix: false,
+    },
+  );
+
+  const [row] = await db
+    .insert(schema.documents)
+    .values({
+      applicationId: params.applicationId,
+      kind: "screening",
+      version: nextVersion,
+      blobUrlPdf: null,
+      // repurpose blobUrlDocx to hold the markdown URL, matching the cover-letter pattern
+      blobUrlDocx: blob.url,
+      publicSlug: slug,
+      generatedByTier: params.tier,
+      tokenCost: String(params.tokenCostEur),
+    })
+    .returning({ id: schema.documents.id });
+
+  return { id: row.id, blobUrl: blob.url, publicSlug: slug, version: nextVersion };
+}
