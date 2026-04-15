@@ -102,14 +102,22 @@ function bodyText(c: CoverLetterStruct): string {
 
 interface Violation { pattern: string; sample: string }
 
+const FORBIDDEN_REGEX: Array<{ re: RegExp; label: string }> = [
+  // Em-dash (any form)
+  { re: /—/g, label: "em-dash (—)" },
+  // "maps X to" variants: maps to, maps directly to, maps closely to, maps neatly to, maps cleanly to, mapped to
+  { re: /\bmaps?\s+(\w+\s+)?to\b/gi, label: "maps [X] to (any variant)" },
+  { re: /\bmapped\s+(\w+\s+)?to\b/gi, label: "mapped [X] to" },
+  { re: /\bmapping\s+(\w+\s+)?to\b/gi, label: "mapping [X] to" },
+  // Negative parallelisms
+  { re: /\bnot\s+just\b/gi, label: "not just" },
+  { re: /\bnot\s+only\b/gi, label: "not only" },
+  { re: /\bnot\s+merely\b/gi, label: "not merely" },
+  { re: /\bmore\s+than\s+just\b/gi, label: "more than just" },
+  { re: /\brather\s+than\s+\w+ing\b/gi, label: "rather than X-ing" },
+];
+
 const FORBIDDEN_SUBSTRINGS: string[] = [
-  "—",                     // em-dash
-  "maps to",
-  "maps directly to",
-  "not just",
-  "not only",
-  "not merely",
-  "more than just",
   "at the intersection of",
   "sits at the heart of",
   "in the heart of",
@@ -152,12 +160,22 @@ const FORBIDDEN_SUBSTRINGS: string[] = [
 ];
 
 function findViolations(text: string): Violation[] {
-  const lower = text.toLowerCase();
   const hits: Violation[] = [];
+  // Regex-based patterns first (catches variants like "maps closely to")
+  for (const { re, label } of FORBIDDEN_REGEX) {
+    re.lastIndex = 0;
+    const match = re.exec(text);
+    if (!match) continue;
+    const idx = match.index;
+    const start = Math.max(0, idx - 25);
+    const end = Math.min(text.length, idx + match[0].length + 35);
+    hits.push({ pattern: label, sample: text.slice(start, end).replace(/\s+/g, " ").trim() });
+  }
+  // Literal substring patterns
+  const lower = text.toLowerCase();
   for (const needle of FORBIDDEN_SUBSTRINGS) {
     const idx = lower.indexOf(needle.toLowerCase());
     if (idx === -1) continue;
-    // Capture ~60 chars around the hit for feedback
     const start = Math.max(0, idx - 25);
     const end = Math.min(text.length, idx + needle.length + 35);
     hits.push({ pattern: needle, sample: text.slice(start, end).replace(/\s+/g, " ").trim() });
@@ -220,7 +238,7 @@ export async function generateCoverLetter(input: GenerationInput): Promise<Gener
   ].join("\n");
 
   const llm = getLLM();
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 5;
   let res: Awaited<ReturnType<typeof llm.structured<CoverLetterStruct>>> | null = null;
   let accumulatedTokens = { in: 0, out: 0, cached: 0 };
   let accumulatedCost = 0;
