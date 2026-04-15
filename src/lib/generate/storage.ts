@@ -33,7 +33,8 @@ export async function storeArtifact(params: {
       kind: "artifact",
       artifactType: params.artifactType,
       version: nextVersion,
-      blobUrlDocx: null,
+      // Blob column is repurposed to hold the HTML url so it can be surfaced in the UI
+      blobUrlDocx: blob.url,
       blobUrlPdf: null,
       publicSlug: slug,
       generatedByTier: params.tier,
