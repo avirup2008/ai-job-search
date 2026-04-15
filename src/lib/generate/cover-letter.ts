@@ -33,11 +33,11 @@ BANNED WORDS AND PHRASES (do not use any of these, even once):
 - delve, crucial, pivotal, underscore, underscores, highlight (as verb), showcase (as verb), leverage (as verb), foster, fostering, garner, resonate, resonates, align with, alignment, tapestry, landscape (figurative), intricate, enduring, vibrant, robust, robustly, seamless, seamlessly, elevate, unlock, unlocking, testament, ever-evolving, dynamic, transformative, empower, navigate the (figurative), at the intersection of, sits at the heart of, in the heart of, nestled, nestle, stand as, stands as, serves as, marks a, represents a shift, paving the way, shaping the future, in today's (landscape|world|market), additionally, moreover, furthermore, it is worth noting, it's worth noting, it is important to note, notably, ultimately, indeed, truly, genuinely, arguably
 
 BANNED RHETORICAL MOVES:
+- **ZERO em-dashes (—). None. Not one. Use commas, periods, colons, or parentheses.** The em-dash is one of the strongest LLM tells. If you feel the urge to use an em-dash, rewrite the sentence. This rule is absolute: a single em-dash in the output counts as a failure.
+- **ZERO negative parallelisms.** All of these are banned with no exceptions: "not just X, but Y", "not only X but also Y", "not merely X, Y", "more than just X, it's Y", "X isn't Y, it's Z", "not X — Y", "rather than X, Y". This construction is a top LLM tell. Rewrite as a plain positive statement.
 - Tricolons used as rhetorical flourish (e.g. "performance marketing, CRM retention, and data-driven segmentation"). Use two items, or three only if they are the real three things, not padding.
-- Negative parallelisms: "not just X, but Y", "not only... but also", "not merely", "more than just".
 - Superficial trailing -ing clauses that puff the previous clause: "..., mirroring your priorities", "..., contributing to X", "..., reflecting Y". Cut the -ing clause or replace with a short direct sentence.
-- Em-dashes as rhythm devices. Use commas, periods, or parentheses. At most ONE em-dash in the whole letter, and only if it genuinely punctuates a parenthetical aside.
-- "Elegant variation" — do not call the same thing three different names across the letter (the role, the position, this opportunity, this remit). Pick one.
+- "Elegant variation" — do not call the same thing three different names across the letter (the role, the position, this opportunity, this remit). Pick one and stick to it.
 - Rule-of-three adjectives: "strategic, data-driven, and scalable" = avoid.
 - "X stands out / sits / represents / embodies Y" constructions. Use plain is/does/has.
 - "Maps to / mirrors / translates to / speaks to / ties into" when drawing parallels. Just say what matches.
@@ -58,7 +58,7 @@ PREFERRED PATTERNS:
 - Closing (~35 words): clear next step + immediate availability. No flourish.
 
 ======= SUBJECT LINE =======
-Plain and functional. Format: "Application – {RoleTitle}". No dashes with her name, no marketing copy. Under 80 chars.
+Plain and functional. Format: "Application: {RoleTitle}" (colon, not a dash). No name, no marketing copy, no dashes of any kind. Under 80 chars.
 
 ======= SIGNATURE =======
 Put ALL of this inside the 'signature' field as a single string with newlines:
