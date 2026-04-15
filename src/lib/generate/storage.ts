@@ -33,9 +33,7 @@ export async function storeCv(params: {
       addRandomSuffix: false,
     },
   );
-  const pdfBlob: { url: string } | null = null;
-
-  // Insert documents row with both URLs
+  // PDF rendering deferred for v1 — blobUrlPdf stays null
   const [row] = await db
     .insert(schema.documents)
     .values({
@@ -43,7 +41,7 @@ export async function storeCv(params: {
       kind: "cv",
       version: nextVersion,
       blobUrlDocx: docxBlob.url,
-      blobUrlPdf: pdfBlob?.url ?? null,
+      blobUrlPdf: null,
       publicSlug: slug,
       generatedByTier: params.tier,
       tokenCost: String(params.tokenCostEur),
@@ -53,7 +51,7 @@ export async function storeCv(params: {
   return {
     id: row.id,
     docxUrl: docxBlob.url,
-    pdfUrl: pdfBlob?.url ?? null,
+    pdfUrl: null,
     publicSlug: slug,
     version: nextVersion,
   };
