@@ -91,6 +91,80 @@ function toMarkdown(c: CoverLetterStruct): string {
   ].join("\n");
 }
 
+/**
+ * Text-only content of the letter (everything the candidate would actually send).
+ * We validate this portion — NOT the signature block (which legitimately contains
+ * vertical bars between contact fields).
+ */
+function bodyText(c: CoverLetterStruct): string {
+  return [c.subject, c.greeting, ...c.paragraphs, c.closing].join("\n");
+}
+
+interface Violation { pattern: string; sample: string }
+
+const FORBIDDEN_SUBSTRINGS: string[] = [
+  "—",                     // em-dash
+  "maps to",
+  "maps directly to",
+  "not just",
+  "not only",
+  "not merely",
+  "more than just",
+  "at the intersection of",
+  "sits at the heart of",
+  "in the heart of",
+  "stands as",
+  "serves as",
+  "delve",
+  "pivotal",
+  "crucial",
+  "seamless",
+  "seamlessly",
+  "tapestry",
+  "intricate",
+  "enduring",
+  "vibrant",
+  "robust",
+  "robustly",
+  "leverage",
+  "leveraging",
+  "foster",
+  "fostering",
+  "transformative",
+  "ever-evolving",
+  "paving the way",
+  "shaping the future",
+  "ultimately",
+  "in today's",
+  "additionally",
+  "moreover",
+  "furthermore",
+  "it is worth noting",
+  "it's worth noting",
+  "it is important to note",
+  "underscore",
+  "underscores",
+  "mirrors",
+  "mirroring",
+  "translates to",
+  "speaks to",
+  "ties into",
+];
+
+function findViolations(text: string): Violation[] {
+  const lower = text.toLowerCase();
+  const hits: Violation[] = [];
+  for (const needle of FORBIDDEN_SUBSTRINGS) {
+    const idx = lower.indexOf(needle.toLowerCase());
+    if (idx === -1) continue;
+    // Capture ~60 chars around the hit for feedback
+    const start = Math.max(0, idx - 25);
+    const end = Math.min(text.length, idx + needle.length + 35);
+    hits.push({ pattern: needle, sample: text.slice(start, end).replace(/\s+/g, " ").trim() });
+  }
+  return hits;
+}
+
 export async function generateCoverLetter(input: GenerationInput): Promise<GenerationResult> {
   // Load job + company
   const [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, input.jobId)).limit(1);
@@ -146,20 +220,56 @@ export async function generateCoverLetter(input: GenerationInput): Promise<Gener
   ].join("\n");
 
   const llm = getLLM();
-  const res = await llm.structured({
-    model: "sonnet",
-    system: SYSTEM_PROMPT,
-    prompt,
-    schema: CoverLetterSchema,
-    maxTokens: 1500,
-    temperature: 0.4,
-    cacheSystem: true,
-  });
+  const MAX_ATTEMPTS = 3;
+  let res: Awaited<ReturnType<typeof llm.structured<CoverLetterStruct>>> | null = null;
+  let accumulatedTokens = { in: 0, out: 0, cached: 0 };
+  let accumulatedCost = 0;
+  let lastViolations: Violation[] = [];
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const retryFeedback = attempt === 1
+      ? ""
+      : [
+          "",
+          `===RETRY FEEDBACK — attempt ${attempt} of ${MAX_ATTEMPTS}===`,
+          "Your previous draft violated these anti-AI rules. Rewrite the letter WITHOUT any of these patterns:",
+          ...lastViolations.map((v) => `  • "${v.pattern}" found in: "${v.sample}"`),
+          "Rewrite cleanly. Same content, zero banned tokens.",
+          "===END RETRY FEEDBACK===",
+          "",
+        ].join("\n");
+
+    const thisRes = await llm.structured({
+      model: "sonnet",
+      system: SYSTEM_PROMPT,
+      prompt: prompt + retryFeedback,
+      schema: CoverLetterSchema,
+      maxTokens: 1500,
+      temperature: 0.4,
+      cacheSystem: true,
+    });
+
+    accumulatedTokens.in += thisRes.tokensIn;
+    accumulatedTokens.out += thisRes.tokensOut;
+    accumulatedTokens.cached += thisRes.cachedTokensIn;
+    accumulatedCost += thisRes.costEur;
+
+    const violations = findViolations(bodyText(thisRes.data));
+    if (violations.length === 0) {
+      res = thisRes;
+      break;
+    }
+    lastViolations = violations;
+    res = thisRes; // keep latest even if violating, in case we exhaust retries
+    console.warn(`[cover-letter] attempt ${attempt} violated ${violations.length} rule(s): ${violations.map((v) => v.pattern).join(", ")}`);
+  }
+
+  if (!res) throw new Error("cover letter generation failed — no response");
 
   return {
     cover: res.data,
     markdown: toMarkdown(res.data),
-    tokens: { in: res.tokensIn, out: res.tokensOut, cached: res.cachedTokensIn },
-    costEur: res.costEur,
+    tokens: accumulatedTokens,
+    costEur: accumulatedCost,
   };
 }
