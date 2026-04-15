@@ -22,8 +22,8 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: "AI Job Search",
-  description: "Private tool",
+  title: "Shortlist",
+  description: "A curated job pipeline.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

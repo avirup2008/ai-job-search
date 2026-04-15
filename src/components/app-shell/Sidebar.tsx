@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV = [
+  { href: "/", label: "Today", glyph: "○" },
   { href: "/inbox", label: "Inbox", glyph: "◨" },
   { href: "/pipeline", label: "Pipeline", glyph: "▤" },
   { href: "/dashboard", label: "Dashboard", glyph: "◆" },
@@ -14,13 +15,16 @@ export function Sidebar() {
   const pathname = usePathname();
   return (
     <aside className="sidebar" aria-label="Main navigation">
-      <div className="sidebar-brand">
-        <span className="sidebar-brand-mark">AJ</span>
-        <span className="sidebar-brand-name display">Job Search</span>
-      </div>
+      <Link href="/" className="sidebar-brand" aria-label="Shortlist home">
+        <span className="sidebar-brand-dot" aria-hidden="true" />
+        <span className="sidebar-brand-name">Shortlist<span className="sidebar-brand-dot-end">.</span></span>
+      </Link>
       <nav className="sidebar-nav">
         {NAV.map((item) => {
-          const active = pathname === item.href || pathname?.startsWith(item.href + "/");
+          const active =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
           return (
             <Link
               key={item.href}

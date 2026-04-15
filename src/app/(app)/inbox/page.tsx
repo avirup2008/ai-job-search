@@ -98,11 +98,11 @@ export default async function InboxPage({
     <>
       <header className="app-header">
         <div>
-          <span className="label">Matched jobs</span>
+          <span className="label">Matched roles</span>
           <h1>Inbox</h1>
         </div>
         <div className="app-header-meta">
-          Sorted by match score. {total} jobs across T1–T3.
+          {total} role{total === 1 ? "" : "s"} worth a look, sorted by match score.
         </div>
       </header>
 
