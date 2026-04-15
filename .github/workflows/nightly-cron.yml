@@ -1,0 +1,56 @@
+name: Nightly pipeline cron
+
+# Hits /api/cron/nightly every 15 min during a 6-hour UTC window so the
+# pipeline (up to ~14 min end-to-end) converges within each night's run.
+# Each invocation gets ~5 min (Vercel Hobby function timeout); idempotency
+# guarantees no duplicate work.
+#
+# Time window: 00:00–05:59 UTC = 02:00–07:59 CEST (summer) / 01:00–06:59 CET (winter)
+# Frequency: every 15 min → 24 invocations/night.
+
+on:
+  schedule:
+    - cron: "*/15 0-5 * * *"
+  workflow_dispatch: # allow manual trigger from the Actions tab
+
+concurrency:
+  # If a previous tick is still running, let it finish; skip this one.
+  group: nightly-cron
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Call /api/cron/nightly
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -e
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET secret is not set on the repository."
+            exit 1
+          fi
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "::error::PRODUCTION_URL variable is not set on the repository."
+            exit 1
+          fi
+          URL="${PRODUCTION_URL%/}/api/cron/nightly"
+          echo "Hitting $URL"
+          HTTP_CODE=$(curl -sS -o /tmp/body.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 330 \
+            "$URL")
+          echo "HTTP $HTTP_CODE"
+          echo "--- Response body ---"
+          cat /tmp/body.json | head -c 4000
+          echo ""
+          echo "--------------------"
+          # Treat 200 OK and 504 (timeout-after-partial-work) as success.
+          # 401/500 → fail so the Action logs show red.
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "504" ]; then
+            exit 0
+          fi
+          exit 1
