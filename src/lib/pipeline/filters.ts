@@ -1,3 +1,4 @@
+import { franc } from "franc-min";
 import { detectWorkMode, checkCommute } from "./commute";
 
 export type FilterReason =
@@ -99,6 +100,15 @@ export function applyHardFilters(input: FilterInput): FilterResult {
 
   // Dutch-only words in title
   if (DUTCH_TITLE_WORDS.some((re) => re.test(title))) {
+    return { filter: "dutch_required" };
+  }
+
+  // Language detection: if the title + JD body together detect as Dutch,
+  // the role is a Dutch-speaking role regardless of whether it explicitly
+  // says so. Catches fully-Dutch JDs (e.g. Leapforce Magnet.me posting)
+  // and Dutch-title variants not in the word list (e.g. Opleidingscoördinator).
+  const combined = `${title}\n${jd.slice(0, 2000)}`;
+  if (combined.length > 100 && franc(combined, { minLength: 50 }) === "nld") {
     return { filter: "dutch_required" };
   }
 
