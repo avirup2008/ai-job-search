@@ -67,8 +67,8 @@ You assess how well a role matches THIS candidate. You MUST:
 - NEVER fabricate experience or claim tools the candidate doesn't have.
 - Mark seniority score high (>=0.8) for mid/senior/manager/lead; low (<=0.3) for director/VP/C-level or intern/junior.
 - The candidate's commute has been pre-verified — do not re-evaluate geography. Score purely on skills/tools/seniority/industry fit.
-- Output recommendation: strong_apply (fit >= 0.75 all components), apply_with_caveat (one weak component), stretch (2+ weak), skip (fundamental mismatch).
 - Keep strengths/gaps concrete, not generic.
+- Recommendation will be derived from the overall fit score — you only need to populate components and strengths/gaps honestly.
 
 Return ONLY via the structured response tool.`;
 
@@ -100,5 +100,20 @@ export async function assessJob(params: {
 
   const components = res.data.components;
   const fitScore = blendFitScore(components);
-  return { fitScore, components, assessment: res.data };
+  // Deterministic recommendation from fit score, independent of Haiku's judgment.
+  // Thresholds align with tier boundaries so tier + recommendation stay consistent.
+  const recommendation = recommendationFromFit(fitScore);
+  return {
+    fitScore,
+    components,
+    assessment: { ...res.data, recommendation },
+  };
+}
+
+export function recommendationFromFit(fitScore: number): "strong_apply" | "apply_with_caveat" | "stretch" | "skip" {
+  if (!Number.isFinite(fitScore)) return "skip";
+  if (fitScore >= 80) return "strong_apply";
+  if (fitScore >= 65) return "apply_with_caveat";
+  if (fitScore >= 40) return "stretch";
+  return "skip";
 }
