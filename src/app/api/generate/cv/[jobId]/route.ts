@@ -4,7 +4,6 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { generateCV } from "@/lib/generate/cv";
 import { renderCvDocx } from "@/lib/generate/cv-docx";
-import { renderCvPdf } from "@/lib/generate/cv-pdf";
 import { storeCv } from "@/lib/generate/storage";
 
 export const runtime = "nodejs";
@@ -38,17 +37,12 @@ export async function POST(_req: Request, ctx: { params: Promise<Params> }) {
     // Generate structured CV via Sonnet
     const gen = await generateCV(jobId);
 
-    // Render DOCX and PDF in parallel
-    const [docxBuffer, pdfBuffer] = await Promise.all([
-      renderCvDocx(gen.cv),
-      renderCvPdf(gen.cv),
-    ]);
+    // Render DOCX (PDF deferred to Phase 9 UI — client-side print or future pdfkit migration)
+    const docxBuffer = await renderCvDocx(gen.cv);
 
-    // Store both blobs and insert documents row
     const doc = await storeCv({
       applicationId: app.id,
       docxBuffer,
-      pdfBuffer,
       tokenCostEur: gen.costEur,
       tier: job.tier ?? null,
     });

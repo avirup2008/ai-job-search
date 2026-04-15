@@ -15,3 +15,5 @@ tsconfig.tsbuildinfo
 
 # Worktrees from unrelated projects living in this directory tree
 .claude/worktrees/
+.vercel
+.env*.local
