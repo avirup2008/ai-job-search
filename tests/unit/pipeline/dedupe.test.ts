@@ -46,6 +46,54 @@ describe("computeDedupeHash", () => {
     });
     expect(w1).not.toBe(w2);
   });
+
+  it("same company + same title + different locations → same hash (location-agnostic)", () => {
+    const h1 = computeDedupeHash({
+      companyName: "Picnic", title: "Marketing Manager", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    const h2 = computeDedupeHash({
+      companyName: "Picnic", title: "Marketing Manager", location: "Rotterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    expect(h1).toBe(h2);
+  });
+
+  it("strips (m/f) parenthetical from title before hashing", () => {
+    const h1 = computeDedupeHash({
+      companyName: "Acme", title: "Marketing Manager (m/f)", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    const h2 = computeDedupeHash({
+      companyName: "Acme", title: "Marketing Manager", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    expect(h1).toBe(h2);
+  });
+
+  it("strips 'bij <Company>' suffix from title before hashing", () => {
+    const h1 = computeDedupeHash({
+      companyName: "Picnic", title: "Marketing Manager bij Picnic", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    const h2 = computeDedupeHash({
+      companyName: "Picnic", title: "Marketing Manager", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    expect(h1).toBe(h2);
+  });
+
+  it("strips Senior/Junior level prefix from title before hashing", () => {
+    const h1 = computeDedupeHash({
+      companyName: "Acme", title: "Senior Marketing Manager", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    const h2 = computeDedupeHash({
+      companyName: "Acme", title: "Marketing Manager", location: "Amsterdam",
+      postedAt: new Date("2026-04-10"),
+    });
+    expect(h1).toBe(h2);
+  });
 });
 
 describe("clusterJobs", () => {
@@ -99,5 +147,41 @@ describe("clusterJobs", () => {
     expect(clusters.length).toBe(3);
     const memberCounts = clusters.map((c) => c.members.length).sort();
     expect(memberCounts).toEqual([1, 1, 2]);
+  });
+
+  it("same company + same title + different locations → 1 cluster", () => {
+    const jobs = [
+      mk({ source: "adzuna", sourceExternalId: "1", location: "Amsterdam" }),
+      mk({ source: "jooble", sourceExternalId: "2", location: "Rotterdam" }),
+    ];
+    const clusters = clusterJobs(jobs);
+    expect(clusters.length).toBe(1);
+  });
+
+  it("same company + (m/f) variant titles → 1 cluster", () => {
+    const jobs = [
+      mk({ source: "adzuna", sourceExternalId: "1", title: "Marketing Manager (m/f)" }),
+      mk({ source: "jooble", sourceExternalId: "2", title: "Marketing Manager" }),
+    ];
+    const clusters = clusterJobs(jobs);
+    expect(clusters.length).toBe(1);
+  });
+
+  it("same company + 'bij X' suffix variant → 1 cluster", () => {
+    const jobs = [
+      mk({ source: "adzuna", sourceExternalId: "1", title: "Marketing Manager bij Picnic" }),
+      mk({ source: "jooble", sourceExternalId: "2", title: "Marketing Manager" }),
+    ];
+    const clusters = clusterJobs(jobs);
+    expect(clusters.length).toBe(1);
+  });
+
+  it("different companies → separate clusters", () => {
+    const jobs = [
+      mk({ source: "adzuna", sourceExternalId: "1", companyName: "Picnic", title: "Marketing Manager" }),
+      mk({ source: "jooble", sourceExternalId: "2", companyName: "Mollie", title: "Marketing Manager" }),
+    ];
+    const clusters = clusterJobs(jobs);
+    expect(clusters.length).toBe(2);
   });
 });

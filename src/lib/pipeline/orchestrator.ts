@@ -138,7 +138,12 @@ export async function runNightly(): Promise<RunSummary> {
         location: j.location,
         postedAt: j.postedAt,
       });
-      const hardFilter = applyHardFilters({ title: j.title, jdText: j.jdText, seniority: null });
+      const hardFilter = applyHardFilters({
+        title: j.title,
+        jdText: j.jdText,
+        location: j.location,
+        seniority: null,
+      });
       const entry: ClassifiedJob = { j, companyId, dedupeHash, filter: hardFilter.filter };
 
       if (hardFilter.filter) toFilter.push(entry);
@@ -208,7 +213,6 @@ export async function runNightly(): Promise<RunSummary> {
               location: e.j.location,
               postedAt: e.j.postedAt ?? null,
               dedupeHash: e.dedupeHash,
-              dutchRequired: rank.assessment.dutchRequired,
               seniority: rank.assessment.seniorityLevel,
               fitScore: String(rank.fitScore),
               fitBreakdown: rank.components,

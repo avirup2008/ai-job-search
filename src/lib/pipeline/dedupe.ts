@@ -1,10 +1,5 @@
 import type { RawJob } from "@/lib/sources/types";
 
-function normalize(s: string | null | undefined): string {
-  if (!s) return "";
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
-}
-
 function isoWeek(d: Date): string {
   const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
   const day = t.getUTCDay() || 7;
@@ -14,17 +9,46 @@ function isoWeek(d: Date): string {
   return `${t.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
+// Aggressive title normalization — collapse cross-source variations into
+// a single canonical form for dedupe. Strip:
+//   - Parenthetical qualifiers: "(m/f)", "(Dutch Speaking)", "(Remote)"
+//   - Pipe/dash suffixes: " | Agri", " - Amsterdam"
+//   - Level prefixes: Senior, Junior, Lead, Staff, Principal, Associate
+//   - Trailing "bij <Company>" (Dutch "at <Company>")
+//   - Language specifiers: "Spanish Speaking", "German-speaking"
+function normalizeTitleCore(title: string, companyName: string | null): string {
+  let t = title.toLowerCase();
+  // Strip parentheticals: (Dutch Speaking), (m/f), (Remote)
+  t = t.replace(/\([^)]*\)/g, " ");
+  // Strip pipe + trailing content
+  t = t.replace(/[|]\s*.*$/g, " ");
+  // Strip trailing " - City" or " – City"
+  t = t.replace(/\s+[-–—]\s+.+$/g, " ");
+  // Strip "bij <Company>" Dutch pattern
+  if (companyName) {
+    const co = companyName.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    t = t.replace(new RegExp(`\\s+bij\\s+${co.split(" ").join("\\s+")}\\s*$`, "i"), " ");
+    // Also strip trailing bare company name
+    t = t.replace(new RegExp(`\\s+${co.split(" ").join("\\s+")}\\s*$`, "i"), " ");
+  }
+  // Strip level prefixes
+  t = t.replace(/^\s*(senior|junior|lead|staff|principal|associate|jr\.?|sr\.?)\s+/i, "");
+  // Strip language specifiers
+  t = t.replace(/\b(spanish|german|french|italian|dutch|english)[-\s]speaking\b/gi, " ");
+  // Final normalize
+  return t.replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
+}
+
 export function computeDedupeHash(input: {
   companyName: string | null;
   title: string;
-  location: string | null;
+  location: string | null;  // kept in signature for backward compat; not used in hash
   postedAt: Date | null;
 }): string {
-  const co = normalize(input.companyName);
-  const ti = normalize(input.title);
-  const lo = normalize(input.location);
+  const co = (input.companyName ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const ti = normalizeTitleCore(input.title, input.companyName);
   const wk = input.postedAt ? isoWeek(input.postedAt) : "noweek";
-  return `${co}|${ti}|${lo}|${wk}`;
+  return `${co}|${ti}|${wk}`;
 }
 
 export interface JobCluster {

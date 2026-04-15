@@ -5,16 +5,14 @@ export interface FitComponents {
   skills: number;     // 0..1 — core responsibilities / domain match
   tools: number;      // 0..1 — tool stack overlap
   seniority: number;  // 0..1 — level match (mid/senior = 1, director/intern = 0)
-  geo: number;        // 0..1 — location / commute match
   industry: number;   // 0..1 — industry overlap
 }
 
 const WEIGHTS: FitComponents = {
   skills: 0.40,
-  tools: 0.25,
+  tools: 0.30,
   seniority: 0.15,
-  geo: 0.10,
-  industry: 0.10,
+  industry: 0.15,
 };
 
 function clamp01(v: number): number {
@@ -28,7 +26,6 @@ export function blendFitScore(c: FitComponents): number {
     clamp01(c.skills) * WEIGHTS.skills +
     clamp01(c.tools) * WEIGHTS.tools +
     clamp01(c.seniority) * WEIGHTS.seniority +
-    clamp01(c.geo) * WEIGHTS.geo +
     clamp01(c.industry) * WEIGHTS.industry;
   return Math.round(raw * 1000) / 10; // 0..100 with 1 decimal
 }
@@ -40,15 +37,12 @@ const FitAssessmentSchema = z.object({
   seniorityLevel: z.enum([
     "intern", "junior", "mid", "senior", "lead", "manager", "director", "vp", "c_level", "unknown",
   ]),
-  dutchRequired: z.boolean().describe("True only if Dutch fluency is required (not just preferred)"),
   industries: z.array(z.string()),
-  locationText: z.string().nullable(),
   // Fit component scores 0..1
   components: z.object({
     skills: z.number().min(0).max(1).describe("How well core responsibilities match candidate's demonstrated work. 1 = strong match."),
     tools: z.number().min(0).max(1).describe("Overlap between JD tools and candidate's toolStack. 1 = strong overlap."),
     seniority: z.number().min(0).max(1).describe("Level match. 1 = mid/senior/manager. 0 = director+ or intern/junior."),
-    geo: z.number().min(0).max(1).describe("Location/commute fit. 1 = Netherlands + commutable or remote-EU. 0 = non-NL, non-remote."),
     industry: z.number().min(0).max(1).describe("Industry overlap with candidate's background."),
   }),
   // Explanations (short, one line each)
@@ -71,9 +65,8 @@ const SYSTEM_PROMPT = `You are an expert job-fit analyst for a single candidate 
 You assess how well a role matches THIS candidate. You MUST:
 - Rate each component 0..1 based on concrete signals in the JD vs the profile.
 - NEVER fabricate experience or claim tools the candidate doesn't have.
-- Mark dutchRequired=true ONLY if Dutch fluency (B2+) is required or if the JD is itself in Dutch; prefer false when ambiguous.
 - Mark seniority score high (>=0.8) for mid/senior/manager/lead; low (<=0.3) for director/VP/C-level or intern/junior.
-- Mark geo score high (1.0) for Netherlands-based or remote-EU, moderate (0.5) for hybrid-NL, low for non-EU / US-only.
+- The candidate's commute has been pre-verified — do not re-evaluate geography. Score purely on skills/tools/seniority/industry fit.
 - Output recommendation: strong_apply (fit >= 0.75 all components), apply_with_caveat (one weak component), stretch (2+ weak), skip (fundamental mismatch).
 - Keep strengths/gaps concrete, not generic.
 
