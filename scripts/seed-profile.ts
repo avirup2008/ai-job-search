@@ -117,6 +117,8 @@ const PROFILE: Profile = {
     industryAntiPreference: [],
   },
 
+  fullName: "Upashana Borpuzari",
+  headline: "Marketing Operations & Campaign Specialist | HubSpot Automation | Landing Page Design | Paid Media",
   portfolioUrl: "https://upashana.online",
   linkedinUrl: "https://www.linkedin.com/in/upashana-borpuzari/",
   contactEmail: "upashana1910@gmail.com",
@@ -127,6 +129,10 @@ async function main() {
   loadDbEnv();
   const existing = await db.select({ id: schema.profile.id }).from(schema.profile).limit(1);
   const payload = {
+    fullName: PROFILE.fullName,
+    headline: PROFILE.headline ?? null,
+    contactEmail: PROFILE.contactEmail ?? null,
+    phone: PROFILE.phone ?? null,
     roles: PROFILE.roles as unknown,
     achievements: PROFILE.achievements as unknown,
     toolStack: PROFILE.toolStack as unknown,

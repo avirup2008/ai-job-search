@@ -15,6 +15,13 @@
       "when": 1776198580332,
       "tag": "0001_misty_master_mold",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776251447578,
+      "tag": "0002_last_red_wolf",
+      "breakpoints": true
     }
   ]
 }

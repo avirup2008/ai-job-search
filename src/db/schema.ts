@@ -5,6 +5,10 @@ import {
 
 export const profile = pgTable("profile", {
   id: uuid("id").primaryKey().defaultRandom(),
+  fullName: text("full_name"),
+  headline: text("headline"),
+  contactEmail: text("contact_email"),
+  phone: text("phone"),
   roles: jsonb("roles").$type<unknown>().notNull().default([]),
   achievements: jsonb("achievements").$type<unknown>().notNull().default([]),
   toolStack: jsonb("tool_stack").$type<unknown>().notNull().default({}),

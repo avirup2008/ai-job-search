@@ -23,6 +23,8 @@ export interface ProfileAchievement {
 }
 
 export interface Profile {
+  fullName: string;
+  headline?: string;
   roles: ProfileRole[];
   achievements: ProfileAchievement[];
   toolStack: Record<string, string>;
@@ -54,6 +56,16 @@ export interface Profile {
 
 export function profileToCompactText(p: Profile): string {
   const parts: string[] = [];
+  // Identity block first — generation code needs this for signatures
+  parts.push(`NAME: ${p.fullName}`);
+  if (p.headline) parts.push(`HEADLINE: ${p.headline}`);
+  const contactParts: string[] = [];
+  if (p.contactEmail) contactParts.push(`email: ${p.contactEmail}`);
+  if (p.phone) contactParts.push(`phone: ${p.phone}`);
+  if (p.portfolioUrl) contactParts.push(`portfolio: ${p.portfolioUrl}`);
+  if (p.linkedinUrl) contactParts.push(`linkedin: ${p.linkedinUrl}`);
+  if (contactParts.length > 0) parts.push(`CONTACT: ${contactParts.join(" | ")}`);
+
   if (Object.keys(p.toolStack).length) {
     parts.push("TOOLS: " + Object.entries(p.toolStack).map(([t, lvl]) => `${t} (${lvl})`).join(", "));
   }

@@ -76,6 +76,8 @@ export async function runNightly(): Promise<RunSummary> {
     const [profileRow] = await db.select().from(schema.profile).limit(1);
     if (!profileRow) throw new Error("No profile row found — run scripts/seed-profile.ts first");
     const profile: Profile = {
+      fullName: profileRow.fullName ?? "",
+      headline: profileRow.headline ?? undefined,
       roles: profileRow.roles as Profile["roles"],
       achievements: profileRow.achievements as Profile["achievements"],
       toolStack: profileRow.toolStack as Profile["toolStack"],
@@ -83,6 +85,10 @@ export async function runNightly(): Promise<RunSummary> {
       stories: profileRow.stories as Profile["stories"],
       constraints: profileRow.constraints as Profile["constraints"],
       preferences: profileRow.preferences as Profile["preferences"],
+      portfolioUrl: profileRow.portfolioUrl ?? undefined,
+      linkedinUrl: profileRow.linkedinUrl,
+      contactEmail: profileRow.contactEmail ?? undefined,
+      phone: profileRow.phone ?? undefined,
     };
 
     // 2. Pre-pass: idempotency check across the whole batch

@@ -70,6 +70,8 @@ export async function generateCoverLetter(input: GenerationInput): Promise<Gener
   const [profileRow] = await db.select().from(schema.profile).limit(1);
   if (!profileRow) throw new Error("No profile row in DB — seed first");
   const profile: Profile = {
+    fullName: profileRow.fullName ?? "",
+    headline: profileRow.headline ?? undefined,
     roles: profileRow.roles as Profile["roles"],
     achievements: profileRow.achievements as Profile["achievements"],
     toolStack: profileRow.toolStack as Profile["toolStack"],
@@ -79,6 +81,8 @@ export async function generateCoverLetter(input: GenerationInput): Promise<Gener
     preferences: profileRow.preferences as Profile["preferences"],
     portfolioUrl: profileRow.portfolioUrl ?? undefined,
     linkedinUrl: profileRow.linkedinUrl,
+    contactEmail: profileRow.contactEmail ?? undefined,
+    phone: profileRow.phone ?? undefined,
   };
 
   // Lazy-research dossier
