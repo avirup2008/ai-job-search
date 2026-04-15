@@ -10,7 +10,7 @@ const CoverLetterSchema = z.object({
   greeting: z.string().describe("Greeting line, e.g. 'Dear hiring team,'"),
   paragraphs: z.array(z.string()).min(3).max(5).describe("2-4 body paragraphs, each 2-5 sentences"),
   closing: z.string().describe("Closing line, e.g. 'Kind regards,'"),
-  signature: z.string().describe("Candidate name + portfolio url if available"),
+  signature: z.string().describe("Full signature block as one string with newlines: Name, then Email | Phone | LinkedIn | Portfolio on separate lines using whichever contact details are present in the profile"),
 });
 export type CoverLetterStruct = z.infer<typeof CoverLetterSchema>;
 
@@ -24,12 +24,20 @@ HARD RULES — you will be tested for compliance:
 - Cite 1-2 concrete achievements from the profile that match the JD emphasis. Use the candidate's real metrics.
 - Read the company dossier and demonstrate comprehension — acknowledge what they do in 1 phrase early in the body.
 - Avoid cliches ("I'm passionate about", "I'm a self-starter"). Be concrete.
-- 200-350 words total across all paragraphs. Dense, not flowery.
+- **Target 240-290 words** across the body paragraphs. Tight, dense, and purposeful.
+- If the company's marketing stack (from dossier) overlaps the candidate's tools, NAME the overlap directly (e.g. "Your HubSpot setup maps to work I did at Inbox Storage...").
+- Greeting fallback: "Dear Hiring Manager," unless the dossier provides a specific named contact.
 
 Structure:
-- Opener paragraph: what drew the candidate to this role + a one-line grasp of what the company does.
-- 1-2 body paragraphs: concrete match evidence from the candidate's profile, mapped to JD priorities.
-- Closing paragraph: clear call to action, available-immediately signal.`;
+- Opener paragraph (~50 words): a specific hook about the role + one-phrase grasp of what the company does.
+- Body 1 (~100 words): strongest match evidence — one achievement with metrics, mapped to a JD priority.
+- Body 2 (~80 words): second evidence OR stack-overlap callout OR cross-border / team coordination strength.
+- Closing (~40 words): clear call to action + immediate availability signal.
+
+Signature block format (put ALL of this inside the 'signature' field as a single string with newlines):
+  {fullName}
+  {email} | {phone} | {linkedinUrl} | {portfolioUrl}
+Use whichever contact fields are present in the profile. Separate available fields with " | ". If a field is missing, omit it cleanly — do not emit placeholders.`;
 
 export interface GenerationInput {
   jobId: string;
