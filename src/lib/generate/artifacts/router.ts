@@ -8,7 +8,7 @@ const AVAILABLE_TYPES: ArtifactType[] = ["thirty_sixty_ninety", "email_crm_teard
 const RouterSchema = z.object({
   primary: z.enum(AVAILABLE_TYPES as [ArtifactType, ...ArtifactType[]]),
   secondary: z.enum(["thirty_sixty_ninety", "email_crm_teardown", "none"] as const).describe("optional second artifact; 'none' if one is enough"),
-  reasoning: z.string().max(300),
+  reasoning: z.string().max(600),
 });
 
 const SYSTEM = `You pick 1-2 proof-of-work artifacts to attach to a specific job application.
@@ -29,7 +29,7 @@ export async function pickArtifacts(params: {
     system: SYSTEM,
     prompt: `JD TITLE: ${params.jobTitle}\n\nJD:\n${params.jdText.slice(0, 4000)}`,
     schema: RouterSchema,
-    maxTokens: 300,
+    maxTokens: 500,
     temperature: 0.1,
   });
   return {

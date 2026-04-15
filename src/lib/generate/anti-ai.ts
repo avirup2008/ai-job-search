@@ -81,6 +81,34 @@ export function findViolations(text: string): Violation[] {
   return hits;
 }
 
+/**
+ * Mechanical cleanup for tells that are purely cosmetic.
+ * Applied after the retry loop exhausts as a last-resort sanitiser.
+ * Only fixes the tells that can be safely regex-replaced without changing meaning.
+ */
+export function sanitizeMechanicalTells(text: string): string {
+  return text
+    // em-dash → ", " (most natural replacement in prose)
+    .replace(/\s*—\s*/g, ", ")
+    // en-dash between words → "-" (between numbers it stays, but this pattern needs letters on both sides)
+    .replace(/(\w)\s*–\s*(\w)/g, "$1-$2");
+}
+
+/**
+ * Deep-walks an object/array/string tree and runs `fn` on every string leaf.
+ * Used to sanitise structured LLM output after the retry loop.
+ */
+export function mapStrings<T>(value: T, fn: (s: string) => string): T {
+  if (typeof value === "string") return fn(value) as unknown as T;
+  if (Array.isArray(value)) return value.map((v) => mapStrings(v, fn)) as unknown as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) out[k] = mapStrings(v, fn);
+    return out as unknown as T;
+  }
+  return value;
+}
+
 export function formatViolationsForRetry(violations: Violation[]): string {
   return [
     "",

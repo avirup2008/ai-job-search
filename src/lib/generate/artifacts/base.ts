@@ -4,7 +4,7 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { getCompanyDossier } from "@/lib/research";
 import { profileToCompactText, type Profile } from "@/lib/profile/types";
-import { findViolations, formatViolationsForRetry } from "../anti-ai";
+import { findViolations, formatViolationsForRetry, mapStrings, sanitizeMechanicalTells } from "../anti-ai";
 
 export interface ArtifactContext {
   jobId: string;
@@ -86,5 +86,8 @@ export async function runAntiAiLoop<T>(params: {
     console.warn(`[artifact] attempt ${attempt} violated ${v.length}: ${v.map((x) => x.pattern).join(", ")}`);
   }
   if (!last) throw new Error("artifact generation failed");
-  return { data: last.data, tokens: { in: acc.in, out: acc.out, cached: acc.cached }, costEur: acc.cost, attempts: attempt };
+  // Final sanitisation: mechanically remove cosmetic tells (em-dash, en-dash) on every string leaf.
+  // Retry loop handles semantic tells (negative parallelisms, banned words); this catches what slips through.
+  const sanitised = mapStrings(last.data, sanitizeMechanicalTells);
+  return { data: sanitised, tokens: { in: acc.in, out: acc.out, cached: acc.cached }, costEur: acc.cost, attempts: attempt };
 }
