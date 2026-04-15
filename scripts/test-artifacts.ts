@@ -58,14 +58,24 @@ async function main() {
     console.log(`[test-artifacts] SECONDARY ${picker.secondary} → attempts=${sec.attempts}, cost=€${sec.costEur.toFixed(4)}, bytes=${sec.html.length}`);
   }
 
-  // Force-generate whichever type the router didn't pick, for completeness
-  const ALL = ["thirty_sixty_ninety", "email_crm_teardown"] as const;
+  // Force-generate every remaining type for full coverage
+  const ALL = [
+    "thirty_sixty_ninety",
+    "email_crm_teardown",
+    "funnel_teardown",
+    "seo_audit",
+    "competitive_snapshot",
+    "paid_audit",
+  ] as const;
+  let totalCost = primary.costEur + (picker.secondary ? 0 : 0);
   for (const t of ALL) {
     if (t === picker.primary || t === picker.secondary) continue;
     const r = await generateArtifact(job.id, t);
     writeFileSync(`.tmp/artifact-${t}.html`, r.html);
+    totalCost += r.costEur;
     console.log(`[test-artifacts] FORCED ${t} → attempts=${r.attempts}, cost=€${r.costEur.toFixed(4)}, bytes=${r.html.length}`);
   }
+  console.log(`[test-artifacts] TOTAL ARTIFACT COST: €${totalCost.toFixed(4)}`);
 
   console.log("[test-artifacts] DONE — HTML files in .tmp/");
 }

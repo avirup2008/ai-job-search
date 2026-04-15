@@ -1,6 +1,10 @@
 import type { ArtifactHeader } from "./types";
 import type { ThirtySixtyNinetyStruct } from "./thirty-sixty-ninety";
 import type { EmailCrmTeardownStruct } from "./email-crm-teardown";
+import type { FunnelTeardownStruct } from "./funnel-teardown";
+import type { SeoAuditStruct } from "./seo-audit";
+import type { CompetitiveSnapshotStruct } from "./competitive-snapshot";
+import type { PaidAuditStruct } from "./paid-audit";
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
@@ -118,6 +122,163 @@ ${d.caveats.length > 0 ? `
 </section>` : ""}
 <footer class="footer-caveats">
   Prepared by ${escapeHtml(d.header.authorName)} for ${escapeHtml(d.header.companyName)}. A teardown based on publicly available signals and stated JD priorities; precise numbers and specific emails are hypotheses, not claims about internal data.
+</footer>
+</body></html>`;
+}
+
+export function renderFunnelTeardownHtml(d: FunnelTeardownStruct): string {
+  const stageHtml = d.funnelStages.map((s) => `
+    <div class="obs">
+      <span class="area">${escapeHtml(s.stage)}</span>
+      <div class="signal">${escapeHtml(s.observation)}</div>
+      <div class="gap"><strong>Friction: </strong>${escapeHtml(s.frictionPoint)}</div>
+      <div class="suggestion"><strong>Experiment: </strong>${escapeHtml(s.experiment)}</div>
+    </div>
+  `).join("");
+
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(d.header.title)}</title>
+<style>${BASE_STYLE}</style>
+</head><body>
+${headerHtml(d.header)}
+<section>
+  <h2>Premise</h2>
+  <p>${escapeHtml(d.premise)}</p>
+</section>
+<section>
+  <h2>Funnel Stages</h2>
+  ${stageHtml}
+</section>
+<section>
+  <h2>Measurement Plan</h2>
+  <p>${escapeHtml(d.measurementPlan)}</p>
+</section>
+${d.caveats.length > 0 ? `
+<section>
+  <h2>Caveats</h2>
+  <ul>${d.caveats.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+</section>` : ""}
+<footer class="footer-caveats">
+  Prepared by ${escapeHtml(d.header.authorName)} for ${escapeHtml(d.header.companyName)}. A funnel teardown based on publicly available signals and stated JD priorities; specific drop-off points and conversion rates are hypotheses, not claims about internal data.
+</footer>
+</body></html>`;
+}
+
+export function renderSeoAuditHtml(d: SeoAuditStruct): string {
+  const findingsHtml = d.findings.map((f) => `
+    <div class="obs">
+      <span class="area">${escapeHtml(f.area)}</span>
+      <div class="signal">${escapeHtml(f.observation)}</div>
+      <div class="gap"><strong>Impact: </strong>${escapeHtml(f.impact)}</div>
+      <div class="suggestion"><strong>Recommendation: </strong>${escapeHtml(f.recommendation)}</div>
+    </div>
+  `).join("");
+
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(d.header.title)}</title>
+<style>${BASE_STYLE}</style>
+</head><body>
+${headerHtml(d.header)}
+<section>
+  <h2>Premise</h2>
+  <p>${escapeHtml(d.premise)}</p>
+</section>
+<section>
+  <h2>Findings</h2>
+  ${findingsHtml}
+</section>
+<section>
+  <h2>Quick Wins</h2>
+  <ul>${d.quickWins.map((q) => `<li>${escapeHtml(q)}</li>`).join("")}</ul>
+</section>
+${d.caveats.length > 0 ? `
+<section>
+  <h2>Caveats</h2>
+  <ul>${d.caveats.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+</section>` : ""}
+<footer class="footer-caveats">
+  Prepared by ${escapeHtml(d.header.authorName)} for ${escapeHtml(d.header.companyName)}. An SEO audit based on publicly visible signals; specific rankings and traffic numbers are hypotheses, not claims about internal data.
+</footer>
+</body></html>`;
+}
+
+export function renderCompetitiveSnapshotHtml(d: CompetitiveSnapshotStruct): string {
+  const compHtml = d.competitors.map((c) => `
+    <div class="obs">
+      <span class="area">${escapeHtml(c.name)}</span>
+      <div class="signal">${escapeHtml(c.positioning)}</div>
+      <div class="gap"><strong>Strength: </strong>${escapeHtml(c.strength)}</div>
+      <div class="gap"><strong>Weakness: </strong>${escapeHtml(c.weakness)}</div>
+      <div class="suggestion"><strong>Takeaway for us: </strong>${escapeHtml(c.takeawayForUs)}</div>
+    </div>
+  `).join("");
+
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(d.header.title)}</title>
+<style>${BASE_STYLE}</style>
+</head><body>
+${headerHtml(d.header)}
+<section>
+  <h2>Premise</h2>
+  <p>${escapeHtml(d.premise)}</p>
+</section>
+<section>
+  <h2>Competitors</h2>
+  ${compHtml}
+</section>
+<section>
+  <h2>Strategic Readout</h2>
+  <p>${escapeHtml(d.strategicReadout)}</p>
+</section>
+${d.caveats.length > 0 ? `
+<section>
+  <h2>Caveats</h2>
+  <ul>${d.caveats.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+</section>` : ""}
+<footer class="footer-caveats">
+  Prepared by ${escapeHtml(d.header.authorName)} for ${escapeHtml(d.header.companyName)}. A competitive snapshot based on publicly available signals; competitor strategy, financials, and internal priorities are hypotheses, not claims about private data.
+</footer>
+</body></html>`;
+}
+
+export function renderPaidAuditHtml(d: PaidAuditStruct): string {
+  const chanHtml = d.channels.map((c) => `
+    <div class="obs">
+      <span class="area">${escapeHtml(c.channel)}</span>
+      <div class="signal">${escapeHtml(c.currentState)}</div>
+      <div class="gap"><strong>Opportunity: </strong>${escapeHtml(c.opportunity)}</div>
+      <div class="suggestion"><strong>Test plan: </strong>${escapeHtml(c.testPlan)}</div>
+    </div>
+  `).join("");
+
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(d.header.title)}</title>
+<style>${BASE_STYLE}</style>
+</head><body>
+${headerHtml(d.header)}
+<section>
+  <h2>Premise</h2>
+  <p>${escapeHtml(d.premise)}</p>
+</section>
+<section>
+  <h2>Channels</h2>
+  ${chanHtml}
+</section>
+<section>
+  <h2>Budget Hypothesis</h2>
+  <p>${escapeHtml(d.budgetHypothesis)}</p>
+</section>
+${d.caveats.length > 0 ? `
+<section>
+  <h2>Caveats</h2>
+  <ul>${d.caveats.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+</section>` : ""}
+<footer class="footer-caveats">
+  Prepared by ${escapeHtml(d.header.authorName)} for ${escapeHtml(d.header.companyName)}. A paid-media audit based on publicly visible creative and positioning; spend, CAC, and ROAS are hypotheses, not claims about internal accounts.
 </footer>
 </body></html>`;
 }
