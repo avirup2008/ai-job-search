@@ -64,7 +64,6 @@ async function loadDetail(jobId: string) {
 }
 
 export default async function JobDetailPage({ params }: { params: Promise<Params> }) {
-  if (!(await isAdmin())) redirect("/admin");
   const { jobId } = await params;
 
   const detail = await loadDetail(jobId);

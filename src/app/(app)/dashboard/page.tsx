@@ -140,7 +140,6 @@ function budgetLevel(pct: number): "ok" | "warn" | "danger" {
 }
 
 export default async function DashboardPage() {
-  if (!(await isAdmin())) redirect("/admin");
   const d = await loadData();
 
   const budgetPct = d.capEur > 0 ? (d.eurSpent / d.capEur) * 100 : 0;

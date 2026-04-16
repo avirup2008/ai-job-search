@@ -135,7 +135,6 @@ export default async function InboxPage({
 }: {
   searchParams: Promise<{ band?: string }>;
 }) {
-  if (!(await isAdmin())) redirect("/admin");
 
   const { band: bandRaw } = await searchParams;
   const band = parseBand(bandRaw);

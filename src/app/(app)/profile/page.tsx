@@ -42,7 +42,6 @@ function yearsFromRoles(roles: Role[]): number {
 }
 
 export default async function ProfilePage() {
-  if (!(await isAdmin())) redirect("/admin");
 
   const row = await loadProfile();
 

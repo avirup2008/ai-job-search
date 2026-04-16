@@ -54,7 +54,6 @@ async function loadHome() {
 }
 
 export default async function HomePage() {
-  if (!(await isAdmin())) redirect("/admin");
   const d = await loadHome();
   const f = d.featured;
   const strengths = (f?.gapAnalysis as GapAnalysis)?.strengths ?? [];

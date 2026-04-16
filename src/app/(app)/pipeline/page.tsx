@@ -113,7 +113,6 @@ async function loadPipelineData() {
 
 /* ── page ── */
 export default async function PipelinePage() {
-  if (!(await isAdmin())) redirect("/admin");
   const { apps, docMap, recentDocs } = await loadPipelineData();
 
   if (apps.length === 0) {
