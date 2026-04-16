@@ -388,27 +388,27 @@ export default async function DashboardPage() {
             ))}
           </div>
         </section>
-      </div>
 
-      {/* ── Budget (inline, no separate row) ── */}
-      <section className="panel" style={{ maxWidth: 480 }}>
-        <h2>Budget</h2>
-        <div className="budget-head">
-          <span className="budget-used">&euro;{d.eurSpent.toFixed(2)}</span>
-          <span className="budget-cap">/ &euro;{d.capEur.toFixed(0)}</span>
-        </div>
-        <div className="budget-bar" role="progressbar" aria-valuenow={Math.round(budgetPct)} aria-valuemin={0} aria-valuemax={100}>
-          <div
-            className="budget-fill"
-            data-level={bLevel}
-            style={{ width: `${Math.min(100, budgetPct).toFixed(1)}%` }}
-          />
-        </div>
-        <div className="budget-meta">
-          <span>{budgetPct.toFixed(0)}% used</span>
-          <span className="mono">&euro;{budgetRemaining.toFixed(2)} left</span>
-        </div>
-      </section>
+        {/* 7. Budget — inside the grid, spans 2 columns */}
+        <section className="panel span-2">
+          <h2>Budget</h2>
+          <div className="budget-head">
+            <span className="budget-used">&euro;{d.eurSpent.toFixed(2)}</span>
+            <span className="budget-cap">/ &euro;{d.capEur.toFixed(0)}</span>
+          </div>
+          <div className="budget-bar" role="progressbar" aria-valuenow={Math.round(budgetPct)} aria-valuemin={0} aria-valuemax={100}>
+            <div
+              className="budget-fill"
+              data-level={bLevel}
+              style={{ width: `${Math.min(100, budgetPct).toFixed(1)}%` }}
+            />
+          </div>
+          <div className="budget-meta">
+            <span>{budgetPct.toFixed(0)}% used</span>
+            <span className="mono">&euro;{budgetRemaining.toFixed(2)} left</span>
+          </div>
+        </section>
+      </div>
     </>
   );
 }
