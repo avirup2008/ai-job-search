@@ -10,7 +10,6 @@ export const maxDuration = 300;
 interface Params { jobId: string }
 
 export async function POST(_req: Request, ctx: { params: Promise<Params> }) {
-  }
   const { jobId } = await ctx.params;
   try {
     const [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId)).limit(1);

@@ -10,7 +10,6 @@ export const maxDuration = 300;
 interface Params { jobId: string }
 
 export async function POST(_req: Request, ctx: { params: Promise<Params> }) {
-  }
   const { jobId } = await ctx.params;
   try {
     // Ensure application row exists for this job
