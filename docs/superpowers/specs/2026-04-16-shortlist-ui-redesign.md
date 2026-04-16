@@ -1,16 +1,17 @@
-# Shortlist UI Redesign — Design Spec
+# Disha UI Redesign — Design Spec
 
 **Date:** 2026-04-16
 **Status:** Approved via visual brainstorming session
 **Scope:** Complete frontend rebuild of all pages + new query logic
+**Production URL:** https://disha-cloud.vercel.app
 
 ---
 
 ## Brand Identity
 
-- **Name:** Shortlist (was "AI Job Search")
-- **Wordmark:** Cormorant Garamond italic 400, 24px, with Forest Green dot accent + trailing green period: `• Shortlist.`
-- **Tab title:** "Shortlist"
+- **Name:** Disha (दिशा — "direction" in Hindi/Sanskrit. Was "AI Job Search" → "Disha" → "Disha")
+- **Wordmark:** Cormorant Garamond italic 400, 28px, with Forest Green dot accent + trailing green period: `• Disha.`
+- **Tab title:** "Disha"
 
 ## Design System
 
@@ -45,13 +46,15 @@
 
 ---
 
-## Sidebar (global)
+## Navigation (global top bar — no sidebar)
 
-- **Nav items:** Today, Inbox, Pipeline, Dashboard, Profile (5 items — Budget removed)
-- **Paste button:** Green CTA `+ Paste a role` directly below Profile nav item (not pushed to bottom)
-- **"For Upashana" removed**
-- **Active state:** accent-wash background + accent text + font-weight 600
-- **Wordmark:** clickable, links to `/`
+- **Layout:** Horizontal top bar, 60px height, full width. Brand left, nav center, paste button right.
+- **Brand:** `• Disha.` at 28px in top-left, clickable → `/`
+- **Nav items:** Today, Inbox, Pipeline, Dashboard, Profile (5 items — Budget removed). Horizontal row, centered.
+- **Paste button:** Green CTA `+ Paste a role` in top-right.
+- **Active state:** accent-wash background + accent text + font-weight 600 on the active nav link.
+- **Mobile:** collapse nav to hamburger menu. Brand + paste button remain visible.
+- **Benefit:** Content gets full viewport width (no 220px sidebar). More room for floating illustrations, wider cards, more breathing space.
 
 ---
 
@@ -235,7 +238,7 @@ LIMIT 1
 
 ## Page 7: Profile (`/profile`)
 
-**Title:** "Your profile" (Cormorant italic 36px). Meta: "This is what Shortlist knows about you."
+**Title:** "Your profile" (Cormorant italic 36px). Meta: "This is what Disha knows about you."
 
 **Identity card:** Avatar (green circle, initial), name (Cormorant italic 28px), headline, contact links, Edit button.
 
