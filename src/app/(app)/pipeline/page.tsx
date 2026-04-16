@@ -15,6 +15,15 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
   rejected: "Rejected",
 };
 
+const STAGE_EMPTY: Record<PipelineStage, string> = {
+  new: "Roles land here when you generate docs from the inbox.",
+  saved: "Star a role from the inbox to save it here.",
+  applied: "Move a role here once you've submitted the application.",
+  interview: "Roles you're actively interviewing for.",
+  offer: "Roles where you've received an offer.",
+  rejected: "Roles you've decided to pass on.",
+};
+
 async function loadApplications(): Promise<PipelineCardData[]> {
   const rows = await db
     .select({
@@ -77,7 +86,7 @@ export default async function PipelinePage() {
             </div>
             <div className="kanban-list">
               {byStage[stage].length === 0 ? (
-                <div className="kanban-empty">—</div>
+                <div className="kanban-empty">{STAGE_EMPTY[stage]}</div>
               ) : (
                 byStage[stage].map((a) => (
                   <PipelineCard key={a.applicationId} data={a} />

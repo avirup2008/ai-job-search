@@ -170,26 +170,27 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
           )}
 
           <section className="detail-section">
-            <h2>Company dossier</h2>
-            <p style={{ fontSize: 14, marginBottom: 8 }}>
-              <strong>{dossier.productOneLiner}</strong>
-            </p>
-            <p className="meta" style={{ marginBottom: 12 }}>
-              {dossier.stage} · {dossier.industry}
-              {dossier.lowSignal && " · low-signal dossier (be conservative)"}
-            </p>
-            <p style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 12, lineHeight: 1.65 }}>
-              {dossier.narrative}
-            </p>
+            <h2>Company snapshot</h2>
+            <p className="dossier-oneliner">{dossier.productOneLiner}</p>
+            <div className="dossier-meta-row">
+              <span className="dossier-tag">{dossier.stage}</span>
+              <span className="dossier-tag">{dossier.industry}</span>
+              {dossier.lowSignal && <span className="dossier-tag dossier-tag-warn">Low signal</span>}
+            </div>
             {dossier.marketingStack.length > 0 && (
-              <>
-                <span className="label" style={{ display: "block", marginBottom: 6 }}>Marketing stack detected</span>
+              <div className="dossier-stack-row">
+                <span className="label">Stack</span>
                 <div className="dossier-stack">
                   {dossier.marketingStack.map((tool) => (
                     <span key={tool} className="dossier-chip">{tool}</span>
                   ))}
                 </div>
-              </>
+              </div>
+            )}
+            {dossier.narrative && (
+              <p className="dossier-insight">
+                {dossier.narrative.split(/\.\s+/).slice(0, 2).join(". ")}.
+              </p>
             )}
           </section>
 

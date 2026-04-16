@@ -168,6 +168,35 @@
 .signal-list-strong .marker { background: var(--match-strong-bg); color: var(--match-strong); }
 .signal-list-weak .marker   { background: var(--match-medium-bg); color: var(--match-medium); }
 
+.dossier-oneliner {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-1);
+  margin-bottom: 12px;
+}
+.dossier-meta-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.dossier-tag {
+  padding: 4px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.dossier-tag-warn { border-color: var(--warning); color: var(--warning); background: var(--warning-wash); }
+.dossier-stack-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.dossier-stack-row .label { flex-shrink: 0; margin-top: 5px; }
 .dossier-stack {
   display: flex;
   flex-wrap: wrap;
@@ -175,26 +204,33 @@
 }
 .dossier-chip {
   padding: 3px 10px;
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   font-size: 12px;
   color: var(--text-2);
 }
+.dossier-insight {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-2);
+  font-style: italic;
+  border-left: 2px solid var(--border);
+  padding-left: 16px;
+  max-width: 560px;
+}
 
 .jd-text {
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--text-1);
   white-space: pre-wrap;
   max-width: 68ch;
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
-  padding: var(--s-5) var(--s-6);
-  border-radius: 0 8px 8px 0;
-  max-height: 540px;
-  overflow-y: auto;
+  padding: var(--s-6) var(--s-8);
+  border-radius: 0 10px 10px 0;
 }
 
 /* Generate panel (aside) */
