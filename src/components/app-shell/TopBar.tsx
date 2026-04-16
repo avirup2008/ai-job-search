@@ -1,6 +1,9 @@
 "use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PasteRolePanel } from "@/components/paste-role/PasteRolePanel";
 
 const NAV = [
   { href: "/", label: "Today" },
@@ -12,6 +15,7 @@ const NAV = [
 
 export function TopBar() {
   const pathname = usePathname();
+  const [pasteOpen, setPasteOpen] = useState(false);
   return (
     <header className="topbar">
       <Link href="/" className="topbar-brand" aria-label="Disha home">
@@ -38,7 +42,10 @@ export function TopBar() {
           );
         })}
       </nav>
-      {/* Paste-a-role button — hidden until Phase 10 implementation */}
+      <button className="topbar-paste" onClick={() => setPasteOpen(true)}>
+        + Paste a role
+      </button>
+      <PasteRolePanel open={pasteOpen} onClose={() => setPasteOpen(false)} />
     </header>
   );
 }
