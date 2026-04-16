@@ -1,7 +1,5 @@
 import { db, schema } from "@/db";
 import { and, desc, gte, inArray, lt, sql } from "drizzle-orm";
-import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/auth/admin";
 import { JobCard, type JobCardData } from "@/components/inbox/JobCard";
 import "@/components/inbox/inbox.css";
 

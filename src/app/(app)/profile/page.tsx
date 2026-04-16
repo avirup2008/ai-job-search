@@ -1,6 +1,4 @@
 import { db, schema } from "@/db";
-import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/auth/admin";
 import "@/components/profile/profile.css";
 
 export const dynamic = "force-dynamic";

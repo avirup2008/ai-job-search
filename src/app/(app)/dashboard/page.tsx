@@ -1,7 +1,5 @@
 import { db, schema } from "@/db";
 import { eq, sql, inArray, isNotNull } from "drizzle-orm";
-import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/auth/admin";
 import { PIPELINE_STAGES } from "@/app/(app)/pipeline/stages";
 import "@/components/dashboard/dashboard.css";
 

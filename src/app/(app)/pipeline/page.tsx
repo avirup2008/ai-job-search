@@ -1,7 +1,5 @@
 import { db, schema } from "@/db";
 import { eq, desc, ne, and, count } from "drizzle-orm";
-import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/auth/admin";
 import { PipelineCard, type PipelineCardData } from "@/components/pipeline/PipelineCard";
 import "@/components/pipeline/pipeline.css";
 

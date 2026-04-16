@@ -1,8 +1,6 @@
 import { db, schema } from "@/db";
 import { desc, eq, gte, inArray, sql, and } from "drizzle-orm";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { isAdmin } from "@/lib/auth/admin";
 import "@/components/home/home.css";
 
 type GapAnalysis = { strengths?: string[] } | null;

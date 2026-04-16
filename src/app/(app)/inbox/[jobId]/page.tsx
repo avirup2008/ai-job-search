@@ -2,7 +2,6 @@ import { db, schema } from "@/db";
 import { eq, desc, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { isAdmin } from "@/lib/auth/admin";
 import { getCompanyDossier } from "@/lib/research";
 import { companyAvatar, matchBand } from "@/lib/ui/avatar";
 import { GeneratePanel, type DocSummary } from "@/components/job-detail/GeneratePanel";
