@@ -11,10 +11,17 @@ export const CvSchema = z.object({
     portfolio: z.string().optional(),
   }),
   summary: z.string().describe("3-4 sentence professional summary tailored to THIS role"),
-  skillsGrouped: z.array(z.object({
-    group: z.string(),
-    items: z.array(z.string()),
-  })).min(2).max(5),
+  skillsGrouped: z.preprocess(
+    (val) => {
+      // Sonnet sometimes returns a flat string — coerce to array
+      if (typeof val === "string") return [{ group: "Skills", items: val.split(/,\s*/) }];
+      return val;
+    },
+    z.array(z.object({
+      group: z.string(),
+      items: z.array(z.string()),
+    })).min(1).max(5),
+  ),
   experience: z.array(z.object({
     company: z.string(),
     title: z.string(),
