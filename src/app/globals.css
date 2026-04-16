@@ -41,9 +41,10 @@
   --match-weak-bg: #F0EDE7;
 
   /* Type */
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
   --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-doc: "Lora", ui-serif, Georgia, serif;
 
   /* Spacing scale (8px base) */
   --s-1: 4px;

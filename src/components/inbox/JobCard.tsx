@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { matchBand } from "@/lib/ui/avatar";
+import { SaveButton } from "./SaveButton";
 
 export interface JobCardData {
   id: string;
@@ -30,32 +31,34 @@ export function JobCard({ job }: { job: JobCardData }) {
   const band = matchBand(job.fitScore);
   const score = job.fitScore ?? null;
   const topStrength = job.strengths?.[0] ?? null;
+  const dateStr = fmtDate(job.postedAt);
 
   return (
-    <Link href={`/inbox/${job.id}`} className="job-card" data-band={band}>
+    <div className="job-card" data-band={band}>
       <div className="job-card-rail" aria-hidden="true" />
-      <div className="job-card-body">
+      <Link href={`/inbox/${job.id}`} className="job-card-body">
         <div className="job-card-top">
           <span className="job-card-company">{job.companyName}</span>
           <span className="job-card-score mono" data-band={band}>
-            {score != null ? `${Math.round(score)}%` : "—"}
+            {score != null ? `${Math.round(score)}%` : "\u2014"}
           </span>
         </div>
         <h3 className="job-card-title">{job.title}</h3>
         {topStrength && (
           <p className="job-card-strength">
-            <span aria-hidden="true" className="job-card-strength-mark">+</span>
+            <span aria-hidden="true" className="job-card-strength-mark">&#10022;</span>
             {topStrength}
           </p>
         )}
         <div className="job-card-foot">
           {job.location && <span className="meta-chip">{job.location}</span>}
-          {job.tier != null && <span className="meta-chip">Tier {job.tier}</span>}
-          {job.dutchRequired && <span className="meta-chip">Dutch</span>}
+          {dateStr && <span className="meta-chip">{dateStr}</span>}
           <span className="meta-chip meta-chip-source">{job.source}</span>
-          {job.postedAt && <span className="meta-chip">{fmtDate(job.postedAt)}</span>}
         </div>
+      </Link>
+      <div className="job-card-actions">
+        <SaveButton jobId={job.id} />
       </div>
-    </Link>
+    </div>
   );
 }

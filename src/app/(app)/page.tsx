@@ -1,5 +1,5 @@
 import { db, schema } from "@/db";
-import { desc, eq, gte, inArray, sql, and, ne } from "drizzle-orm";
+import { desc, eq, gte, inArray, sql, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isAdmin } from "@/lib/auth/admin";
@@ -20,12 +20,15 @@ function greeting(): string {
 }
 
 function fmtDate(d: Date): string {
-  return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "long" }).toUpperCase();
+  const day = d.getDate();
+  const month = d.toLocaleDateString("en-GB", { month: "long" }).toUpperCase();
+  return `${weekday} ${day} ${month}`;
 }
 
 async function loadHome() {
   const since24h = new Date(Date.now() - 24 * 3600_000);
-  const [profile, featured, newToday, strongCount, inPipeline, totalT123] = await Promise.all([
+  const [profile, featured, newToday, strongCount, totalT123] = await Promise.all([
     db.select({ fullName: schema.profile.fullName }).from(schema.profile).limit(1),
     db.select({
       id: schema.jobs.id, title: schema.jobs.title, location: schema.jobs.location,
@@ -38,8 +41,6 @@ async function loadHome() {
     db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs).where(gte(schema.jobs.discoveredAt, since24h)),
     db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs)
       .where(and(inArray(schema.jobs.tier, [1, 2, 3]), gte(schema.jobs.fitScore, "80"))),
-    db.select({ count: sql<number>`count(*)::int` }).from(schema.applications)
-      .where(and(ne(schema.applications.status, "rejected"), ne(schema.applications.status, "new"))),
     db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs).where(inArray(schema.jobs.tier, [1, 2, 3])),
   ]);
 
@@ -48,7 +49,6 @@ async function loadHome() {
     featured: featured[0] ?? null,
     newToday: newToday[0]?.count ?? 0,
     strongCount: strongCount[0]?.count ?? 0,
-    inPipeline: inPipeline[0]?.count ?? 0,
     totalInbox: totalT123[0]?.count ?? 0,
   };
 }
@@ -62,86 +62,116 @@ export default async function HomePage() {
 
   return (
     <div className="home">
-      <section className="home-hero">
-        {/* Left: greeting */}
-        <div className="home-left">
-          <div className="home-date">{fmtDate(new Date())}</div>
-          <h1 className="home-greeting">
-            {greeting()},<br />{d.name}<span className="accent-dot">.</span>
-          </h1>
-          <p className="home-sub">
-            {d.strongCount > 0 ? (
-              <>You have <strong>{d.strongCount}</strong> strong match{d.strongCount === 1 ? "" : "es"} waiting.</>
-            ) : d.totalInbox > 0 ? (
-              <><strong>{d.totalInbox}</strong> roles in your inbox, sorted by fit.</>
-            ) : (
-              <>Discovery runs overnight. Check back in the morning.</>
-            )}
-          </p>
-          <Link href="/inbox" className="home-inbox-link">
-            See all {d.totalInbox} roles →
-          </Link>
-        </div>
+      {/* Floating doc illustrations */}
+      <div className="home-float home-float-cv" aria-hidden="true">
+        <svg width="48" height="60" viewBox="0 0 48 60" fill="none">
+          <rect x="0.5" y="0.5" width="47" height="59" rx="3" stroke="var(--border)" fill="var(--surface)" />
+          <line x1="10" y1="16" x2="38" y2="16" stroke="var(--border-h)" strokeWidth="1.5" />
+          <line x1="10" y1="22" x2="32" y2="22" stroke="var(--border)" strokeWidth="1" />
+          <line x1="10" y1="27" x2="35" y2="27" stroke="var(--border)" strokeWidth="1" />
+          <line x1="10" y1="32" x2="28" y2="32" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+        <span className="home-float-label">CV</span>
+      </div>
+      <div className="home-float home-float-cover" aria-hidden="true">
+        <svg width="44" height="56" viewBox="0 0 44 56" fill="none">
+          <rect x="0.5" y="0.5" width="43" height="55" rx="3" stroke="var(--border)" fill="var(--surface)" />
+          <line x1="8" y1="14" x2="36" y2="14" stroke="var(--border-h)" strokeWidth="1.5" />
+          <line x1="8" y1="20" x2="30" y2="20" stroke="var(--border)" strokeWidth="1" />
+          <line x1="8" y1="25" x2="33" y2="25" stroke="var(--border)" strokeWidth="1" />
+          <line x1="8" y1="30" x2="26" y2="30" stroke="var(--border)" strokeWidth="1" />
+          <line x1="8" y1="35" x2="30" y2="35" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+        <span className="home-float-label">COVER LETTER</span>
+      </div>
+      <div className="home-float home-float-plan" aria-hidden="true">
+        <svg width="46" height="58" viewBox="0 0 46 58" fill="none">
+          <rect x="0.5" y="0.5" width="45" height="57" rx="3" stroke="var(--border)" fill="var(--surface)" />
+          <line x1="9" y1="15" x2="37" y2="15" stroke="var(--border-h)" strokeWidth="1.5" />
+          <line x1="9" y1="21" x2="31" y2="21" stroke="var(--border)" strokeWidth="1" />
+          <line x1="9" y1="26" x2="34" y2="26" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+        <span className="home-float-label">30-60-90</span>
+      </div>
 
-        {/* Right: featured pick */}
-        <div className="home-right">
-          {f ? (
-            <>
-              <div className="home-pick-label">Picked for you</div>
-              <Link href={`/inbox/${f.id}`} className="home-featured">
-                {score != null && <span className="home-featured-wm" aria-hidden="true">{score}</span>}
-                <div className="home-featured-company">
-                  {f.companyName ?? "Unknown"}
-                  {f.location && ` · ${f.location}`}
-                </div>
+      {/* Accent dots */}
+      <span className="home-dot home-dot-1" aria-hidden="true" />
+      <span className="home-dot home-dot-2" aria-hidden="true" />
+      <span className="home-dot home-dot-3" aria-hidden="true" />
+
+      {/* Growth curve */}
+      <svg className="home-growth" aria-hidden="true" viewBox="0 0 720 400" fill="none" preserveAspectRatio="none">
+        <path d="M0 380 C180 370, 300 340, 400 280 S560 120, 720 40" stroke="var(--accent)" strokeWidth="2" />
+      </svg>
+
+      {/* Narrative column */}
+      <div className="home-narrative">
+        {/* 1. Date */}
+        <div className="home-date">{fmtDate(new Date())}</div>
+
+        {/* 2. Greeting */}
+        <h1 className="home-greeting">
+          {greeting()},<br />
+          {d.name}<span className="home-accent-dot">.</span>
+        </h1>
+
+        {/* 3. Subtext */}
+        {d.strongCount > 0 || d.totalInbox > 0 ? (
+          <p className="home-sub">
+            You have <strong>{d.strongCount}</strong> strong match{d.strongCount === 1 ? "" : "es"} waiting.{" "}
+            <strong>{d.newToday}</strong> new roles arrived overnight.
+          </p>
+        ) : (
+          <p className="home-sub">Discovery runs overnight. Check back in the morning.</p>
+        )}
+
+        {f ? (
+          <>
+            {/* 4. Transition */}
+            <div className="home-transition">
+              <span className="home-transition-line" />
+              One stands out
+            </div>
+
+            {/* 5. Featured card */}
+            <Link href={`/inbox/${f.id}`} className="home-featured">
+              <div className="home-featured-left">
+                <div className="home-featured-company">{f.companyName ?? "Unknown"}</div>
                 <h2 className="home-featured-title">{f.title}</h2>
-                {score != null && (
-                  <div className="home-featured-score">
-                    <span className="home-featured-score-num">{score}</span>
-                    <span className="home-featured-score-pct">% match</span>
-                  </div>
-                )}
                 <p className="home-featured-reason">
                   {strengths.length > 0
                     ? strengths.slice(0, 2).join(". ") + "."
                     : "Strong profile match on skills, tools, and seniority."}
                 </p>
-                <span className="home-featured-cta">Open this role →</span>
-              </Link>
-            </>
-          ) : (
-            <div className="home-empty-right">
-              <h2>Nothing here yet.</h2>
-              <p>Your first nightly run surfaces a top match here. The cron runs between 02:00 and 07:00.</p>
-            </div>
-          )}
-        </div>
-      </section>
+                <span className="home-featured-cta">Open this role &rarr;</span>
+              </div>
+              {score != null && (
+                <div className="home-featured-right">
+                  <span className="home-featured-score">{score}</span>
+                  <span className="home-featured-pct">% match</span>
+                </div>
+              )}
+            </Link>
+          </>
+        ) : (
+          <div className="home-empty">
+            Discovery runs overnight. Check back in the morning.
+          </div>
+        )}
 
-      {/* Glance tiles below the fold */}
-      <section className="home-glance-section">
-        <div className="home-glance-divider" />
-        <div className="home-glance">
-          <Link className="home-glance-tile" href="/inbox">
-            <span className="home-glance-label">Inbox</span>
-            <span className="home-glance-value">{d.totalInbox}</span>
-            <span className="home-glance-sub">roles worth reviewing</span>
-            <span className="home-glance-link">See all →</span>
+        {/* 6. KPI pills */}
+        <div className="home-pills">
+          <Link href="/inbox" className="home-pill">
+            <strong>{d.totalInbox}</strong> in your inbox
           </Link>
-          <Link className="home-glance-tile" href="/pipeline">
-            <span className="home-glance-label">Pipeline</span>
-            <span className="home-glance-value">{d.inPipeline}</span>
-            <span className="home-glance-sub">saved or applied</span>
-            <span className="home-glance-link">View pipeline →</span>
+          <Link href="/inbox?filter=strong" className="home-pill home-pill-accent">
+            <strong>{d.strongCount}</strong> strong matches
           </Link>
-          <Link className="home-glance-tile" href="/dashboard">
-            <span className="home-glance-label">Discovered</span>
-            <span className="home-glance-value">{d.newToday > 0 ? `+${d.newToday}` : "—"}</span>
-            <span className="home-glance-sub">in the last 24 hours</span>
-            <span className="home-glance-link">Dashboard →</span>
+          <Link href="/dashboard" className="home-pill">
+            <strong>{d.newToday}</strong> discovered
           </Link>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

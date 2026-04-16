@@ -87,10 +87,13 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
       ]
     : [];
 
+  const fitSnippet = (gap?.strengths ?? []).slice(0, 2).join(". ");
+
   return (
     <>
-      <Link href="/inbox" className="detail-back">← Inbox</Link>
+      <Link href="/inbox" className="detail-back">&larr; Inbox</Link>
 
+      {/* 1. Header */}
       <div className="detail-head">
         <div className="detail-head-avatar" style={{ background: avatar.bg }} aria-hidden="true">
           {avatar.letter}
@@ -99,16 +102,16 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
           <h1>{job.title}</h1>
           <div className="detail-head-meta">
             <span>{companyName}</span>
-            {job.location && <><span className="sep">·</span><span>{job.location}</span></>}
-            {job.tier != null && <><span className="sep">·</span><span>Tier {job.tier}</span></>}
-            {job.dutchRequired && <><span className="sep">·</span><span>Dutch required</span></>}
-            <span className="sep">·</span>
-            <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer">{job.source} ↗</a>
+            {job.location && <><span className="sep">&middot;</span><span>{job.location}</span></>}
+            {job.tier != null && <><span className="sep">&middot;</span><span>Tier {job.tier}</span></>}
+            {job.dutchRequired && <><span className="sep">&middot;</span><span>Dutch required</span></>}
+            <span className="sep">&middot;</span>
+            <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer">{job.source} &#8599;</a>
           </div>
         </div>
         <div className="detail-score">
           <span className="detail-score-num mono" data-band={scoreBand}>
-            {scoreNum != null ? `${Math.round(scoreNum)}%` : "—"}
+            {scoreNum != null ? `${Math.round(scoreNum)}%` : "\u2014"}
           </span>
           <span className="detail-score-label">Match</span>
         </div>
@@ -116,61 +119,77 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
 
       <div className="detail-layout">
         <div>
-          {breakdownRows.length > 0 && (
-            <section className="detail-section">
-              <h2>Match breakdown</h2>
-              <div className="breakdown">
-                {breakdownRows.map((r) => {
-                  const pct = Math.round(r.value * 100);
-                  const band = bandOf(r.value);
-                  return (
-                    <div key={r.label} className="breakdown-row">
-                      <span className="breakdown-label">{r.label}</span>
-                      <div className="breakdown-bar">
-                        <div
-                          className="breakdown-fill"
-                          data-band={band}
-                          style={{ width: `${pct}%` }}
-                          aria-label={`${r.label} ${pct}%`}
-                        />
-                      </div>
-                      <span className="breakdown-value">{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
+          {/* 2. Why you're a strong fit — LEADS the page */}
           {(gap?.strengths?.length || gap?.gaps?.length) && (
             <section className="detail-section">
-              <h2>Signals</h2>
-              <div className="two-col">
-                <div>
-                  <span className="label" style={{ marginBottom: 8, display: "block" }}>Lead with</span>
-                  <ul className="signal-list signal-list-strong">
+              <h2>Why you&rsquo;re a strong fit</h2>
+              <div className="fit-hero">
+                <p className="fit-hero-headline">
+                  This role plays directly to your strongest skills.
+                </p>
+                {(gap.strengths ?? []).length > 0 && (
+                  <ul className="fit-list fit-list-strengths">
                     {(gap.strengths ?? []).map((s, i) => (
-                      <li key={i}><span className="marker">+</span><span>{s}</span></li>
+                      <li key={i}><span className="fit-marker">&#10022;</span><span>{s}</span></li>
                     ))}
                   </ul>
-                </div>
-                <div>
-                  <span className="label" style={{ marginBottom: 8, display: "block" }}>Acknowledge</span>
-                  <ul className="signal-list signal-list-weak">
-                    {(gap.gaps ?? []).map((s, i) => (
-                      <li key={i}><span className="marker">!</span><span>{s}</span></li>
-                    ))}
-                  </ul>
-                </div>
+                )}
+                {(gap.gaps ?? []).length > 0 && (
+                  <>
+                    <span className="fit-prep-label">Areas to prepare for</span>
+                    <ul className="fit-list fit-list-prep">
+                      {(gap.gaps ?? []).map((s, i) => (
+                        <li key={i}><span className="fit-marker">&#9675;</span><span>{s}</span></li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </div>
               {gap.recommendationReason && (
                 <p className="meta" style={{ marginTop: 12, fontStyle: "italic" }}>{gap.recommendationReason}</p>
               )}
+              {breakdownRows.length > 0 && (
+                <div className="breakdown" style={{ marginTop: 20 }}>
+                  {breakdownRows.map((r) => {
+                    const pct = Math.round(r.value * 100);
+                    const band = bandOf(r.value);
+                    return (
+                      <div key={r.label} className="breakdown-row">
+                        <span className="breakdown-label">{r.label}</span>
+                        <div className="breakdown-bar">
+                          <div
+                            className="breakdown-fill"
+                            data-band={band}
+                            style={{ width: `${pct}%` }}
+                            aria-label={`${r.label} ${pct}%`}
+                          />
+                        </div>
+                        <span className="breakdown-value">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
 
+          {/* 3. Your application — doc cards */}
+          <section className="detail-section detail-section-docs">
+            <h2>Your application</h2>
+            <GeneratePanel jobId={jobId} docs={documents} />
+          </section>
+
+          {/* 4. About the role — JD text */}
           <section className="detail-section">
-            <h2>Company snapshot</h2>
+            <h2>About the role</h2>
+            <div className="jd-text">
+              {job.jdText ?? "(no description captured)"}
+            </div>
+          </section>
+
+          {/* 5. About the company — redesigned snapshot */}
+          <section className="detail-section">
+            <h2>About the company</h2>
             <p className="dossier-oneliner">{dossier.productOneLiner}</p>
             <div className="dossier-meta-row">
               <span className="dossier-tag">{dossier.stage}</span>
@@ -178,32 +197,27 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
               {dossier.lowSignal && <span className="dossier-tag dossier-tag-warn">Low signal</span>}
             </div>
             {dossier.marketingStack.length > 0 && (
-              <div className="dossier-stack-row">
-                <span className="label">Stack</span>
-                <div className="dossier-stack">
-                  {dossier.marketingStack.map((tool) => (
-                    <span key={tool} className="dossier-chip">{tool}</span>
-                  ))}
-                </div>
+              <div className="dossier-meta-row">
+                {dossier.marketingStack.map((tool) => (
+                  <span key={tool} className="dossier-tag">{tool}</span>
+                ))}
               </div>
             )}
-            {dossier.narrative && (
-              <p className="dossier-insight">
-                {dossier.narrative.split(/\.\s+/).slice(0, 2).join(". ")}.
-              </p>
+            {fitSnippet && (
+              <div className="snapshot-fit">
+                <div className="snapshot-fit-label">Why this company fits you</div>
+                <div className="snapshot-fit-text">{fitSnippet}.</div>
+              </div>
             )}
-          </section>
-
-          <section className="detail-section">
-            <h2>Job description</h2>
-            <div className="jd-text">
-              {job.jdText ?? "(no description captured)"}
-            </div>
           </section>
         </div>
 
         <aside className="detail-col-aside">
-          <GeneratePanel jobId={jobId} docs={documents} />
+          {/* Sticky bottom bar within aside for now */}
+          <div className="sticky-pursue">
+            <p className="sticky-pursue-text">Ready to pursue this role?</p>
+            <button className="btn btn-ghost" disabled>Save to pipeline &rarr;</button>
+          </div>
         </aside>
       </div>
     </>

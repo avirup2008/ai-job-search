@@ -1,4 +1,13 @@
-/* Inbox — simplified hierarchy, editorial tone */
+/* Inbox — score-band layout, editorial tone */
+
+.inbox-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
 
 .inbox-toolbar {
   display: flex;
@@ -50,34 +59,67 @@
   color: var(--accent);
 }
 
-.inbox-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--s-5);
-}
-@media (min-width: 1100px) {
-  .inbox-grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-5); }
+/* Section headers */
+.inbox-list {
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
 }
 
-/* Job card — new hierarchy */
+.inbox-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.inbox-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.inbox-section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.inbox-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+/* Job card */
 .job-card {
   display: grid;
-  grid-template-columns: 3px 1fr;
+  grid-template-columns: 3px 1fr auto;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
   transition: border-color var(--dur-150) var(--ease-io), box-shadow var(--dur-150) var(--ease-io), transform var(--dur-150) var(--ease-io);
+  max-width: 960px;
 }
 .job-card:hover {
-  border-color: var(--border-h);
+  border-color: var(--accent);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
-.job-card:focus-visible {
+.job-card:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
+
 .job-card-rail {
   background: var(--border);
   transition: background var(--dur-150) var(--ease-io);
@@ -87,11 +129,13 @@
 .job-card[data-band="weak"]   .job-card-rail { background: var(--border-h); }
 
 .job-card-body {
-  padding: 22px 24px;
+  padding: 22px 28px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  text-decoration: none;
+  color: inherit;
 }
 
 .job-card-top {
@@ -104,7 +148,7 @@
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-1);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -113,7 +157,7 @@
 }
 .job-card-score {
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 500;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -147,19 +191,19 @@
   display: flex;
   gap: 6px;
   align-items: flex-start;
+  margin: 0;
 }
 .job-card-strength-mark {
   color: var(--match-strong);
-  font-weight: 700;
-  font-family: var(--font-mono);
   font-size: 12px;
-  margin-top: 1px;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .job-card-foot {
   display: flex;
   align-items: center;
-  gap: 6px 10px;
+  gap: 0;
   flex-wrap: wrap;
   padding-top: 2px;
 }
@@ -170,12 +214,43 @@
   letter-spacing: 0.03em;
 }
 .meta-chip + .meta-chip::before {
-  content: "·";
+  content: "\00b7";
   color: var(--text-3);
-  margin-right: 8px;
+  margin: 0 8px;
 }
-.meta-chip-source { color: var(--text-3); margin-left: auto; font-size: 11px; text-transform: capitalize; }
-.meta-chip-source::before { display: none !important; }
+.meta-chip-source {
+  text-transform: capitalize;
+}
+
+/* Save button — appears on hover */
+.job-card-actions {
+  display: flex;
+  align-items: center;
+  padding-right: 20px;
+}
+.save-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--dur-150) var(--ease-io), background var(--dur-150) var(--ease-io);
+}
+.job-card:hover .save-btn {
+  opacity: 1;
+}
+.save-btn:hover {
+  background: var(--accent-wash);
+}
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 
 .inbox-empty {
   background: var(--surface);

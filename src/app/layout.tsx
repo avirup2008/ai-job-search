@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import { Instrument_Serif, Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, IBM_Plex_Mono, Lora } from "next/font/google";
 import "./globals.css";
 
-const display = Instrument_Serif({
+const display = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["300", "400"],
+  style: ["normal", "italic"],
   variable: "--font-display-var",
   display: "swap",
 });
@@ -20,15 +21,22 @@ const mono = IBM_Plex_Mono({
   variable: "--font-mono-var",
   display: "swap",
 });
+const doc = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-doc-var",
+  display: "swap",
+});
 
 export const metadata = {
-  title: "Shortlist",
-  description: "A curated job pipeline.",
+  title: "Disha",
+  description: "Your career direction.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable} ${doc.variable}`}>
       <body>{children}</body>
     </html>
   );
