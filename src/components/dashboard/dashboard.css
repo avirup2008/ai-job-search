@@ -74,7 +74,7 @@
 .kpi-value {
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: clamp(24px, 2.8vw, 28px);
+  font-size: 20px;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--text-1);
@@ -162,7 +162,7 @@
   display: flex;
   gap: 4px;
   align-items: flex-end;
-  height: 100px;
+  height: 80px;
 }
 .hist-col {
   flex: 1;
@@ -202,16 +202,16 @@
 .hbar-list {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: 4px;
 }
 .hbar-row {
   display: grid;
-  grid-template-columns: 110px 1fr 32px;
+  grid-template-columns: 100px 1fr 28px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .hbar-name {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-1);
   font-weight: 500;
   white-space: nowrap;
@@ -242,23 +242,23 @@
 .funnel-list {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: 4px;
 }
 .funnel-row {
   display: grid;
-  grid-template-columns: 90px 1fr 36px;
+  grid-template-columns: 80px 1fr 32px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .funnel-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-1);
   font-weight: 500;
 }
 .funnel-track {
-  height: 10px;
+  height: 7px;
   background: var(--surface-2);
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
 }
 .funnel-fill {

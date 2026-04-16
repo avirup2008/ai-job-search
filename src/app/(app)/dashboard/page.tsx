@@ -179,9 +179,9 @@ export default async function DashboardPage() {
   const matchQuality = mockMatchQualityData();
   const heatmap = mockHeatmapData();
 
-  // SVG chart dimensions
+  // SVG chart dimensions — compact to reduce page height
   const chartW = 560;
-  const chartH = 200;
+  const chartH = 140;
   const padL = 36;
   const padR = 12;
   const padT = 12;
