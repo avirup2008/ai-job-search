@@ -312,10 +312,11 @@
   flex: 1;
 }
 .heatmap-cell {
-  flex: 1;
+  width: 100%;
   aspect-ratio: 1;
+  max-width: 18px;
+  max-height: 18px;
   border-radius: 2px;
-  min-height: 0;
 }
 .heatmap-cell.l0 { background: var(--surface-2); }
 .heatmap-cell.l1 { background: rgba(29, 74, 53, 0.15); }
