@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth/admin";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { generateScreeningQA } from "@/lib/generate/screening-qa";
@@ -11,8 +10,6 @@ export const maxDuration = 300;
 interface Params { jobId: string }
 
 export async function POST(_req: Request, ctx: { params: Promise<Params> }) {
-  if (!(await isAdmin())) {
-    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
   const { jobId } = await ctx.params;
   try {

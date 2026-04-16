@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth/admin";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { generateArtifact, type ArtifactType } from "@/lib/generate/artifacts";
@@ -11,8 +10,6 @@ export const maxDuration = 300;
 const VALID_TYPES: ArtifactType[] = ["thirty_sixty_ninety", "email_crm_teardown"];
 
 export async function POST(_req: Request, ctx: { params: Promise<{ jobId: string; type: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
-  const { jobId, type } = await ctx.params;
   if (!VALID_TYPES.includes(type as ArtifactType)) {
     return NextResponse.json({ ok: false, error: `unsupported artifact type: ${type}` }, { status: 400 });
   }

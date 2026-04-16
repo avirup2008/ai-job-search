@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth/admin";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { pickArtifacts, generateArtifact } from "@/lib/generate/artifacts";
@@ -9,8 +8,6 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 export async function POST(_req: Request, ctx: { params: Promise<{ jobId: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
-  const { jobId } = await ctx.params;
   try {
     const [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId)).limit(1);
     if (!job) return NextResponse.json({ ok: false, error: "job not found" }, { status: 404 });
