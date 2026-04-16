@@ -361,3 +361,190 @@
   color: var(--text-2);
   line-height: 1.6;
 }
+
+/* Editable chips */
+.profile-chip-editable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 6px;
+}
+.profile-chip-remove {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  border-radius: 50%;
+  transition: opacity var(--dur-150) var(--ease-io), background var(--dur-150) var(--ease-io);
+}
+.profile-chip-editable:hover .profile-chip-remove,
+.profile-chip-editable:focus-within .profile-chip-remove {
+  opacity: 0.7;
+}
+.profile-chip-remove:hover {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.08);
+}
+.profile-chip-remove:disabled {
+  cursor: wait;
+  opacity: 0.3 !important;
+}
+
+/* Add-skill button (active state) */
+.profile-chip-add-active {
+  cursor: pointer;
+  opacity: 1;
+  color: var(--text-2);
+  transition: color var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
+}
+.profile-chip-add-active:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.profile-chip-add-active:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+/* Inline chip input */
+.profile-chip-input-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+.profile-chip-input {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--text-1);
+  outline: none;
+  min-width: 120px;
+  font-family: inherit;
+}
+.profile-chip-input:disabled { opacity: 0.6; }
+
+/* Achievement remove button */
+.profile-achievement-remove {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  opacity: 0;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  transition: opacity var(--dur-150) var(--ease-io), color var(--dur-150) var(--ease-io);
+}
+.profile-achievement:hover .profile-achievement-remove,
+.profile-achievement:focus-within .profile-achievement-remove {
+  opacity: 0.8;
+}
+.profile-achievement-remove:hover {
+  opacity: 1 !important;
+  color: var(--text-1);
+}
+.profile-achievement-remove:disabled {
+  cursor: wait;
+  opacity: 0.3 !important;
+}
+
+/* Achievement add button (active state) */
+.profile-achievement-add-active {
+  cursor: pointer;
+  opacity: 1;
+  color: var(--text-2);
+  transition: color var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
+}
+.profile-achievement-add-active:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.profile-achievement-add-active:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+/* Achievement add form */
+.profile-achievement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+}
+.profile-achievement-input,
+.profile-achievement-metric-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+}
+.profile-achievement-input:focus,
+.profile-achievement-metric-input:focus {
+  border-color: var(--accent);
+}
+.profile-achievement-metric-input {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.profile-achievement-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Rescore notice — fixed bottom toast */
+.profile-rescore-notice {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: var(--accent-wash);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 1000;
+  animation: profile-rescore-in 180ms var(--ease-io), profile-rescore-out 280ms var(--ease-io) 2720ms forwards;
+}
+.profile-rescore-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: profile-rescore-pulse 1.4s ease-in-out infinite;
+}
+@keyframes profile-rescore-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes profile-rescore-out {
+  to { opacity: 0; transform: translate(-50%, 12px); }
+}
+@keyframes profile-rescore-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}

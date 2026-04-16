@@ -1,5 +1,8 @@
 import { db, schema } from "@/db";
 import "@/components/profile/profile.css";
+import { EditableChipList } from "@/components/profile/EditableChipList";
+import { EditableAchievements } from "@/components/profile/EditableAchievements";
+import { addTool, removeTool, addAchievement, removeAchievement } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -121,32 +124,28 @@ export default async function ProfilePage() {
           {/* Tools & Skills */}
           <section className="profile-section">
             <h2 className="profile-section-title">Tools &amp; skills</h2>
-            <div className="profile-chips">
-              {toolNames.map((t, i) => (
-                <span key={t} className={`profile-chip${i < 3 ? " profile-chip-primary" : ""}`}>
-                  {t}
-                </span>
-              ))}
-              <button className="profile-chip-add" disabled>+ Add skill</button>
-            </div>
+            <EditableChipList
+              items={toolNames}
+              primaryCount={3}
+              addLabel="Add skill"
+              placeholder="e.g. Figma"
+              onAdd={addTool}
+              onRemove={removeTool}
+            />
           </section>
 
           {/* Key Achievements */}
           <section className="profile-section">
             <h2 className="profile-section-title">Key achievements</h2>
-            <div className="profile-achievements">
-              {achievements.map((a, i) => (
-                <div key={i} className="profile-achievement">
-                  <span className="profile-achievement-desc">
-                    {typeof a === "string" ? a : a.description}
-                  </span>
-                  {typeof a !== "string" && a.metric && (
-                    <span className="profile-achievement-metric">{a.metric}</span>
-                  )}
-                </div>
-              ))}
-              <button className="profile-achievement-add" disabled>+ Add an achievement</button>
-            </div>
+            <EditableAchievements
+              items={achievements.map((a) =>
+                typeof a === "string"
+                  ? { description: a }
+                  : { description: a.description, metric: a.metric },
+              )}
+              onAdd={addAchievement}
+              onRemove={removeAchievement}
+            />
           </section>
 
           {/* Experience */}
