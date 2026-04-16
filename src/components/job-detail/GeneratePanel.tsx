@@ -138,12 +138,10 @@ export function GeneratePanel({ jobId, docs }: { jobId: string; docs: DocSummary
               >
                 {ready ? "Regenerate" : "Generate"}
               </button>
-              {existing.slice(-2).map((d) =>
-                d.url ? (
-                  <a key={`${d.kind}-${d.artifactType ?? ""}-${d.version}`} className="gen-link" href={d.url} target="_blank" rel="noopener noreferrer">
-                    v{d.version}{d.artifactType ? ` · ${d.artifactType.replace(/_/g, " ")}` : ""}
-                  </a>
-                ) : null,
+              {existing.length > 0 && (
+                <a className="gen-link" href={`/inbox/${jobId}/docs?doc=${spec.key === "cover-letter" ? "cover" : spec.key === "screening-qa" ? "screening" : spec.key}`}>
+                  Review in app
+                </a>
               )}
             </div>
 
@@ -176,19 +174,12 @@ export function GeneratePanel({ jobId, docs }: { jobId: string; docs: DocSummary
                   <span>&#10003; No AI tells</span>
                 </div>
                 <div className="gen-summary-actions">
-                  {existing.slice(-1).map((d) =>
-                    d.url ? (
-                      <a
-                        key={`review-${d.kind}-${d.version}`}
-                        className="gen-link"
-                        href={d.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Review
-                      </a>
-                    ) : null,
-                  )}
+                  <a
+                    className="gen-link"
+                    href={`/inbox/${jobId}/docs?doc=${spec.key === "cover-letter" ? "cover" : spec.key === "screening-qa" ? "screening" : spec.key}`}
+                  >
+                    Review
+                  </a>
                   {existing.slice(-1).map((d) =>
                     d.url ? (
                       <a
