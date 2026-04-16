@@ -38,7 +38,7 @@ export function TopBar() {
           );
         })}
       </nav>
-      <button className="topbar-paste" disabled title="Coming soon — paste a LinkedIn URL or JD to score it">+ Paste a role</button>
+      {/* Paste-a-role button — hidden until Phase 10 implementation */}
     </header>
   );
 }
