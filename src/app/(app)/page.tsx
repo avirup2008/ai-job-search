@@ -3,6 +3,10 @@ import { desc, eq, gte, inArray, sql, and } from "drizzle-orm";
 import Link from "next/link";
 import "@/components/home/home.css";
 
+// Force re-render on each request so greeting reflects current time
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type GapAnalysis = { strengths?: string[] } | null;
 
 function firstName(full: string | null): string {
@@ -11,16 +15,23 @@ function firstName(full: string | null): string {
 }
 
 function greeting(): string {
-  const h = new Date().getHours();
+  // Use Amsterdam timezone explicitly — server runs in UTC otherwise
+  const h = Number(new Date().toLocaleString("en-GB", {
+    timeZone: "Europe/Amsterdam",
+    hour: "numeric",
+    hour12: false,
+  }));
   if (h < 12) return "Good morning";
   if (h < 18) return "Good afternoon";
   return "Good evening";
 }
 
 function fmtDate(d: Date): string {
-  const weekday = d.toLocaleDateString("en-GB", { weekday: "long" }).toUpperCase();
-  const day = d.getDate();
-  const month = d.toLocaleDateString("en-GB", { month: "long" }).toUpperCase();
+  // Use Amsterdam timezone for all date parts
+  const tz = "Europe/Amsterdam";
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "long", timeZone: tz }).toUpperCase();
+  const day = Number(d.toLocaleString("en-GB", { day: "numeric", timeZone: tz }));
+  const month = d.toLocaleDateString("en-GB", { month: "long", timeZone: tz }).toUpperCase();
   return `${weekday} ${day} ${month}`;
 }
 
