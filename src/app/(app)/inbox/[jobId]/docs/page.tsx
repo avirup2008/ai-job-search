@@ -2,6 +2,7 @@ import { db, schema } from "@/db";
 import { eq, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import mammoth from "mammoth";
 import "@/components/doc-viewer/doc-viewer.css";
 
 /* ── Types ── */
@@ -153,8 +154,20 @@ export default async function DocsPage({
     const url = activeDoc.blobUrlDocx ?? activeDoc.blobUrlPdf;
     isCv = activeDoc.kind === "cv";
 
-    if (isCv) {
-      // CV is DOCX -- show download fallback
+    if (isCv && url) {
+      // CV is DOCX — convert to HTML with mammoth
+      try {
+        const docxRes = await fetch(url, { next: { revalidate: 3600 } });
+        if (docxRes.ok) {
+          const buffer = Buffer.from(await docxRes.arrayBuffer());
+          const result = await mammoth.convertToHtml({ buffer });
+          contentHtml = result.value;
+          isHtml = true;
+          isCv = false; // treat as rendered HTML now
+        }
+      } catch {
+        // fallback to download if conversion fails
+      }
     } else if (url) {
       const raw = await fetchDocContent(url);
       if (activeDoc.kind === "artifact") {
