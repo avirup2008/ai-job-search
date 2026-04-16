@@ -238,6 +238,16 @@ export default async function DocsPage({
             );
           })}
         </div>
+
+        {tabs.length > 0 && (
+          <a
+            href={`/api/download-pack/${jobId}`}
+            className="doc-download-pack"
+            download
+          >
+            &darr; Download application pack
+          </a>
+        )}
       </div>
 
       {/* ── Right viewer ── */}
