@@ -100,11 +100,18 @@ export async function POST(req: Request) {
     let jdText: string;
 
     if (isUrl) {
+      // LinkedIn requires auth — can't scrape
+      if (rawText.includes("linkedin.com")) {
+        return NextResponse.json(
+          { ok: false, error: "LinkedIn requires login to view job listings. Please copy and paste the job description text directly instead of the URL." },
+          { status: 400 },
+        );
+      }
       try {
         jdText = await fetchUrlText(rawText);
       } catch {
         return NextResponse.json(
-          { ok: false, error: "Could not fetch URL" },
+          { ok: false, error: "Could not fetch that URL. Try pasting the job description text directly instead." },
           { status: 400 },
         );
       }
