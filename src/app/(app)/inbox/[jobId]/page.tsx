@@ -2,13 +2,20 @@ import { db, schema } from "@/db";
 import { eq, desc, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { getCompanyDossier } from "@/lib/research";
 import { companyAvatar, matchBand } from "@/lib/ui/avatar";
 import { GeneratePanel, type DocSummary } from "@/components/job-detail/GeneratePanel";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
 type GapAnalysis = { strengths?: string[]; gaps?: string[]; recommendation?: string; recommendationReason?: string } | null;
+type DossierData = { productOneLiner?: string; stage?: string; industry?: string; marketingStack?: string[]; narrative?: string; lowSignal?: boolean } | null;
+
+/** Format raw JD text into paragraphs with basic structure detection */
+function formatJd(raw: string): string[] {
+  // Split on double newlines or lines that look like headers
+  const blocks = raw.split(/\n{2,}/).filter((b) => b.trim());
+  return blocks.map((b) => b.trim());
+}
 
 function bandOf(v: number | undefined): "strong" | "medium" | "weak" {
   if (v == null) return "weak";
@@ -54,10 +61,10 @@ async function loadDetail(jobId: string) {
     }));
   }
 
-  const dossier = await getCompanyDossier({
-    companyName: company?.name ?? "the company",
-    domain: company?.domain ?? null,
-  });
+  // Use cached research only — never block page load with a live Sonnet call
+  const dossier = company?.researchJson
+    ? (company.researchJson as { productOneLiner?: string; stage?: string; industry?: string; marketingStack?: string[]; narrative?: string; lowSignal?: boolean })
+    : null;
 
   return { job, company, documents, dossier };
 }
@@ -91,27 +98,29 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
     <>
       <Link href="/inbox" className="detail-back">&larr; Inbox</Link>
 
-      {/* 1. Header */}
+      {/* 1. Header with apply button */}
       <div className="detail-head">
         <div className="detail-head-avatar" style={{ background: avatar.bg }} aria-hidden="true">
           {avatar.letter}
         </div>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h1>{job.title}</h1>
           <div className="detail-head-meta">
             <span>{companyName}</span>
             {job.location && <><span className="sep">&middot;</span><span>{job.location}</span></>}
-            {job.tier != null && <><span className="sep">&middot;</span><span>Tier {job.tier}</span></>}
             {job.dutchRequired && <><span className="sep">&middot;</span><span>Dutch required</span></>}
-            <span className="sep">&middot;</span>
-            <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer">{job.source} &#8599;</a>
           </div>
         </div>
-        <div className="detail-score">
-          <span className="detail-score-num mono" data-band={scoreBand}>
-            {scoreNum != null ? `${Math.round(scoreNum)}%` : "\u2014"}
-          </span>
-          <span className="detail-score-label">Match</span>
+        <div className="detail-head-right">
+          <div className="detail-score">
+            <span className="detail-score-num mono" data-band={scoreBand}>
+              {scoreNum != null ? `${Math.round(scoreNum)}%` : "\u2014"}
+            </span>
+            <span className="detail-score-label">Match</span>
+          </div>
+          <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="detail-apply-btn">
+            Apply on {job.source} &#8599;
+          </a>
         </div>
       </div>
 
@@ -177,37 +186,64 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
             <GeneratePanel jobId={jobId} docs={documents} />
           </section>
 
-          {/* 4. About the role — JD text */}
+          {/* 4. About the role — formatted JD text */}
           <section className="detail-section">
             <h2>About the role</h2>
             <div className="jd-text">
-              {job.jdText ?? "(no description captured)"}
+              {job.jdText ? (
+                formatJd(job.jdText).map((block, i) => {
+                  const trimmed = block.trim();
+                  // Detect bullet lines
+                  if (trimmed.match(/^[•\-\*]\s/m)) {
+                    const items = trimmed.split(/\n/).filter((l) => l.trim());
+                    return (
+                      <ul key={i} className="jd-bullets">
+                        {items.map((item, j) => (
+                          <li key={j}>{item.replace(/^[•\-\*]\s*/, "")}</li>
+                        ))}
+                      </ul>
+                    );
+                  }
+                  // Detect section headers (short lines, possibly uppercase or ending with :)
+                  if (trimmed.length < 60 && (trimmed === trimmed.toUpperCase() || trimmed.endsWith(":"))) {
+                    return <h3 key={i} className="jd-heading">{trimmed}</h3>;
+                  }
+                  return <p key={i}>{trimmed}</p>;
+                })
+              ) : (
+                <p className="meta">(no description captured)</p>
+              )}
             </div>
+            <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="jd-source-link">
+              Read full listing on {job.source} &#8599;
+            </a>
           </section>
 
-          {/* 5. About the company — redesigned snapshot */}
-          <section className="detail-section">
-            <h2>About the company</h2>
-            <p className="dossier-oneliner">{dossier.productOneLiner}</p>
-            <div className="dossier-meta-row">
-              <span className="dossier-tag">{dossier.stage}</span>
-              <span className="dossier-tag">{dossier.industry}</span>
-              {dossier.lowSignal && <span className="dossier-tag dossier-tag-warn">Low signal</span>}
-            </div>
-            {dossier.marketingStack.length > 0 && (
+          {/* 5. About the company — snapshot from cache only */}
+          {dossier && (
+            <section className="detail-section">
+              <h2>About the company</h2>
+              {dossier.productOneLiner && <p className="dossier-oneliner">{dossier.productOneLiner}</p>}
               <div className="dossier-meta-row">
-                {dossier.marketingStack.map((tool) => (
-                  <span key={tool} className="dossier-tag">{tool}</span>
-                ))}
+                {dossier.stage && <span className="dossier-tag">{dossier.stage}</span>}
+                {dossier.industry && <span className="dossier-tag">{dossier.industry}</span>}
+                {dossier.lowSignal && <span className="dossier-tag dossier-tag-warn">Low signal</span>}
               </div>
-            )}
-            {fitSnippet && (
-              <div className="snapshot-fit">
-                <div className="snapshot-fit-label">Why this company fits you</div>
-                <div className="snapshot-fit-text">{fitSnippet}.</div>
-              </div>
-            )}
-          </section>
+              {(dossier.marketingStack ?? []).length > 0 && (
+                <div className="dossier-meta-row">
+                  {(dossier.marketingStack ?? []).map((tool) => (
+                    <span key={tool} className="dossier-tag">{tool}</span>
+                  ))}
+                </div>
+              )}
+              {fitSnippet && (
+                <div className="snapshot-fit">
+                  <div className="snapshot-fit-label">Why this company fits you</div>
+                  <div className="snapshot-fit-text">{fitSnippet}.</div>
+                </div>
+              )}
+            </section>
+          )}
         </div>
 
         <aside className="detail-col-aside">
