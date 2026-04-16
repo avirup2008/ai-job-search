@@ -6,7 +6,7 @@ const NAV = [
   { href: "/", label: "Today" },
   { href: "/inbox", label: "Inbox" },
   { href: "/pipeline", label: "Pipeline" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard", label: "Analytics" },
   { href: "/profile", label: "Profile" },
 ] as const;
 
@@ -38,7 +38,7 @@ export function TopBar() {
           );
         })}
       </nav>
-      <button className="topbar-paste">+ Paste a role</button>
+      <button className="topbar-paste" disabled title="Coming soon — paste a LinkedIn URL or JD to score it">+ Paste a role</button>
     </header>
   );
 }

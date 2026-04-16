@@ -390,37 +390,25 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      {/* ── Bottom row ── */}
-      <div className="bottom-row">
-        {/* Budget card */}
-        <section className="panel">
-          <h2>Budget</h2>
-          <div className="budget-head">
-            <span className="budget-used">&euro;{d.eurSpent.toFixed(2)}</span>
-            <span className="budget-cap">/ &euro;{d.capEur.toFixed(0)}</span>
-          </div>
-          <div className="budget-bar" role="progressbar" aria-valuenow={Math.round(budgetPct)} aria-valuemin={0} aria-valuemax={100}>
-            <div
-              className="budget-fill"
-              data-level={bLevel}
-              style={{ width: `${Math.min(100, budgetPct).toFixed(1)}%` }}
-            />
-          </div>
-          <div className="budget-meta">
-            <span>{budgetPct.toFixed(0)}% used</span>
-            <span className="mono">&euro;{budgetRemaining.toFixed(2)} left</span>
-          </div>
-        </section>
-
-        {/* Streak card (span 2) */}
-        <section className="panel streak-card span-2">
-          <div className="streak-number">7</div>
-          <div className="streak-text">
-            <span className="streak-label">Day streak</span>
-            <span className="streak-msg">You have been consistently reviewing and applying. Keep the momentum going.</span>
-          </div>
-        </section>
-      </div>
+      {/* ── Budget (inline, no separate row) ── */}
+      <section className="panel" style={{ maxWidth: 480 }}>
+        <h2>Budget</h2>
+        <div className="budget-head">
+          <span className="budget-used">&euro;{d.eurSpent.toFixed(2)}</span>
+          <span className="budget-cap">/ &euro;{d.capEur.toFixed(0)}</span>
+        </div>
+        <div className="budget-bar" role="progressbar" aria-valuenow={Math.round(budgetPct)} aria-valuemin={0} aria-valuemax={100}>
+          <div
+            className="budget-fill"
+            data-level={bLevel}
+            style={{ width: `${Math.min(100, budgetPct).toFixed(1)}%` }}
+          />
+        </div>
+        <div className="budget-meta">
+          <span>{budgetPct.toFixed(0)}% used</span>
+          <span className="mono">&euro;{budgetRemaining.toFixed(2)} left</span>
+        </div>
+      </section>
     </>
   );
 }

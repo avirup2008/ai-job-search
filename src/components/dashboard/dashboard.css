@@ -5,7 +5,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--s-8);
+  margin-bottom: var(--s-5);
   flex-wrap: wrap;
   gap: var(--s-4);
 }
@@ -45,8 +45,8 @@
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--s-4);
-  margin-bottom: var(--s-8);
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
 }
 @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 768px)  { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -108,8 +108,8 @@
 .panel-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-4);
-  margin-bottom: var(--s-8);
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
 }
 @media (max-width: 1024px) {
   .panel-grid { grid-template-columns: repeat(2, 1fr); }
@@ -126,7 +126,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: var(--s-5);
+  padding: var(--s-4);
 }
 .panel h2 {
   font-family: var(--font-body);
