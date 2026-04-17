@@ -36,6 +36,7 @@ function docLabel(d: DocRow): string {
   if (d.kind === "cover") return "Cover letter";
   if (d.kind === "cv") return "Tailored CV";
   if (d.kind === "screening") return "Screening Q&A";
+  if (d.kind === "interview-prep") return "Interview prep";
   if (d.kind === "artifact" && d.artifactType) {
     return d.artifactType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }

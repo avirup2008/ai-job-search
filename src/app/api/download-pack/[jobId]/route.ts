@@ -50,6 +50,8 @@ function filenameFor(d: DocRow): PackFile | null {
       return { filename: "cv.docx", description: "cv.docx — tailored CV", binary: true, url };
     case "screening":
       return { filename: "screening-qa.md", description: "screening-qa.md — screening Q&A responses", binary: false, url };
+    case "interview-prep":
+      return { filename: "interview-prep.md", description: "interview-prep.md — interview prep (phone screen, HM, case, culture-fit)", binary: false, url };
     case "artifact": {
       const type = d.artifactType ?? "artifact";
       const safe = slugify(type);
