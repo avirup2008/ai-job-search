@@ -38,6 +38,11 @@ const blobSchema = z.object({
   BLOB_READ_WRITE_TOKEN: z.string().min(1, "BLOB_READ_WRITE_TOKEN is required for Vercel Blob"),
 });
 
+const retentionSchema = z.object({
+  // Default "true" → first deploy is observe-only. Flip to "false" in env to enable real deletion.
+  RETENTION_DRY_RUN: z.enum(["true", "false"]).default("true"),
+});
+
 const generalSchema = z.object({
   TZ: z.string().default("Europe/Amsterdam"),
 });
@@ -51,6 +56,7 @@ export type AdminEnv = z.infer<typeof adminSchema>;
 export type CronEnv = z.infer<typeof cronSchema>;
 export type BlobEnv = z.infer<typeof blobSchema>;
 export type GeneralEnv = z.infer<typeof generalSchema>;
+export type RetentionEnv = z.infer<typeof retentionSchema>;
 
 function load<T>(schema: z.ZodType<T>, label: string): T {
   const parsed = schema.safeParse(process.env);
@@ -71,6 +77,7 @@ let adminCache: unknown = null;
 let cronCache: unknown = null;
 let blobCache: unknown = null;
 let generalCache: unknown = null;
+let retentionCache: unknown = null;
 
 export function loadDbEnv(): DbEnv { return (dbCache as DbEnv) ?? (dbCache = load(dbSchema, "database")) as DbEnv; }
 export function loadLlmEnv(): LlmEnv { return (llmCache as LlmEnv) ?? (llmCache = load(llmSchema, "llm")) as LlmEnv; }
@@ -80,9 +87,11 @@ export function loadAdminEnv(): AdminEnv { return (adminCache as AdminEnv) ?? (a
 export function loadCronEnv(): CronEnv { return (cronCache as CronEnv) ?? (cronCache = load(cronSchema, "cron")) as CronEnv; }
 export function loadBlobEnv(): BlobEnv { return (blobCache as BlobEnv) ?? (blobCache = load(blobSchema, "blob")) as BlobEnv; }
 export function loadGeneralEnv(): GeneralEnv { return (generalCache as GeneralEnv) ?? (generalCache = load(generalSchema, "general")) as GeneralEnv; }
+export function loadRetentionEnv(): RetentionEnv { return (retentionCache as RetentionEnv) ?? (retentionCache = load(retentionSchema, "retention")) as RetentionEnv; }
 
 // Test-only: clear all caches (used by vitest setup if needed)
 export function _clearEnvCache(): void {
   dbCache = null; llmCache = null; sourcesCache = null; notifyCache = null;
   adminCache = null; cronCache = null; blobCache = null; generalCache = null;
+  retentionCache = null;
 }
