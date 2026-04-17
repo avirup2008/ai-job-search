@@ -7,6 +7,7 @@ import { PasteRolePanel } from "@/components/paste-role/PasteRolePanel";
 
 const NAV = [
   { href: "/inbox", label: "Inbox" },
+  { href: "/gap-coach", label: "Gap Coach" },
   { href: "/pipeline", label: "Pipeline" },
   { href: "/analytics", label: "Analytics" },
   { href: "/profile", label: "Profile" },
