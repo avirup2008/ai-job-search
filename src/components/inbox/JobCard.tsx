@@ -11,6 +11,7 @@ export interface JobCardData {
   sourceUrl: string;
   postedAt: Date | string | null;
   tier: number | null;
+  previousTier: number | null;
   fitScore: number | null;
   strengths: string[] | null;
   gaps: string[] | null;
@@ -39,9 +40,20 @@ export function JobCard({ job }: { job: JobCardData }) {
       <Link href={`/inbox/${job.id}`} className="job-card-body">
         <div className="job-card-top">
           <span className="job-card-company">{job.companyName}</span>
-          <span className="job-card-score mono" data-band={band}>
-            {score != null ? `${Math.round(score)}%` : "\u2014"}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {job.previousTier != null && job.previousTier !== job.tier && (
+              <span
+                className="drift-badge"
+                data-direction={job.previousTier > (job.tier ?? 0) ? "up" : "down"}
+                title="Score drift detected on last nightly run"
+              >
+                T{job.previousTier} &rarr; T{job.tier}
+              </span>
+            )}
+            <span className="job-card-score mono" data-band={band}>
+              {score != null ? `${Math.round(score)}%` : "\u2014"}
+            </span>
+          </div>
         </div>
         <h3 className="job-card-title">{job.title}</h3>
         {topStrength && (

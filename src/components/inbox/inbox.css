@@ -268,3 +268,16 @@
   color: var(--text-1);
 }
 .inbox-empty p { color: var(--text-2); max-width: 420px; margin: 0 auto; }
+
+.drift-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-left: 8px;
+}
+.drift-badge[data-direction="up"]   { background: rgba(10, 123, 52, 0.12); color: #0a7b34; }
+.drift-badge[data-direction="down"] { background: rgba(163, 75, 0, 0.12); color: #a34b00; }
