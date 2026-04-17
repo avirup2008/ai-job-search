@@ -221,7 +221,7 @@
   background: var(--accent-wash);
   border-radius: var(--r-lg);
   padding: 14px 16px;
-  border-left: 3px solid var(--accent);
+  border: 1px solid var(--accent-a15);
   margin: 16px 0;
 }
 .paste-fit-heading {

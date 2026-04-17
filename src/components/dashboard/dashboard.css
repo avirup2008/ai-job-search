@@ -91,7 +91,7 @@
   align-items: center;
   gap: 2px;
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--r-sm);
   width: fit-content;
 }
 .kpi-delta.up {
@@ -224,13 +224,13 @@
 .hbar-track {
   height: 6px;
   background: var(--surface-2);
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 .hbar-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   transition: width var(--dur-400) var(--ease-out);
 }
 .hbar-count {
@@ -261,12 +261,12 @@
 .funnel-track {
   height: 7px;
   background: var(--surface-2);
-  border-radius: 4px;
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 .funnel-fill {
   height: 100%;
-  border-radius: 5px;
+  border-radius: var(--r-md);
   transition: width var(--dur-400) var(--ease-out);
 }
 .funnel-fill.funnel-grey  { background: var(--text-3); }
@@ -385,13 +385,13 @@
 .budget-bar {
   height: 10px;
   background: var(--surface-2);
-  border-radius: 5px;
+  border-radius: var(--r-md);
   overflow: hidden;
 }
 .budget-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: 5px;
+  border-radius: var(--r-md);
   transition: width var(--dur-400) var(--ease-out);
 }
 .budget-fill[data-level="warn"]   { background: var(--warning); }

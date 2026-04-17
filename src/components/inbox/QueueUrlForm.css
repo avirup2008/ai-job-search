@@ -86,7 +86,7 @@
 }
 
 .queue-url-msg-error {
-  background: var(--danger-wash, #fef2f2);
-  color: var(--danger, #991b1b);
-  border: 1px solid var(--danger-border, #fecaca);
+  background: var(--danger-wash);
+  color: var(--danger);
+  border: 1px solid rgba(153, 27, 27, 0.2);
 }
