@@ -82,8 +82,7 @@ export default async function RootPage() {
   const score = f?.fitScore != null ? Math.round(Number(f.fitScore)) : null;
 
   return (
-    // Full-viewport wrapper — no app shell, so 100vh not calc(100vh - 60px)
-    <div className="home" style={{ minHeight: "100vh", maxHeight: "none" }}>
+    <div className="home">
       {/* Floating doc illustrations */}
       <div className="home-float home-float-cv" aria-hidden="true">
         <svg width="48" height="60" viewBox="0 0 48 60" fill="none">
@@ -148,9 +147,9 @@ export default async function RootPage() {
         <div style={{
           display: "grid",
           gridTemplateColumns: f ? "1fr 1fr" : "1fr",
-          gap: 24,
+          gap: 20,
           alignItems: "start",
-          marginTop: 36,
+          marginTop: 28,
         }}>
           {/* Left: password prompt */}
           <LoginCard />
@@ -179,7 +178,7 @@ export default async function RootPage() {
         </div>
 
         {/* Section 3: KPI pills */}
-        <div className="home-pills" style={{ pointerEvents: "none", opacity: 0.6, marginTop: 28 }}>
+        <div className="home-pills" style={{ pointerEvents: "none", opacity: 0.6, marginTop: 20 }}>
           <span className="home-pill"><strong>{d.totalInbox}</strong> in your inbox</span>
           <span className="home-pill home-pill-accent"><strong>{d.strongCount}</strong> strong matches</span>
           <span className="home-pill"><strong>{d.newToday}</strong> discovered</span>
