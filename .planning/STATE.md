@@ -40,8 +40,8 @@ Last activity: 2026-04-17
 | 12 A/B + Screening + Interview | ⚠ partial | Interview prep shipped (quick 260417-fiz); A/B + extra screening skipped by user (not valuable for n=1) |
 | 13 Smarter Scoring + ATS Keyword Pass | ✅ complete | R-78 ✅ R-79 ✅ R-80 ✅ R-84 ✅ — all 3 plans done |
 | 14 Enhanced Discovery | Not started | v2.0 — R-81, R-82 |
-| 15 Candidate Intelligence UI | Not started | v2.0 — R-85, R-86, R-89 |
-| 16 Analytics & Reporting | Not started | v2.0 — R-83, R-87, R-88 |
+| 15 Candidate Intelligence UI | 📋 planned | v2.0 — R-85, R-86, R-89 — 3 plans, Wave 1-2 |
+| 16 Analytics & Reporting | 📋 planned | v2.0 — R-83, R-87, R-88 — 2 plans, Wave 1-2 |
 
 ### Quick Tasks Completed
 

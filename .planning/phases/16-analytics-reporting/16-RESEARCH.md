@@ -472,22 +472,16 @@ Security enforcement is enabled (ASVS Level 1).
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Where is the events INSERT that writes status transitions?**
-   - What we know: `pipeline/actions.ts` calls `db.update(schema.applications)` and then separate logic for multipliers and interview prep
-   - What's unclear: Whether `db.insert(schema.events)` is called, and with what `kind` string — the actions.ts excerpt cut off at 80 lines
-   - Recommendation: At implementation time, read the full `pipeline/actions.ts` (all lines). If events are not being inserted, use the `lastEventAt` fallback for days-to-response.
+   - RESOLVED: Use the `lastEventAt` fallback query (`applications.lastEventAt - applications.appliedAt`) for all days-to-response calculations. Avoids the events.kind format uncertainty entirely. If events are available, the fallback still works correctly.
 
 2. **Should the Weekly Brief be emailed or UI-only?**
-   - What we know: R-87 says "card (or email-ready block)"; Resend is already configured; hard constraint is no new paid API keys
-   - What's unclear: Whether Avi wants the brief emailed to Upashana or just visible in the app
-   - Recommendation: Implement UI-only first (brief stored in runs, shown as analytics panel). The email send can be added in the same cron route with one `resend.emails.send()` call if desired — infrastructure is ready.
+   - RESOLVED: UI-only card on the analytics page. Brief stored in `runs` table (`status: 'weekly-brief'`, `stageMetrics` JSONB). No email for now — Resend infrastructure is ready if needed later.
 
 3. **Target pace for applications per week (R-87)**
-   - What we know: The brief must show "applications sent this week vs target pace"
-   - What's unclear: What is the target? (5/week? 3/week?)
-   - Recommendation: Use a constant `TARGET_APPLICATIONS_PER_WEEK = 5` in the brief module. Could also read from `profile.preferences` if Avi wants it configurable.
+   - RESOLVED: `TARGET_APPLICATIONS_PER_WEEK = 5` constant in `weekly-brief.ts`. Hardcoded for now; can be made configurable via profile.preferences in a future iteration.
 
 ---
 
