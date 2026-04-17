@@ -51,6 +51,7 @@ Last activity: 2026-04-17
 | 260417-fiz | Phase 12: interview prep generation | 2026-04-17 | 01423ab | [260417-fiz-phase-12-interview-prep-generation](./quick/260417-fiz-phase-12-interview-prep-generation/) |
 | 260417-g4p | Wire real data into analytics page charts | 2026-04-17 | 181e977 | [260417-g4p-wire-real-data-into-analytics-page-chart](./quick/260417-g4p-wire-real-data-into-analytics-page-chart/) |
 | 260417-kgd | Fix auth gap, fire-and-forget async, and retention of filtered jobs | 2026-04-17 | 6307d67 | [260417-kgd-fix-auth-gap-fire-and-forget-async-and-r](./quick/260417-kgd-fix-auth-gap-fire-and-forget-async-and-r/) |
+| 260417-kqy | Build polished Disha login page as app homepage | 2026-04-17 | c430e50 | [260417-kqy-build-polished-disha-login-page-as-app-h](./quick/260417-kqy-build-polished-disha-login-page-as-app-h/) |
 
 ## Completed before GSD init
 
