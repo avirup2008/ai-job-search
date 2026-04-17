@@ -5,6 +5,7 @@ import Link from "next/link";
 import { companyAvatar, matchBand } from "@/lib/ui/avatar";
 import { GeneratePanel, type DocSummary } from "@/components/job-detail/GeneratePanel";
 import { ScoreBreakdown } from "@/components/job-detail/ScoreBreakdown";
+import { InterviewPromptPanel } from "@/components/job-detail/InterviewPromptPanel";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
@@ -60,7 +61,7 @@ async function loadDetail(jobId: string) {
     ? (company.researchJson as { productOneLiner?: string; stage?: string; industry?: string; marketingStack?: string[]; narrative?: string; lowSignal?: boolean })
     : null;
 
-  return { job, company, documents, dossier };
+  return { job, company, documents, dossier, status: application?.status ?? null };
 }
 
 export default async function JobDetailPage({ params }: { params: Promise<Params> }) {
@@ -69,7 +70,7 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
   const detail = await loadDetail(jobId);
   if (!detail) notFound();
 
-  const { job, company, documents, dossier } = detail;
+  const { job, company, documents, dossier, status } = detail;
   const companyName = company?.name ?? "Unknown company";
   const avatar = companyAvatar(companyName);
   const scoreNum = job.fitScore == null ? null : Number(job.fitScore);
@@ -142,6 +143,15 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
               )}
               <ScoreBreakdown breakdown={breakdown} matched={gap?.strengths ?? []} missing={gap?.gaps ?? []} />
             </section>
+          )}
+
+          {status === "interview" && (
+            <InterviewPromptPanel
+              role={job.title}
+              companyName={companyName}
+              jdText={job.jdText ?? ""}
+              dossier={dossier}
+            />
           )}
 
           {/* 3. Your application — doc cards */}
