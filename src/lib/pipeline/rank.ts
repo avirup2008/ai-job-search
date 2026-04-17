@@ -8,7 +8,7 @@ export interface FitComponents {
   industry: number;   // 0..1 — industry overlap
 }
 
-const WEIGHTS: FitComponents = {
+export const WEIGHTS: FitComponents = {
   skills: 0.40,
   tools: 0.30,
   seniority: 0.15,

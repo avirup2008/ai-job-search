@@ -8,6 +8,8 @@ import { assessJob } from "./rank";
 import { assignTier } from "./tier";
 import type { Profile } from "@/lib/profile/types";
 import type { RawJob } from "@/lib/sources/types";
+import { readMultipliersFromProfile, blendFitScoreWithMultipliers, type ScoringMultipliers } from "@/lib/scoring/multipliers";
+import { detectDrift } from "@/lib/scoring/drift";
 
 export interface RunSummary {
   runId: string;
@@ -19,6 +21,8 @@ export interface RunSummary {
     filtered: number;    // passed insertion but hit a hard filter
     ranked: number;      // went through Haiku
     byTier: Record<string, number>;
+    rescored: number;    // existing jobs re-scored via multipliers (no LLM)
+    drifted: number;     // jobs whose tier changed after re-score
   };
   perSource: Record<string, number>;
   errors: Record<string, string>;
@@ -90,6 +94,8 @@ export async function runNightly(): Promise<RunSummary> {
       contactEmail: profileRow.contactEmail ?? undefined,
       phone: profileRow.phone ?? undefined,
     };
+
+    const multipliers: ScoringMultipliers = readMultipliersFromProfile(profileRow.preferences);
 
     // 2. Pre-pass: idempotency check across the whole batch
     const existingRows = await db
@@ -247,6 +253,67 @@ export async function runNightly(): Promise<RunSummary> {
       ),
     );
 
+    // 7. Re-score pass — re-apply profile multipliers to every existing ranked job.
+    //    Uses stored fitBreakdown — NO Haiku calls — per D-1 (re-score ALL) and budget constraint.
+    //    Industries are not stored as a dedicated column; seniority-only bucket is used instead.
+    //    Plan 02 consumers may surface this gap once industries are stored explicitly.
+    const existingRanked = await db
+      .select({
+        id: schema.jobs.id,
+        tier: schema.jobs.tier,
+        fitScore: schema.jobs.fitScore,
+        fitBreakdown: schema.jobs.fitBreakdown,
+        seniority: schema.jobs.seniority,
+      })
+      .from(schema.jobs);
+
+    let rescoredCount = 0;
+    let driftedCount = 0;
+    for (const row of existingRanked) {
+      if (row.tier == null) continue; // filtered or rank-failed — skip
+      const fb = row.fitBreakdown as { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
+      if (!fb) continue;
+      const components = {
+        skills: fb.skills ?? 0,
+        tools: fb.tools ?? 0,
+        seniority: fb.seniority ?? 0,
+        industry: fb.industry ?? 0,
+      };
+      // Industries are not stored as a dedicated column — use seniority-only bucket for now.
+      // NOTE: Plan 02 should surface this gap; consumers expecting industry-keyed multipliers
+      // will not see industry signal until a dedicated column is added.
+      const seniorityStr = row.seniority ?? "";
+      const newScore = blendFitScoreWithMultipliers(components, multipliers, { industries: [], seniority: seniorityStr });
+      const newTier = assignTier(newScore);
+      const drift = detectDrift(row.tier, newTier);
+      rescoredCount++;
+      if (drift.drifted) {
+        driftedCount++;
+        await db
+          .update(schema.jobs)
+          .set({ previousTier: row.tier, tier: newTier, fitScore: String(newScore) })
+          .where(eq(schema.jobs.id, row.id));
+        // Emit tier_drift event if an application row exists for this job
+        const [app] = await db
+          .select({ id: schema.applications.id })
+          .from(schema.applications)
+          .where(eq(schema.applications.jobId, row.id))
+          .limit(1);
+        if (app) {
+          await db.insert(schema.events).values({
+            applicationId: app.id,
+            kind: "tier_drift",
+            payload: { jobId: row.id, oldTier: row.tier, newTier, delta: drift.delta },
+          });
+        }
+      } else if (Math.abs(Number(row.fitScore ?? 0) - newScore) > 0.5) {
+        await db
+          .update(schema.jobs)
+          .set({ fitScore: String(newScore) })
+          .where(eq(schema.jobs.id, row.id));
+      }
+    }
+
     const summary: RunSummary = {
       runId,
       counts: {
@@ -257,6 +324,8 @@ export async function runNightly(): Promise<RunSummary> {
         filtered,
         ranked,
         byTier,
+        rescored: rescoredCount,
+        drifted: driftedCount,
       },
       perSource: disc.perSource,
       errors: disc.errors,
