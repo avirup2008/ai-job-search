@@ -1,0 +1,168 @@
+/* Gap Coach — T2 job list ranked by closeness-to-T1 */
+
+.gap-coach-title-h1 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.gap-coach-subtitle {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: 4px 0 0;
+}
+
+/* List container */
+.gap-coach-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* Individual row */
+.gap-coach-row {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  transition: border-color var(--dur-150) var(--ease-io), box-shadow var(--dur-150) var(--ease-io);
+}
+
+.gap-coach-row:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Row link — fills the card */
+.gap-coach-link {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Company avatar circle */
+.gap-coach-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2px;
+}
+
+/* Main content column */
+.gap-coach-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.gap-coach-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gap-coach-company {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* Gap strings block */
+.gap-coach-gaps {
+  margin-top: var(--s-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.gap-coach-gaps-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.gap-coach-gaps ul {
+  list-style: disc;
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gap-coach-gaps ul li {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+/* Score column */
+.gap-coach-score {
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.gap-coach-score-num {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
+
+.gap-coach-score-delta {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* Empty state */
+.gap-coach-empty {
+  max-width: 480px;
+  margin: var(--s-10) auto;
+  text-align: center;
+  padding: var(--s-8);
+  border: 1px dashed var(--border);
+  border-radius: var(--r-lg);
+}
+
+.gap-coach-empty h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin: 0 0 var(--s-2);
+}
+
+.gap-coach-empty p {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: 0;
+  line-height: 1.5;
+}
