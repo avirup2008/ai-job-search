@@ -1,6 +1,7 @@
 import { db, schema } from "@/db";
 import { eq, sql, inArray, isNotNull } from "drizzle-orm";
 import { PIPELINE_STAGES } from "@/app/(app)/pipeline/stages";
+import { aggregateByNormalizedLocation } from "@/lib/location/normalize";
 import "@/components/dashboard/dashboard.css";
 
 function currentPeriod(): string {
@@ -57,7 +58,9 @@ async function loadData() {
       .where(isNotNull(schema.jobs.fitScore))
       .groupBy(sql`floor(${schema.jobs.fitScore}::numeric / 10) * 10`)
       .orderBy(sql`band`),
-    // Location distribution: top 6
+    // Location distribution: raw group-by, re-aggregated after normalization
+    // (so "Netherlands" and "Nederland" merge into one bucket). We skip the
+    // SQL LIMIT because the top-6 cut must happen post-normalization.
     db
       .select({
         location: schema.jobs.location,
@@ -65,9 +68,7 @@ async function loadData() {
       })
       .from(schema.jobs)
       .where(isNotNull(schema.jobs.location))
-      .groupBy(schema.jobs.location)
-      .orderBy(sql`count(*) desc`)
-      .limit(6),
+      .groupBy(schema.jobs.location),
     // Budget
     db
       .select()
@@ -86,6 +87,10 @@ async function loadData() {
   const eurSpent = budgetRow ? Number(budgetRow.eurSpent) : 0;
   const capEur = budgetRow ? Number(budgetRow.capEur) : 20;
 
+  // Merge location variants (Nederland/Netherlands/NL → Netherlands;
+  // "Amsterdam, NL" → "Amsterdam") then take the top 6 by count.
+  const normalizedLocations = aggregateByNormalizedLocation(locationDistribution).slice(0, 6);
+
   return {
     totalJobs,
     matchedCount,
@@ -94,7 +99,7 @@ async function loadData() {
     interviewCount,
     savedCount,
     scoreDistribution,
-    locationDistribution,
+    locationDistribution: normalizedLocations,
     eurSpent,
     capEur,
   };
