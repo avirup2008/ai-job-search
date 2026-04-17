@@ -88,20 +88,18 @@ export async function updateApplicationStatus(applicationId: string, status: Pip
         .where(eq(schema.jobs.id, app.jobId))
         .limit(1);
 
-      void (async () => {
-        try {
-          const gen = await generateInterviewPrep(app.jobId);
-          await storeInterviewPrep({
-            applicationId,
-            markdown: gen.markdown,
-            tokenCostEur: gen.costEur,
-            tier: job?.tier ?? null,
-          });
-          console.log(`[interview-prep-autogen] done for applicationId=${applicationId}`);
-        } catch (err) {
-          console.error("[interview-prep-autogen]", err);
-        }
-      })();
+      try {
+        const gen = await generateInterviewPrep(app.jobId);
+        await storeInterviewPrep({
+          applicationId,
+          markdown: gen.markdown,
+          tokenCostEur: gen.costEur,
+          tier: job?.tier ?? null,
+        });
+        console.log(`[interview-prep-autogen] done for applicationId=${applicationId}`);
+      } catch (err) {
+        console.error("[interview-prep-autogen]", err);
+      }
     }
   }
 }

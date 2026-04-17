@@ -13,18 +13,15 @@ async function loadRow(): Promise<ProfileRow> {
   return row;
 }
 
-function triggerRescore() {
-  // Fire and forget — don't block the action. Log failures.
-  rescoreMatchedJobs()
-    .then((r) => {
-      console.log(`[rescore] updated=${r.updated} costEur=${r.costEur.toFixed(4)}`);
-      // Revalidate once the rescore finishes so the inbox reflects new tiers/scores.
-      revalidatePath("/inbox");
-    })
-    .catch((err) => {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[rescore] failed: ${msg}`);
-    });
+async function triggerRescore() {
+  try {
+    const r = await rescoreMatchedJobs();
+    console.log(`[rescore] updated=${r.updated} costEur=${r.costEur.toFixed(4)}`);
+    revalidatePath("/inbox");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[rescore] failed: ${msg}`);
+  }
 }
 
 export async function addTool(tool: string): Promise<void> {
@@ -39,7 +36,7 @@ export async function addTool(tool: string): Promise<void> {
   await db.update(schema.profile).set({ toolStack, updatedAt: new Date() }).where(eq(schema.profile.id, row.id));
   revalidatePath("/profile");
   revalidatePath("/inbox");
-  triggerRescore();
+  await triggerRescore();
 }
 
 export async function removeTool(tool: string): Promise<void> {
@@ -51,7 +48,7 @@ export async function removeTool(tool: string): Promise<void> {
   await db.update(schema.profile).set({ toolStack, updatedAt: new Date() }).where(eq(schema.profile.id, row.id));
   revalidatePath("/profile");
   revalidatePath("/inbox");
-  triggerRescore();
+  await triggerRescore();
 }
 
 export async function addAchievement(description: string, metric: string): Promise<void> {
@@ -66,7 +63,7 @@ export async function addAchievement(description: string, metric: string): Promi
   await db.update(schema.profile).set({ achievements, updatedAt: new Date() }).where(eq(schema.profile.id, row.id));
   revalidatePath("/profile");
   revalidatePath("/inbox");
-  triggerRescore();
+  await triggerRescore();
 }
 
 export async function removeAchievement(index: number): Promise<void> {
@@ -78,7 +75,7 @@ export async function removeAchievement(index: number): Promise<void> {
   await db.update(schema.profile).set({ achievements, updatedAt: new Date() }).where(eq(schema.profile.id, row.id));
   revalidatePath("/profile");
   revalidatePath("/inbox");
-  triggerRescore();
+  await triggerRescore();
 }
 
 export async function updatePreferences(
@@ -110,5 +107,5 @@ export async function updatePreferences(
     .where(eq(schema.profile.id, row.id));
   revalidatePath("/profile");
   revalidatePath("/inbox");
-  triggerRescore();
+  await triggerRescore();
 }
