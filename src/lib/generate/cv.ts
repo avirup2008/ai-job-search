@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { getCompanyDossier } from "@/lib/research";
 import { profileToCompactText, type Profile } from "@/lib/profile/types";
 import { findViolations, formatViolationsForRetry, mapStrings, sanitizeMechanicalTells, type Violation } from "./anti-ai";
+import { atsKeywordPass } from "@/lib/ats/keyword-pass";
 import { z } from "zod";
 import { CvSchema, cvNarrativeText } from "./cv-types";
 import type { CvStruct } from "./cv-types";
@@ -140,8 +141,18 @@ export async function generateCV(jobId: string): Promise<CvGenerationResult> {
   // Final mechanical sanitisation — catches em-dashes that slip past all 5 retries
   const sanitised = mapStrings(res.data as CvStruct, sanitizeMechanicalTells);
 
+  // R-84: ATS keyword post-pass — inject high-frequency JD keywords missing from skills.
+  // Pure function; no LLM call. Runs AFTER anti-AI sanitisation — injected tokens are
+  // proper-noun tool names so they do not re-trigger mechanical-tell rules.
+  const atsResult = atsKeywordPass(sanitised, job.jdText ?? "");
+  if (atsResult.injected.length > 0) {
+    console.log(`[ats-pass] jobId=${jobId} injected=${atsResult.injected.length} candidates=${atsResult.candidates} keywords=${atsResult.injected.join(",")}`);
+  } else {
+    console.log(`[ats-pass] jobId=${jobId} injected=0 candidates=${atsResult.candidates}`);
+  }
+
   return {
-    cv: sanitised,
+    cv: atsResult.cv,
     tokens: accumulatedTokens,
     costEur: accumulatedCost,
     attempts: finalAttempt,
