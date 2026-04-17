@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { blendFitScore } from "@/lib/pipeline/rank";
+import { blendFitScoreWithMultipliers, type ScoringMultipliers } from "@/lib/scoring/multipliers";
 
 describe("blendFitScore", () => {
   it("returns 100 when all components are 1", () => {
@@ -24,5 +25,30 @@ describe("blendFitScore", () => {
     // = 0.308 + 0.150 + 0.0495 + 0.0375 = 0.545
     // × 100 = 54.5 → round to 1dp = 54.5
     expect(s).toBe(54.5);
+  });
+});
+
+describe("blendFitScoreWithMultipliers", () => {
+  const components = { skills: 0.8, tools: 0.7, seniority: 0.9, industry: 0.6 };
+  const EMPTY: ScoringMultipliers = { byIndustrySeniority: {} };
+
+  it("equals blendFitScore when no matching bucket (identity)", () => {
+    const base = blendFitScore(components);
+    const result = blendFitScoreWithMultipliers(components, EMPTY, { industries: ["SaaS"], seniority: "senior" });
+    expect(result).toBe(base);
+  });
+
+  it("produces a higher score than base when multiplier is 1.2", () => {
+    const base = blendFitScore(components);
+    const m: ScoringMultipliers = { byIndustrySeniority: { "saas|senior": 1.2 } };
+    const result = blendFitScoreWithMultipliers(components, m, { industries: ["SaaS"], seniority: "senior" });
+    expect(result).toBeGreaterThan(base);
+  });
+
+  it("produces a lower score than base when multiplier is 0.8", () => {
+    const base = blendFitScore(components);
+    const m: ScoringMultipliers = { byIndustrySeniority: { "saas|senior": 0.8 } };
+    const result = blendFitScoreWithMultipliers(components, m, { industries: ["SaaS"], seniority: "senior" });
+    expect(result).toBeLessThan(base);
   });
 });
