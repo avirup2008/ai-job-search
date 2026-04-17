@@ -16,6 +16,11 @@ const NAV = [
 export function TopBar() {
   const pathname = usePathname();
   const [pasteOpen, setPasteOpen] = useState(false);
+
+  async function handleSignOut() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
+  }
   return (
     <header className="topbar">
       <Link href="/" className="topbar-brand" aria-label="Disha home">
@@ -44,6 +49,13 @@ export function TopBar() {
       </nav>
       <button className="topbar-paste" onClick={() => setPasteOpen(true)}>
         + Paste a role
+      </button>
+      <button
+        className="btn-ghost"
+        onClick={handleSignOut}
+        style={{ fontSize: 13, padding: "6px 12px" }}
+      >
+        Sign out
       </button>
       <PasteRolePanel open={pasteOpen} onClose={() => setPasteOpen(false)} />
     </header>
