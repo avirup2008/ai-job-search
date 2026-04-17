@@ -6,6 +6,11 @@ import { revalidatePath } from "next/cache";
 import { PIPELINE_STAGES, type PipelineStage } from "./stages";
 import { generateInterviewPrep } from "@/lib/generate/interview-prep";
 import { storeInterviewPrep } from "@/lib/generate/storage";
+import {
+  applyOutcome,
+  readMultipliersFromProfile,
+  writeMultipliersToProfile,
+} from "@/lib/scoring/multipliers";
 
 export async function updateApplicationStatus(applicationId: string, status: PipelineStage) {
   if (!(await isAdmin())) throw new Error("forbidden");
@@ -28,6 +33,38 @@ export async function updateApplicationStatus(applicationId: string, status: Pip
     .where(eq(schema.applications.id, applicationId));
 
   revalidatePath("/pipeline");
+
+  // R-79: outcome feedback hook — adjust scoring multipliers on terminal outcomes.
+  if ((status === "rejected" || status === "interview" || status === "offer") && app) {
+    try {
+      const [jobRow] = await db
+        .select({ seniority: schema.jobs.seniority, gapAnalysis: schema.jobs.gapAnalysis })
+        .from(schema.jobs)
+        .where(eq(schema.jobs.id, app.jobId))
+        .limit(1);
+      if (jobRow) {
+        const ga = jobRow.gapAnalysis as { industries?: unknown } | null;
+        const industries = Array.isArray(ga?.industries)
+          ? (ga!.industries as unknown[]).filter((s): s is string => typeof s === "string")
+          : [];
+        const [profileRow] = await db
+          .select({ id: schema.profile.id, preferences: schema.profile.preferences })
+          .from(schema.profile)
+          .limit(1);
+        if (profileRow) {
+          const current = readMultipliersFromProfile(profileRow.preferences);
+          const next = applyOutcome(current, status, industries, jobRow.seniority ?? "");
+          const updatedPrefs = writeMultipliersToProfile(profileRow.preferences, next);
+          await db
+            .update(schema.profile)
+            .set({ preferences: updatedPrefs })
+            .where(eq(schema.profile.id, profileRow.id));
+        }
+      }
+    } catch (err) {
+      console.error("[feedback-multiplier-hook]", err);
+    }
+  }
 
   // Auto-generate interview prep when moving to "interview" stage
   if (status === "interview" && app) {
