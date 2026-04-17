@@ -1,190 +1,189 @@
-"use client";
+import crypto from "node:crypto";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { db, schema } from "@/db";
+import { desc, eq, gte, inArray, sql, and } from "drizzle-orm";
+import { LoginCard } from "@/components/login/LoginCard";
+import "@/components/home/home.css";
 
-import { useState } from "react";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function LoginPage() {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [shaking, setShaking] = useState(false);
-  const [loading, setLoading] = useState(false);
+// ── Auth check ───────────────────────────────────────────────────
+async function isAuthenticated(): Promise<boolean> {
+  const pw = process.env.DISHA_PASSWORD;
+  if (!pw) return false;
+  const cookieStore = await cookies();
+  const val = cookieStore.get("disha_session")?.value;
+  if (!val) return false;
+  const expected = crypto.createHash("sha256").update(pw).digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(val), Buffer.from(expected));
+}
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+// ── Data helpers (same as today page) ───────────────────────────
+type GapAnalysis = { strengths?: string[] } | null;
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
+function firstName(full: string | null): string {
+  if (!full) return "there";
+  return full.trim().split(/\s+/)[0] ?? "there";
+}
 
-      if (res.ok) {
-        window.location.href = "/inbox";
-      } else {
-        setError("Incorrect password");
-        setShaking(true);
-        setPassword("");
-        setTimeout(() => setShaking(false), 420);
-      }
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+function greeting(): string {
+  const h = Number(new Date().toLocaleString("en-GB", {
+    timeZone: "Europe/Amsterdam", hour: "numeric", hour12: false,
+  }));
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function fmtDate(d: Date): string {
+  const tz = "Europe/Amsterdam";
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "long", timeZone: tz }).toUpperCase();
+  const day = Number(d.toLocaleString("en-GB", { day: "numeric", timeZone: tz }));
+  const month = d.toLocaleDateString("en-GB", { month: "long", timeZone: tz }).toUpperCase();
+  return `${weekday} ${day} ${month}`;
+}
+
+async function loadData() {
+  const since24h = new Date(Date.now() - 24 * 3600_000);
+  const [profile, featured, newToday, strongCount, totalT123] = await Promise.all([
+    db.select({ fullName: schema.profile.fullName }).from(schema.profile).limit(1),
+    db.select({
+      id: schema.jobs.id, title: schema.jobs.title, location: schema.jobs.location,
+      fitScore: schema.jobs.fitScore, gapAnalysis: schema.jobs.gapAnalysis,
+      companyName: schema.companies.name,
+    }).from(schema.jobs)
+      .leftJoin(schema.companies, eq(schema.jobs.companyId, schema.companies.id))
+      .where(inArray(schema.jobs.tier, [1, 2, 3]))
+      .orderBy(desc(schema.jobs.fitScore), desc(schema.jobs.discoveredAt)).limit(1),
+    db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs).where(gte(schema.jobs.discoveredAt, since24h)),
+    db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs)
+      .where(and(inArray(schema.jobs.tier, [1, 2, 3]), gte(schema.jobs.fitScore, "80"))),
+    db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs).where(inArray(schema.jobs.tier, [1, 2, 3])),
+  ]);
+  return {
+    name: firstName(profile[0]?.fullName ?? null),
+    featured: featured[0] ?? null,
+    newToday: newToday[0]?.count ?? 0,
+    strongCount: strongCount[0]?.count ?? 0,
+    totalInbox: totalT123[0]?.count ?? 0,
+  };
+}
+
+// ── Page ─────────────────────────────────────────────────────────
+export default async function RootPage() {
+  // If already authenticated, skip straight to inbox
+  if (await isAuthenticated()) redirect("/inbox");
+
+  const d = await loadData();
+  const f = d.featured;
+  const strengths = (f?.gapAnalysis as GapAnalysis)?.strengths ?? [];
+  const score = f?.fitScore != null ? Math.round(Number(f.fitScore)) : null;
 
   return (
-    <>
-      <style>{`
-        @keyframes disha-shake {
-          0%,100% { transform: translateX(0); }
-          15%      { transform: translateX(-7px); }
-          30%      { transform: translateX(7px); }
-          45%      { transform: translateX(-5px); }
-          60%      { transform: translateX(5px); }
-          75%      { transform: translateX(-3px); }
-          90%      { transform: translateX(3px); }
-        }
-        .disha-shake { animation: disha-shake 420ms ease-in-out; }
+    // Full-viewport wrapper — no app shell, so 100vh not calc(100vh - 60px)
+    <div className="home" style={{ minHeight: "100vh", maxHeight: "none" }}>
+      {/* Floating doc illustrations */}
+      <div className="home-float home-float-cv" aria-hidden="true">
+        <svg width="48" height="60" viewBox="0 0 48 60" fill="none">
+          <rect x="0.5" y="0.5" width="47" height="59" rx="3" stroke="var(--border)" fill="var(--surface)" />
+          <line x1="10" y1="16" x2="38" y2="16" stroke="var(--border-h)" strokeWidth="1.5" />
+          <line x1="10" y1="22" x2="32" y2="22" stroke="var(--border)" strokeWidth="1" />
+          <line x1="10" y1="27" x2="35" y2="27" stroke="var(--border)" strokeWidth="1" />
+          <line x1="10" y1="32" x2="28" y2="32" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+        <span className="home-float-label">CV</span>
+      </div>
+      <div className="home-float home-float-cover" aria-hidden="true">
+        <svg width="44" height="56" viewBox="0 0 44 56" fill="none">
+          <rect x="0.5" y="0.5" width="43" height="55" rx="3" stroke="var(--border)" fill="var(--surface)" />
+          <line x1="8" y1="14" x2="36" y2="14" stroke="var(--border-h)" strokeWidth="1.5" />
+          <line x1="8" y1="20" x2="30" y2="20" stroke="var(--border)" strokeWidth="1" />
+          <line x1="8" y1="25" x2="33" y2="25" stroke="var(--border)" strokeWidth="1" />
+          <line x1="8" y1="30" x2="26" y2="30" stroke="var(--border)" strokeWidth="1" />
+          <line x1="8" y1="35" x2="30" y2="35" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+        <span className="home-float-label">COVER LETTER</span>
+      </div>
+      <div className="home-float home-float-plan" aria-hidden="true">
+        <svg width="46" height="58" viewBox="0 0 46 58" fill="none">
+          <rect x="0.5" y="0.5" width="45" height="57" rx="3" stroke="var(--border)" fill="var(--surface)" />
+          <line x1="9" y1="15" x2="37" y2="15" stroke="var(--border-h)" strokeWidth="1.5" />
+          <line x1="9" y1="21" x2="31" y2="21" stroke="var(--border)" strokeWidth="1" />
+          <line x1="9" y1="26" x2="34" y2="26" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+        <span className="home-float-label">30-60-90</span>
+      </div>
 
-        .login-wrap {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          background: var(--ground);
-          padding: 24px;
-        }
+      {/* Accent dots */}
+      <span className="home-dot home-dot-1" aria-hidden="true" />
+      <span className="home-dot home-dot-2" aria-hidden="true" />
+      <span className="home-dot home-dot-3" aria-hidden="true" />
 
-        .login-card {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 20px;
-          padding: 48px 40px 40px;
-          box-shadow: 0 2px 4px rgba(26,24,20,0.04), 0 8px 24px rgba(26,24,20,0.08);
-          width: 100%;
-          max-width: 380px;
-        }
+      {/* Growth curve */}
+      <svg className="home-growth" aria-hidden="true" viewBox="0 0 720 400" fill="none" preserveAspectRatio="none">
+        <path d="M0 380 C180 370, 300 340, 400 280 S560 120, 720 40" stroke="var(--accent)" strokeWidth="2" />
+      </svg>
 
-        .login-eyebrow {
-          font-family: var(--font-body);
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.10em;
-          text-transform: uppercase;
-          color: var(--accent);
-          margin-bottom: 10px;
-        }
+      {/* Narrative column */}
+      <div className="home-narrative">
+        <div className="home-date">{fmtDate(new Date())}</div>
 
-        .login-title {
-          font-family: var(--font-display);
-          font-weight: 300;
-          font-size: 48px;
-          line-height: 1.0;
-          letter-spacing: -0.03em;
-          color: var(--text-1);
-          margin: 0 0 6px;
-        }
+        <h1 className="home-greeting">
+          {greeting()},<br />
+          {d.name}<span className="home-accent-dot">.</span>
+        </h1>
 
-        .login-sub {
-          font-family: var(--font-body);
-          font-size: 14px;
-          color: var(--text-2);
-          margin: 0 0 32px;
-        }
+        {d.strongCount > 0 || d.totalInbox > 0 ? (
+          <p className="home-sub">
+            You have <strong>{d.strongCount}</strong> strong match{d.strongCount === 1 ? "" : "es"} waiting.{" "}
+            <strong>{d.newToday}</strong> new roles arrived overnight.
+          </p>
+        ) : (
+          <p className="home-sub">Discovery runs overnight. Check back in the morning.</p>
+        )}
 
-        .login-divider {
-          height: 1px;
-          background: var(--border);
-          margin: 0 0 32px;
-        }
-
-        .login-input {
-          width: 100%;
-          box-sizing: border-box;
-          padding: 11px 14px;
-          font-family: var(--font-body);
-          font-size: 14px;
-          color: var(--text-1);
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 10px;
-          outline: none;
-          transition: border-color 120ms ease, box-shadow 120ms ease;
-          margin-bottom: 10px;
-        }
-        .login-input::placeholder { color: var(--text-2); opacity: 0.7; }
-        .login-input:hover { border-color: var(--border-h); }
-        .login-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
-        .login-input.has-error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(153,27,27,0.12); }
-
-        .login-btn {
-          width: 100%;
-          padding: 11px 20px;
-          font-family: var(--font-body);
-          font-size: 14px;
-          font-weight: 600;
-          color: #fff;
-          background: var(--accent);
-          border: none;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
-          letter-spacing: 0.01em;
-        }
-        .login-btn:hover:not(:disabled) { background: var(--accent-h); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,74,53,0.25); }
-        .login-btn:active:not(:disabled) { transform: translateY(0); box-shadow: none; }
-        .login-btn:disabled { background: var(--border); color: var(--text-3); cursor: not-allowed; }
-
-        .login-error {
-          margin-top: 10px;
-          font-size: 13px;
-          color: var(--danger);
-          min-height: 18px;
-        }
-
-        .login-footer {
-          margin-top: 32px;
-          font-size: 12px;
-          color: var(--text-2);
-          text-align: center;
-          opacity: 0.6;
-        }
-      `}</style>
-
-      <div className="login-wrap">
-        <div className={`login-card${shaking ? " disha-shake" : ""}`}>
-          <p className="login-eyebrow">Private access</p>
-          <h1 className="login-title">Disha</h1>
-          <p className="login-sub">Job search, handled.</p>
-          <div className="login-divider" />
-
-          <form onSubmit={handleSubmit}>
-            <input
-              type="password"
-              placeholder="Enter password"
-              className={`login-input${error ? " has-error" : ""}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoFocus
-              autoComplete="current-password"
-            />
-            <button
-              type="submit"
-              className="login-btn"
-              disabled={loading}
-            >
-              {loading ? "Entering…" : "Enter →"}
-            </button>
-            <p className="login-error">{error ?? ""}</p>
-          </form>
+        {/* Login card — sits where the transition + featured card would be */}
+        <div style={{ marginTop: 36 }}>
+          <LoginCard />
         </div>
 
-        <p className="login-footer">Disha · personal</p>
+        {/* Featured job — shown but links disabled pre-login */}
+        {f && (
+          <>
+            <div className="home-transition" style={{ marginTop: 32 }}>
+              <span className="home-transition-line" />
+              One stands out
+            </div>
+            <div className="home-featured" style={{ cursor: "default", pointerEvents: "none", opacity: 0.7 }}>
+              <div className="home-featured-left">
+                <div className="home-featured-company">{f.companyName ?? "Unknown"}</div>
+                <h2 className="home-featured-title">{f.title}</h2>
+                <p className="home-featured-reason">
+                  {strengths.length > 0
+                    ? strengths.slice(0, 2).join(". ") + "."
+                    : "Strong profile match on skills, tools, and seniority."}
+                </p>
+                <span className="home-featured-cta">Log in to open →</span>
+              </div>
+              {score != null && (
+                <div className="home-featured-right">
+                  <span className="home-featured-score">{score}</span>
+                  <span className="home-featured-pct">% match</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* KPI pills — non-interactive pre-login */}
+        <div className="home-pills" style={{ pointerEvents: "none", opacity: 0.6 }}>
+          <span className="home-pill"><strong>{d.totalInbox}</strong> in your inbox</span>
+          <span className="home-pill home-pill-accent"><strong>{d.strongCount}</strong> strong matches</span>
+          <span className="home-pill"><strong>{d.newToday}</strong> discovered</span>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
