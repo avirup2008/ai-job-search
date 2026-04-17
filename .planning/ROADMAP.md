@@ -209,7 +209,10 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
 **Success Criteria** (what must be TRUE):
   1. The nightly cron discovers jobs from Indeed Netherlands via free HTML scraping; results are deduplicated against existing sources and normalised to `RawJob` shape; fixture-based tests pass.
   2. User pastes a non-LinkedIn job URL into the app and sees a confirmation; the next nightly run scores that job and it appears in the triage inbox with a full tier assignment and breakdown.
-**Plans:** TBD
+**Plans:** 3 plans
+- [ ] 14-01-PLAN.md — Indeed NL scraper source (R-81)
+- [ ] 14-02-PLAN.md — URL paste queue backend: /api/queue-url + orchestrator Step 0.5 (R-82)
+- [ ] 14-03-PLAN.md — URL paste queue UI in inbox toolbar (R-82)
 
 ### Phase 15: Candidate Intelligence UI
 **Goal:** Upashana can see exactly what is holding T2 jobs back from T1, get a structured research prompt for any interview at zero API cost, and download a pre-interview PDF brief from the job detail view.
@@ -219,7 +222,10 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
   1. A Gap Coach panel (page or sidebar) lists T2 jobs ranked by closeness-to-T1, and for each job shows the specific keywords and profile fields preventing T1 tier assignment.
   2. When a job moves to "interview" status, a structured research prompt (using company name, role, JD text, and dossier) appears on the job detail view with a one-click copy button — no API call is made; she pastes it into Claude.ai herself.
   3. From any job in "interview" status, user can download a single formatted PDF that combines the existing interview prep document and the company dossier for that job — no new generation, formatting only.
-**Plans:** TBD
+**Plans:** 3 plans
+- [ ] 15-01-PLAN.md — Gap Coach page + nav link (R-85)
+- [ ] 15-02-PLAN.md — Interview research prompt panel (R-86)
+- [ ] 15-03-PLAN.md — Pre-interview brief PDF download (R-89)
 **UI hint:** yes
 
 ### Phase 16: Analytics & Reporting
