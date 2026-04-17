@@ -14,6 +14,12 @@ import { generateCV } from "@/lib/generate/cv";
 import { renderCvDocx } from "@/lib/generate/cv-docx";
 import { storeCv } from "@/lib/generate/storage";
 
+export interface SourceSummaryEntry {
+  source: string;
+  fetched: number;
+  error: string | null;
+}
+
 export interface RunSummary {
   runId: string;
   counts: {
@@ -31,8 +37,10 @@ export interface RunSummary {
     queuedScored: number; // R-82: url_paste queued rows scored this run
     queuedFailed: number; // R-82: url_paste queued rows that failed scoring (will retry)
   };
+  sourceSummary: SourceSummaryEntry[];
   perSource: Record<string, number>;
   errors: Record<string, string>;
+  cvErrors?: Array<{ jobId: string; documentKind: string; error: string }>;
   elapsedMs: number;
 }
 
@@ -386,10 +394,18 @@ export async function runNightly(): Promise<RunSummary> {
       }
     }
 
+    // Build per-source summary after discovery
+    const sourceSummary: SourceSummaryEntry[] = Object.entries(disc.perSource).map(([source, fetched]) => ({
+      source,
+      fetched,
+      error: disc.errors[source] ?? null,
+    }));
+
     // 8. Nightly CV generation — batch generate for new T1/T2 jobs (cap MAX_CV_PER_RUN)
     // R-84: every CV produced here runs through the ATS keyword pass inside generateCV().
     let cvGenerated = 0;
     let cvFailed = 0;
+    const cvErrors: Array<{ jobId: string; documentKind: string; error: string }> = [];
     const needsCv = await db
       .select({
         applicationId: schema.applications.id,
@@ -424,7 +440,9 @@ export async function runNightly(): Promise<RunSummary> {
             cvGenerated++;
           } catch (err) {
             cvFailed++;
+            const msg = err instanceof Error ? err.message : String(err);
             console.error(`[nightly-cv] jobId=${row.jobId}`, err);
+            cvErrors.push({ jobId: row.jobId, documentKind: "cv", error: msg });
           }
         }),
       ),
@@ -447,8 +465,10 @@ export async function runNightly(): Promise<RunSummary> {
         queuedScored,
         queuedFailed,
       },
+      sourceSummary,
       perSource: disc.perSource,
       errors: disc.errors,
+      cvErrors: cvErrors.length > 0 ? cvErrors : undefined,
       elapsedMs: Date.now() - started,
     };
 
@@ -458,6 +478,7 @@ export async function runNightly(): Promise<RunSummary> {
         endedAt: sql`now()`,
         status: Object.keys(disc.errors).length > 0 ? "partial" : "succeeded",
         stageMetrics: summary,
+        errorJson: cvErrors.length > 0 ? { cvErrors } : null,
       })
       .where(eq(schema.runs.id, runId));
 
