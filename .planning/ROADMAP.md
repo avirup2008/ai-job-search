@@ -179,7 +179,7 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
 ## Phases
 
 - [x] **Phase 13: Smarter Scoring + ATS Keyword Pass** - Score breakdowns visible, feedback loop active, ATS keyword injection in pipeline (completed 2026-04-17)
-- [ ] **Phase 14: Enhanced Discovery** - Indeed NL scraper live, manual URL paste queues jobs for scoring
+- [x] **Phase 14: Enhanced Discovery** - Indeed NL scraper live, manual URL paste queues jobs for scoring (completed 2026-04-17)
 - [ ] **Phase 15: Candidate Intelligence UI** - Gap coach panel, interview research prompt, pre-interview brief PDF
 - [ ] **Phase 16: Analytics & Reporting** - Source quality chart, Market Pulse panel, Weekly Strategy Brief
 
@@ -209,10 +209,10 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
 **Success Criteria** (what must be TRUE):
   1. The nightly cron discovers jobs from Indeed Netherlands via free HTML scraping; results are deduplicated against existing sources and normalised to `RawJob` shape; fixture-based tests pass.
   2. User pastes a non-LinkedIn job URL into the app and sees a confirmation; the next nightly run scores that job and it appears in the triage inbox with a full tier assignment and breakdown.
-**Plans:** 3 plans
-- [ ] 14-01-PLAN.md — Indeed NL scraper source (R-81)
-- [ ] 14-02-PLAN.md — URL paste queue backend: /api/queue-url + orchestrator Step 0.5 (R-82)
-- [ ] 14-03-PLAN.md — URL paste queue UI in inbox toolbar (R-82)
+**Plans:** 3/3 plans complete
+- [x] 14-01-PLAN.md — Indeed NL scraper source (R-81)
+- [x] 14-02-PLAN.md — URL paste queue backend: /api/queue-url + orchestrator Step 0.5 (R-82)
+- [x] 14-03-PLAN.md — URL paste queue UI in inbox toolbar (R-82)
 
 ### Phase 15: Candidate Intelligence UI
 **Goal:** Upashana can see exactly what is holding T2 jobs back from T1, get a structured research prompt for any interview at zero API cost, and download a pre-interview PDF brief from the job detail view.
