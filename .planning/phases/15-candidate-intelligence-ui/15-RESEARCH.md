@@ -424,22 +424,16 @@ Status transitions happen via `updateApplicationStatus()` in `src/app/(app)/pipe
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Gap Coach UI placement: standalone page vs inbox tab**
-   - What we know: The inbox has 4 tabs (All, Ready to apply, Worth exploring, Stretch). Adding a 5th "Gap Coach" tab would crowd the nav. A separate `/gap-coach` route keeps the inbox clean.
-   - What's unclear: Does the user want to navigate from a gap-coach job card directly to the job detail? If so, the existing `/inbox/[jobId]` route already serves that purpose.
-   - Recommendation: Standalone `/gap-coach` page. Add a nav link in the app shell alongside the existing inbox/pipeline/analytics links.
+   - RESOLVED: Standalone `/gap-coach` page with nav link in app shell. Keeps inbox clean; existing `/inbox/[jobId]` route serves job detail navigation from gap-coach rows.
 
 2. **Navigation shell: where to add the Gap Coach link**
-   - What we know: The app shell (`src/components/app-shell/`) contains the nav. We need to inspect it to determine how to add a new nav item.
-   - What's unclear: Whether the nav items are hardcoded or configurable.
-   - Recommendation: Read `src/components/app-shell/` during planning to determine exact insertion point.
+   - RESOLVED: Nav items are an array in `src/components/app-shell/TopBar.tsx`. New nav entry added after analytics link: `{ href: "/gap-coach", label: "Gap Coach" }`.
 
 3. **Interview-prep document format: is it always markdown?**
-   - What we know: `storeInterviewPrep` stores markdown via `blobUrlDocx`. The `kind="interview-prep"` documents have their markdown URL in `blobUrlDocx` (column is repurposed, consistent with cover letter storage pattern).
-   - What's unclear: Nothing — this is confirmed by storage.ts code.
-   - Recommendation: Fetch the blob URL, `res.text()` to get markdown, parse into sections for PDF layout.
+   - RESOLVED: Always markdown. `storeInterviewPrep` stores markdown via `blobUrlDocx` (column repurposed, consistent with cover letter pattern). Fetch blob URL, `res.text()` to get markdown, parse into sections for PDF layout.
 
 ---
 
