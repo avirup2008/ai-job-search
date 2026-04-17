@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { PasteRolePanel } from "@/components/paste-role/PasteRolePanel";
 
 const NAV = [
-  { href: "/", label: "Today" },
   { href: "/inbox", label: "Inbox" },
   { href: "/pipeline", label: "Pipeline" },
   { href: "/analytics", label: "Analytics" },
@@ -32,9 +31,7 @@ export function TopBar() {
       <nav className="topbar-nav">
         {NAV.map((item) => {
           const active =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
+            pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
           return (
             <Link
               key={item.href}
