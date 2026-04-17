@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Indeed NL - marketing automation jobs in Nederland</title>
+    <link>https://nl.indeed.com/vacatures</link>
+    <description>Latest marketing automation jobs in Nederland</description>
+    <atom:link href="https://nl.indeed.com/rss?q=marketing+automation&amp;l=Nederland" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title><![CDATA[Marketing Automation Specialist - Atlas Group]]></title>
+      <link>https://nl.indeed.com/viewjob?jk=abc123def456&amp;from=rss</link>
+      <description><![CDATA[<p>We are looking for a <b>Marketing Automation Specialist</b> to join our team in Amsterdam. You will manage HubSpot workflows, build email campaigns, and analyse funnel performance.</p><p>Requirements: 3+ years experience with marketing automation platforms, strong analytical skills.</p>]]></description>
+      <pubDate>Fri, 17 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://nl.indeed.com/viewjob?jk=abc123def456</guid>
+    </item>
+
+    <item>
+      <title><![CDATA[CRM & Email Marketing Manager - Nexora Solutions]]></title>
+      <link>https://nl.indeed.com/viewjob?jk=xyz789pqr012&amp;from=rss</link>
+      <description><![CDATA[Lead our CRM strategy and own end-to-end email marketing programmes. Work closely with sales and product teams to drive engagement and revenue.]]></description>
+      <pubDate>Thu, 16 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://nl.indeed.com/viewjob?jk=xyz789pqr012</guid>
+    </item>
+
+    <item>
+      <title><![CDATA[HubSpot Campaign Manager - Bright Commerce BV]]></title>
+      <link>https://nl.indeed.com/viewjob?jk=hhh555iii666&amp;from=rss</link>
+      <description><![CDATA[Join our growth team as a HubSpot Campaign Manager. You will design and execute inbound marketing campaigns, manage lead nurturing sequences, and report on KPIs.]]></description>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://nl.indeed.com/viewjob?jk=hhh555iii666</guid>
+    </item>
+
+    <item>
+      <title>Digital Marketing Strategist - Orbis Media</title>
+      <link>https://nl.indeed.com/viewjob?jk=ddd111eee222&amp;from=rss</link>
+      <description>Drive digital growth across paid, organic, and lifecycle channels. 5+ years in digital marketing required. Based in Rotterdam.</description>
+      <pubDate>Tue, 14 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://nl.indeed.com/viewjob?jk=ddd111eee222</guid>
+    </item>
+
+    <item>
+      <title><![CDATA[Growth Marketing Lead - No Company Name Format]]></title>
+      <link>https://nl.indeed.com/viewjob?jk=fff333ggg444&amp;from=rss</link>
+      <description><![CDATA[Exciting growth opportunity with a fast-growing scale-up. Own paid acquisition, SEO, and conversion rate optimisation.]]></description>
+      <pubDate>Mon, 13 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://nl.indeed.com/viewjob?jk=fff333ggg444</guid>
+    </item>
+
+  </channel>
+</rss>
