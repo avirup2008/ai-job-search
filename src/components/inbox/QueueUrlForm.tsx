@@ -73,15 +73,13 @@ export function QueueUrlForm() {
 
   return (
     <form className="queue-url-form" onSubmit={handleSubmit}>
-      <label className="queue-url-label" htmlFor="queue-url-input">
-        Queue a job URL
-      </label>
       <div className="queue-url-row">
         <input
           id="queue-url-input"
+          aria-label="Queue a job URL"
           className="queue-url-input"
           type="url"
-          placeholder="https://..."
+          placeholder="https://... — queue a job for tonight"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={busy}
