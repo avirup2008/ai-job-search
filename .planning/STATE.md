@@ -1,10 +1,10 @@
 # STATE — AI Job Search
 
 **Last updated:** 2026-04-17
-**Current milestone:** v1 (1-month job search) · **Week 1 ✅ shipped**
-**Current phase:** All 12 phases complete (v1 feature-complete)
+**Current milestone:** v2.0 Smarter Disha
+**Current phase:** Not started (defining requirements)
 
-Last activity: 2026-04-17 — Completed quick task 260417-g4p: Wire real data into analytics page charts
+Last activity: 2026-04-17 — Milestone v2.0 started
 
 ## Progress
 

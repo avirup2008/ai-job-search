@@ -49,3 +49,38 @@ All LLM calls pass through AI Gateway with monthly budget ledger enforcing hard 
 ## Out of scope for v1
 
 Auto-apply to ATS forms · LinkedIn scraping · Recruiter outreach automation · Multi-tenant · Native mobile app · Dutch-language generation · Salary negotiation · Interview scheduling integration.
+
+## Current Milestone: v2.0 Smarter Disha
+
+**Goal:** Make Disha smarter about scoring, discovery, and application quality — reducing the ATS black hole and giving Upashana clarity on why things are or aren't working.
+
+**Hard constraint:** No new paid API keys. Rules engine, free-source scraping, or existing Anthropic budget only.
+
+**Target features:**
+- Smarter Scoring: explain why T1/T2/T3, feedback loop from outcomes, score drift alerts
+- Analytics: source quality (which discovery source produces best T1s)
+- Discovery: Indeed Netherlands, manual URL paste (non-LinkedIn)
+- Agentic: pre-interview brief PDF, auto-research on interview move
+- Profile Gap Coach: surface T2→T1 conversion opportunities from existing data
+- Weekly Strategy Brief: rules-based weekly review card
+- Market Pulse: response timing context, volume trends, internal benchmarks
+- ATS keyword injection: post-pass on generated CVs to add exact-match JD keywords
+
+**Dropped from brainstorm (require paid API):** Salary intelligence (Glassdoor/SerpAPI).
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
