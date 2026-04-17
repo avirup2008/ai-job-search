@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { COOKIE_NAME, computeSessionToken } from "@/lib/auth/constants";
+import { COOKIE_NAME } from "@/lib/auth/constants";
+
+const sha256hex = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
 
 export async function POST(request: Request) {
   const pw = process.env.DISHA_PASSWORD;
@@ -15,8 +17,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid request" }, { status: 400 });
   }
 
-  const expectedHash = computeSessionToken(pw);
-  const submittedHash = computeSessionToken(body.password ?? "");
+  const expectedHash = sha256hex(pw);
+  const submittedHash = sha256hex(body.password ?? "");
 
   const match = crypto.timingSafeEqual(
     Buffer.from(expectedHash),
