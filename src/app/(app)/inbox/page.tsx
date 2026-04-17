@@ -1,6 +1,7 @@
 import { db, schema } from "@/db";
 import { and, desc, gte, inArray, lt, sql } from "drizzle-orm";
 import { JobCard, type JobCardData } from "@/components/inbox/JobCard";
+import { QueueUrlForm } from "@/components/inbox/QueueUrlForm";
 import "@/components/inbox/inbox.css";
 
 type GapAnalysis = { strengths?: string[]; gaps?: string[] } | null;
@@ -180,6 +181,7 @@ export default async function InboxPage({
             );
           })}
         </div>
+        <QueueUrlForm />
       </div>
 
       {jobs.length === 0 ? (
