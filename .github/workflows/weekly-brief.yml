@@ -1,0 +1,50 @@
+name: Weekly strategy brief
+
+# Calls /api/cron/weekly-brief every Monday 08:00 UTC.
+# The route has a day-of-week guard (returns skipped if not Monday) so
+# manual triggers on other days are safe.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch: # allow manual trigger from the Actions tab
+
+concurrency:
+  # One brief per week is enough; skip any overlapping run.
+  group: weekly-brief
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Call /api/cron/weekly-brief
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -e
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET secret is not set on the repository."
+            exit 1
+          fi
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "::error::PRODUCTION_URL variable is not set on the repository."
+            exit 1
+          fi
+          URL="${PRODUCTION_URL%/}/api/cron/weekly-brief"
+          echo "Hitting $URL"
+          HTTP_CODE=$(curl -sS -o /tmp/body.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 55 \
+            "$URL")
+          echo "HTTP $HTTP_CODE"
+          echo "--- Response body ---"
+          cat /tmp/body.json | head -c 4000
+          echo ""
+          echo "--------------------"
+          if [ "$HTTP_CODE" = "200" ]; then
+            exit 0
+          fi
+          exit 1

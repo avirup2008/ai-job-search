@@ -1,5 +1,6 @@
 import { db, schema } from "@/db";
-import { eq, sql, inArray, isNotNull, gte, and } from "drizzle-orm";
+import { eq, sql, inArray, isNotNull, gte, and, desc } from "drizzle-orm";
+import type { WeeklyBrief } from "@/lib/analytics/weekly-brief";
 import { PIPELINE_STAGES } from "@/app/(app)/pipeline/stages";
 import { aggregateByNormalizedLocation } from "@/lib/location/normalize";
 import { KEYWORDS, extractKeywordCounts, profileKeywordSet } from "@/lib/analytics/keywords";
@@ -29,6 +30,7 @@ async function loadData() {
     profileRows,
     sourceQuality,
     marketPulse,
+    weeklyBriefRows,
   ] = await Promise.all([
     // KPI: total jobs
     db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs),
@@ -138,6 +140,13 @@ async function loadData() {
     querySourceQuality(),
     // Market pulse: avg days-to-response, T1 trend, source response rates
     queryMarketPulse(),
+    // Weekly Strategy Brief: most recent brief stored in runs table
+    db
+      .select({ stageMetrics: schema.runs.stageMetrics, startedAt: schema.runs.startedAt })
+      .from(schema.runs)
+      .where(eq(schema.runs.status, "weekly-brief"))
+      .orderBy(desc(schema.runs.startedAt))
+      .limit(1),
   ]);
 
   const totalJobs = totalJobsRow[0]?.count ?? 0;
@@ -227,6 +236,8 @@ async function loadData() {
     .slice(0, 15)
     .map(([name, count]) => ({ name, count, inProfile: inProfile.has(name) }));
 
+  const latestBrief = (weeklyBriefRows[0]?.stageMetrics ?? null) as WeeklyBrief | null;
+
   return {
     totalJobs,
     matchedCount,
@@ -243,6 +254,7 @@ async function loadData() {
     skills,
     sourceQuality,
     marketPulse,
+    latestBrief,
   };
 }
 
@@ -514,6 +526,37 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Weekly Strategy Brief */}
+        <section className="panel span-2">
+          <h2>Weekly strategy brief</h2>
+          {d.latestBrief === null ? (
+            <p className="chart-caption">No brief yet — generated every Monday at 08:00 UTC.</p>
+          ) : (
+            <>
+              <p className="chart-caption">Week of {d.latestBrief.weekStarting}</p>
+              <div className="hbar-list">
+                <div className="hbar-row">
+                  <span className="hbar-name">Applications this week</span>
+                  <span className="hbar-count">
+                    {d.latestBrief.applicationsSentThisWeek} / {d.latestBrief.targetPacePerWeek} target
+                  </span>
+                </div>
+                <div className="hbar-row">
+                  <span className="hbar-name">T1 jobs available vs applied</span>
+                  <span className="hbar-count">
+                    {d.latestBrief.t1Applied} applied of {d.latestBrief.t1Available} available
+                  </span>
+                </div>
+                <div className="hbar-row">
+                  <span className="hbar-name">Top source this week</span>
+                  <span className="hbar-count">{d.latestBrief.topSourceThisWeek}</span>
+                </div>
+              </div>
+              <p style={{ marginTop: "0.75rem", fontWeight: 600 }}>{d.latestBrief.callout}</p>
+            </>
+          )}
         </section>
       </div>
     </>
