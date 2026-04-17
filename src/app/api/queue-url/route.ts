@@ -134,28 +134,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, queued: true, jobId: existing.id, alreadyQueued: true });
     }
 
-    // 4. Fetch the URL
-    let jdText: string;
+    // 4. Fetch the URL — non-fatal. Many job sites (Indeed, etc.) block
+    //    server-side fetches via Cloudflare. Queue with minimal metadata
+    //    and let the nightly cron attempt scoring with the stored URL.
+    let jdText = "";
     try {
-      jdText = await fetchUrlText(rawUrl);
+      const fetched = await fetchUrlText(rawUrl);
+      jdText = fetched.slice(0, 10_000);
     } catch {
-      return NextResponse.json(
-        { ok: false, error: "Could not fetch that URL. Try pasting the job description text directly instead." },
-        { status: 400 },
-      );
+      // Fetch failed (blocked, timeout, etc.) — queue anyway
     }
 
-    // 5. Truncate and validate
-    jdText = jdText.slice(0, 10_000);
-    if (!jdText.trim()) {
-      return NextResponse.json(
-        { ok: false, error: "Fetched page contained no text" },
-        { status: 400 },
-      );
+    // 6. Extract meta (falls back to hostname-derived title if no text)
+    let title: string;
+    let companyName: string;
+    if (jdText.trim()) {
+      ({ title, company: companyName } = extractMeta(jdText));
+    } else {
+      // Derive a placeholder title from the URL
+      try {
+        const u = new URL(rawUrl);
+        title = u.hostname.replace(/^www\./, "");
+        companyName = title;
+      } catch {
+        title = "Queued job";
+        companyName = "Unknown";
+      }
     }
-
-    // 6. Extract meta
-    const { title, company: companyName } = extractMeta(jdText);
 
     // 7. Upsert company
     let companyId: string;
