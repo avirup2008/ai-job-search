@@ -236,8 +236,6 @@ async function loadData() {
   };
 }
 
-const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const HEATMAP_LEVELS = ["l0", "l1", "l2", "l3", "l4"] as const;
 
 function budgetLevel(pct: number): "ok" | "warn" | "danger" {
   if (pct >= 100) return "danger";
@@ -252,21 +250,6 @@ export default async function DashboardPage() {
   const bLevel = budgetLevel(budgetPct);
   const budgetRemaining = Math.max(0, d.capEur - d.eurSpent);
 
-  // Score distribution bands
-  const SCORE_BANDS = [
-    { label: "40-49", min: 40 },
-    { label: "50-59", min: 50 },
-    { label: "60-69", min: 60 },
-    { label: "70-79", min: 70 },
-    { label: "80-89", min: 80 },
-    { label: "90+", min: 90 },
-  ];
-  const scoreBandCounts = SCORE_BANDS.map((b) => {
-    const row = d.scoreDistribution.find((r) => r.band === b.min);
-    return { ...b, count: row?.count ?? 0 };
-  });
-  const maxBandCount = Math.max(1, ...scoreBandCounts.map((b) => b.count));
-
   // Location bars
   const maxLocCount = Math.max(1, ...d.locationDistribution.map((r) => r.count));
 
@@ -279,9 +262,6 @@ export default async function DashboardPage() {
     { key: "interview", label: "Interview", count: d.interviewCount, color: "funnel-blue" },
   ];
   const maxFunnel = Math.max(1, ...funnelStages.map((s) => s.count));
-
-  // Conversion rate for interviews
-  const conversionPct = d.appliedCount > 0 ? ((d.interviewCount / d.appliedCount) * 100).toFixed(0) : "0";
 
   // SVG chart dimensions — compact to reduce page height
   const chartW = 560;
@@ -346,22 +326,10 @@ export default async function DashboardPage() {
           <span className="kpi-sub">quality matches</span>
         </div>
         <div className="kpi">
-          <span className="kpi-label">Avg match</span>
-          <span className="kpi-value">{d.avgScore}%</span>
-          <span className="kpi-delta up">&#8593; trending</span>
-          <span className="kpi-sub">fitScore (T1-T3)</span>
-        </div>
-        <div className="kpi">
           <span className="kpi-label">Applied</span>
           <span className="kpi-value">{d.appliedCount}</span>
           <span className="kpi-delta neutral">— of {d.savedCount} saved</span>
           <span className="kpi-sub">applications sent</span>
-        </div>
-        <div className="kpi">
-          <span className="kpi-label">Interviews</span>
-          <span className="kpi-value">{d.interviewCount}</span>
-          <span className="kpi-delta up">&#8593; {conversionPct}% conversion</span>
-          <span className="kpi-sub">from applied</span>
         </div>
       </div>
 
@@ -400,28 +368,7 @@ export default async function DashboardPage() {
           )}
         </section>
 
-        {/* 2. Score distribution */}
-        <section className="panel">
-          <h2>Score distribution</h2>
-          <div className="histogram">
-            {scoreBandCounts.map((b) => (
-              <div key={b.label} className="hist-col">
-                <div className="hist-bar-wrap">
-                  <div
-                    className="hist-bar"
-                    data-band={b.min < 60 ? "low" : b.min < 80 ? "mid" : "high"}
-                    style={{ height: `${(b.count / maxBandCount) * 100}%` }}
-                  />
-                </div>
-                <span className="hist-count">{b.count}</span>
-                <span className="hist-label">{b.label}</span>
-              </div>
-            ))}
-          </div>
-          <p className="chart-caption">Most roles cluster at 60-75%.</p>
-        </section>
-
-        {/* 3. Top skills in your matches */}
+        {/* 2. Top skills in your matches */}
         <section className="panel">
           <h2>Top skills in your matches</h2>
           <p className="chart-caption">Orange = gap in your profile · Green = strength</p>
@@ -464,35 +411,7 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* 5. Activity heatmap */}
-        <section className="panel">
-          <h2>Activity heatmap</h2>
-          <div className="heatmap">
-            <div className="heatmap-labels">
-              {DAY_LABELS.filter((_, i) => i % 2 === 0).map((lbl) => (
-                <span key={lbl} className="heatmap-day-label">{lbl}</span>
-              ))}
-            </div>
-            <div className="heatmap-grid">
-              {d.heatmap.map((week, wi) => (
-                <div key={wi} className="heatmap-week">
-                  {week.map((level, di) => (
-                    <div key={di} className={`heatmap-cell ${HEATMAP_LEVELS[level]}`} title={`${DAY_LABELS[di]}: level ${level}`} />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="heatmap-legend">
-            <span className="heatmap-legend-label">Less</span>
-            {HEATMAP_LEVELS.map((l) => (
-              <div key={l} className={`heatmap-cell-sm ${l}`} />
-            ))}
-            <span className="heatmap-legend-label">More</span>
-          </div>
-        </section>
-
-        {/* 6. Where your matches are */}
+        {/* 5. Where your matches are */}
         <section className="panel">
           <h2>Where your matches are</h2>
           <div className="hbar-list">

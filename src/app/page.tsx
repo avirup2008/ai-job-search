@@ -85,43 +85,6 @@ export default async function RootPage() {
 
   return (
     <div className="home">
-      {/* Floating doc illustrations */}
-      <div className="home-float home-float-cv" aria-hidden="true">
-        <svg width="48" height="60" viewBox="0 0 48 60" fill="none">
-          <rect x="0.5" y="0.5" width="47" height="59" rx="3" stroke="var(--border)" fill="var(--surface)" />
-          <line x1="10" y1="16" x2="38" y2="16" stroke="var(--border-h)" strokeWidth="1.5" />
-          <line x1="10" y1="22" x2="32" y2="22" stroke="var(--border)" strokeWidth="1" />
-          <line x1="10" y1="27" x2="35" y2="27" stroke="var(--border)" strokeWidth="1" />
-          <line x1="10" y1="32" x2="28" y2="32" stroke="var(--border)" strokeWidth="1" />
-        </svg>
-        <span className="home-float-label">CV</span>
-      </div>
-      <div className="home-float home-float-cover" aria-hidden="true">
-        <svg width="44" height="56" viewBox="0 0 44 56" fill="none">
-          <rect x="0.5" y="0.5" width="43" height="55" rx="3" stroke="var(--border)" fill="var(--surface)" />
-          <line x1="8" y1="14" x2="36" y2="14" stroke="var(--border-h)" strokeWidth="1.5" />
-          <line x1="8" y1="20" x2="30" y2="20" stroke="var(--border)" strokeWidth="1" />
-          <line x1="8" y1="25" x2="33" y2="25" stroke="var(--border)" strokeWidth="1" />
-          <line x1="8" y1="30" x2="26" y2="30" stroke="var(--border)" strokeWidth="1" />
-          <line x1="8" y1="35" x2="30" y2="35" stroke="var(--border)" strokeWidth="1" />
-        </svg>
-        <span className="home-float-label">COVER LETTER</span>
-      </div>
-      <div className="home-float home-float-plan" aria-hidden="true">
-        <svg width="46" height="58" viewBox="0 0 46 58" fill="none">
-          <rect x="0.5" y="0.5" width="45" height="57" rx="3" stroke="var(--border)" fill="var(--surface)" />
-          <line x1="9" y1="15" x2="37" y2="15" stroke="var(--border-h)" strokeWidth="1.5" />
-          <line x1="9" y1="21" x2="31" y2="21" stroke="var(--border)" strokeWidth="1" />
-          <line x1="9" y1="26" x2="34" y2="26" stroke="var(--border)" strokeWidth="1" />
-        </svg>
-        <span className="home-float-label">30-60-90</span>
-      </div>
-
-      {/* Accent dots */}
-      <span className="home-dot home-dot-1" aria-hidden="true" />
-      <span className="home-dot home-dot-2" aria-hidden="true" />
-      <span className="home-dot home-dot-3" aria-hidden="true" />
-
       {/* Growth curve */}
       <svg className="home-growth" aria-hidden="true" viewBox="0 0 720 400" fill="none" preserveAspectRatio="none">
         <path d="M0 380 C180 370, 300 340, 400 280 S560 120, 720 40" stroke="var(--accent)" strokeWidth="2" />
