@@ -6,6 +6,7 @@ import { companyAvatar, matchBand } from "@/lib/ui/avatar";
 import { GeneratePanel, type DocSummary } from "@/components/job-detail/GeneratePanel";
 import { ScoreBreakdown } from "@/components/job-detail/ScoreBreakdown";
 import { InterviewPromptPanel } from "@/components/job-detail/InterviewPromptPanel";
+import { InterviewBriefDownload } from "@/components/job-detail/InterviewBriefDownload";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
@@ -152,6 +153,10 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
               jdText={job.jdText ?? ""}
               dossier={dossier}
             />
+          )}
+
+          {status === "interview" && (
+            <InterviewBriefDownload jobId={jobId} />
           )}
 
           {/* 3. Your application — doc cards */}
