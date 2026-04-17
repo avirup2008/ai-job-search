@@ -50,7 +50,7 @@ export const KEYWORDS: string[] = [
 /**
  * Escape special regex characters in a string so it can be used in a RegExp.
  */
-function escapeRegex(s: string): string {
+export function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
@@ -59,7 +59,7 @@ function escapeRegex(s: string): string {
  * Uses \b where the character is a word char, otherwise a lookahead/lookbehind.
  * For most marketing keywords (plain words) \b works fine.
  */
-function keywordRegex(keyword: string): RegExp {
+export function keywordRegex(keyword: string): RegExp {
   return new RegExp("\\b" + escapeRegex(keyword) + "\\b", "i");
 }
 
