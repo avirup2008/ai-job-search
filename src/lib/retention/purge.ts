@@ -1,5 +1,5 @@
 import { db, schema } from "@/db";
-import { inArray } from "drizzle-orm";
+import { inArray, lt } from "drizzle-orm";
 import { del } from "@vercel/blob";
 
 /**
@@ -16,6 +16,7 @@ export type PurgeResult = {
 };
 
 const RETENTION_DAYS = 60;
+const ORPHAN_RETENTION_DAYS = 180;
 const PURGE_STATUSES = new Set(["new", "saved", "discarded", "rejected"]);
 // PROTECTED_STATUSES is implicit: any status NOT in PURGE_STATUSES protects its job forever.
 // Concretely those are: applied, interviewing, offered.
@@ -96,6 +97,33 @@ export async function selectPurgeCandidates(now: Date): Promise<{
 }
 
 /**
+ * Jobs that were discovered but never had an application row created.
+ * These are filtered/rank-failed jobs that the pipeline never promoted.
+ * Purge threshold: 180 days since discoveredAt.
+ */
+export async function selectOrphanJobIds(now: Date): Promise<string[]> {
+  const cutoff = new Date(now.getTime() - ORPHAN_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+
+  // Pull all jobIds that have at least one application row.
+  // Use select (not selectDistinct) for broad mock compatibility; deduplicate in JS.
+  const withApps = await db
+    .select({ jobId: schema.applications.jobId })
+    .from(schema.applications);
+
+  const withAppsSet = new Set(withApps.map((r) => r.jobId));
+
+  // Pull all jobs older than the cutoff
+  const oldJobs = await db
+    .select({ id: schema.jobs.id })
+    .from(schema.jobs)
+    .where(lt(schema.jobs.discoveredAt, cutoff));
+
+  return (oldJobs as Array<{ id: string }>)
+    .filter((j) => !withAppsSet.has(j.id))
+    .map((j) => j.id);
+}
+
+/**
  * Orchestrate the purge: select candidates, delete blobs first (so a crash can't
  * leave orphaned blob objects whose DB pointers are already gone), then cascade-delete
  * the jobs row (FKs handle applications / documents / events / screening_answers).
@@ -108,6 +136,11 @@ export async function purgeOldJobs(opts: { dryRun: boolean; now?: Date }): Promi
   const now = opts.now ?? new Date();
 
   const { jobIds, applicationIds, documents } = await selectPurgeCandidates(now);
+  const orphanJobIds = await selectOrphanJobIds(now);
+
+  // Merge, deduplicate (selectPurgeCandidates and orphans are disjoint by definition,
+  // but guard anyway)
+  const allJobIds = [...new Set([...jobIds, ...orphanJobIds])];
 
   // Collect every non-null blob URL. Docs can have 0, 1, or 2 URLs (docx / pdf).
   const urls: string[] = [];
@@ -124,15 +157,15 @@ export async function purgeOldJobs(opts: { dryRun: boolean; now?: Date }): Promi
     if (urls.length > 0) {
       await del(urls);
     }
-    if (jobIds.length > 0) {
-      await db.delete(schema.jobs).where(inArray(schema.jobs.id, jobIds));
+    if (allJobIds.length > 0) {
+      await db.delete(schema.jobs).where(inArray(schema.jobs.id, allJobIds));
     }
   }
 
   const elapsedMs = Math.round(performance.now() - start);
 
   return {
-    jobsDeleted: jobIds.length,
+    jobsDeleted: allJobIds.length,
     applicationsDeleted: applicationIds.length,
     documentsDeleted: documents.length,
     blobsDeleted: urls.length,
