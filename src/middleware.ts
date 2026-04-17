@@ -59,8 +59,11 @@ export const config = {
     "/inbox/:path*",
     "/pipeline/:path*",
     "/analytics/:path*",
+    "/profile/:path*",
     "/paste/:path*",
     "/api/generate/:path*",
     "/api/download-pack/:path*",
+    "/api/paste-role",
+    "/budget/:path*",
   ],
 };

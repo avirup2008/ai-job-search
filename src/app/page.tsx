@@ -17,6 +17,7 @@ async function isAuthenticated(): Promise<boolean> {
   const val = cookieStore.get("disha_session")?.value;
   if (!val) return false;
   const expected = crypto.createHash("sha256").update(pw).digest("hex");
+  if (val.length !== expected.length) return false;
   return crypto.timingSafeEqual(Buffer.from(val), Buffer.from(expected));
 }
 
