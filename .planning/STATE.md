@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-04-17
 **Current milestone:** v2.0 Smarter Disha
-**Current phase:** Not started (defining requirements)
+**Current phase:** Phase 13 — Smarter Scoring + ATS Keyword Pass
 
-Last activity: 2026-04-17 — Milestone v2.0 started
+Last activity: 2026-04-17 — v2.0 roadmap created (Phases 13-16)
 
 ## Progress
 
@@ -22,6 +22,10 @@ Last activity: 2026-04-17 — Milestone v2.0 started
 | 10 Paste-JD + Auth | ✅ complete | Paste-a-role + profile editing + download pack (auth skipped — personal project) |
 | 11 Reveal & Live Ops | ⚠ partial | Retention cron shipped (quick 260417-f2f); reveal done live; GDPR + domain skipped by user |
 | 12 A/B + Screening + Interview | ⚠ partial | Interview prep shipped (quick 260417-fiz); A/B + extra screening skipped by user (not valuable for n=1) |
+| 13 Smarter Scoring + ATS Keyword Pass | Not started | v2.0 — R-78, R-79, R-80, R-84 |
+| 14 Enhanced Discovery | Not started | v2.0 — R-81, R-82 |
+| 15 Candidate Intelligence UI | Not started | v2.0 — R-85, R-86, R-89 |
+| 16 Analytics & Reporting | Not started | v2.0 — R-83, R-87, R-88 |
 
 ### Quick Tasks Completed
 
@@ -46,6 +50,7 @@ Last activity: 2026-04-17 — Milestone v2.0 started
 - English-only outputs in v1
 - Single-user (owner + admin); no multi-tenant
 - Claude writes all code via subagents; Avi approves at phase gates + provides secrets
+- v2.0: No new paid API keys; no new direct LLM calls outside nightly cron
 
 ## Open questions
 
@@ -56,3 +61,5 @@ Last activity: 2026-04-17 — Milestone v2.0 started
 ## Session log
 
 **2026-04-14** Initial GSD scaffolding from existing superpowers spec + plan. Granularity = fine (12 phases). Research = on. Parallelization = on. Git commit of planning docs = on.
+
+**2026-04-17** v2.0 Smarter Disha milestone started. Roadmap created: Phases 13-16 covering R-78 through R-89.

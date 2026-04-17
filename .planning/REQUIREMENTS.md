@@ -177,6 +177,19 @@ See `.planning/ROADMAP.md`. Each phase lists the R-ids it satisfies.
 
 ---
 
-## v2 Requirements-to-phase mapping
+## v2 Traceability
 
-See `.planning/ROADMAP.md` (v2 phases start at Phase 13).
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| R-78 Score breakdown UI | Phase 13 | Pending |
+| R-79 Outcome feedback loop | Phase 13 | Pending |
+| R-80 Score drift alerts | Phase 13 | Pending |
+| R-84 ATS keyword injection | Phase 13 | Pending |
+| R-81 Indeed NL scraper | Phase 14 | Pending |
+| R-82 Manual URL paste | Phase 14 | Pending |
+| R-85 Profile Gap Coach | Phase 15 | Pending |
+| R-86 Interview research prompt | Phase 15 | Pending |
+| R-89 Pre-interview brief PDF | Phase 15 | Pending |
+| R-83 Source quality chart | Phase 16 | Pending |
+| R-87 Weekly Strategy Brief | Phase 16 | Pending |
+| R-88 Market Pulse panel | Phase 16 | Pending |
