@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { companyAvatar, matchBand } from "@/lib/ui/avatar";
 import { GeneratePanel, type DocSummary } from "@/components/job-detail/GeneratePanel";
+import { ScoreBreakdown } from "@/components/job-detail/ScoreBreakdown";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
@@ -15,13 +16,6 @@ function formatJd(raw: string): string[] {
   // Split on double newlines or lines that look like headers
   const blocks = raw.split(/\n{2,}/).filter((b) => b.trim());
   return blocks.map((b) => b.trim());
-}
-
-function bandOf(v: number | undefined): "strong" | "medium" | "weak" {
-  if (v == null) return "weak";
-  if (v >= 0.75) return "strong";
-  if (v >= 0.5) return "medium";
-  return "weak";
 }
 
 interface Params { jobId: string }
@@ -82,15 +76,6 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
   const scoreBand = matchBand(scoreNum);
   const breakdown = (job.fitBreakdown ?? null) as FitBreakdown;
   const gap = (job.gapAnalysis ?? null) as GapAnalysis;
-
-  const breakdownRows: Array<{ label: string; value: number }> = breakdown
-    ? [
-        { label: "Skills", value: breakdown.skills ?? 0 },
-        { label: "Tools", value: breakdown.tools ?? 0 },
-        { label: "Seniority", value: breakdown.seniority ?? 0 },
-        { label: "Industry", value: breakdown.industry ?? 0 },
-      ]
-    : [];
 
   const fitSnippet = (gap?.strengths ?? []).slice(0, 2).join(". ");
 
@@ -155,28 +140,7 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
               {gap.recommendationReason && (
                 <p className="meta" style={{ marginTop: 12, fontStyle: "italic" }}>{gap.recommendationReason}</p>
               )}
-              {breakdownRows.length > 0 && (
-                <div className="breakdown" style={{ marginTop: 20 }}>
-                  {breakdownRows.map((r) => {
-                    const pct = Math.round(r.value * 100);
-                    const band = bandOf(r.value);
-                    return (
-                      <div key={r.label} className="breakdown-row">
-                        <span className="breakdown-label">{r.label}</span>
-                        <div className="breakdown-bar">
-                          <div
-                            className="breakdown-fill"
-                            data-band={band}
-                            style={{ width: `${pct}%` }}
-                            aria-label={`${r.label} ${pct}%`}
-                          />
-                        </div>
-                        <span className="breakdown-value">{pct}%</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <ScoreBreakdown breakdown={breakdown} matched={gap?.strengths ?? []} missing={gap?.gaps ?? []} />
             </section>
           )}
 
