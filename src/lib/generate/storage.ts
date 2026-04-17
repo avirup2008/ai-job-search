@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import { db, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
 
@@ -199,4 +199,90 @@ export async function storeScreeningQA(params: {
     .returning({ id: schema.documents.id });
 
   return { id: row.id, blobUrl: blob.url, publicSlug: slug, version: nextVersion };
+}
+
+/**
+ * Persist a generated interview prep doc. Uploads markdown to Vercel Blob,
+ * writes a `documents` row with kind="interview-prep".
+ */
+export async function storeInterviewPrep(params: {
+  applicationId: string;
+  markdown: string;
+  tokenCostEur: number;
+  tier: number | null;
+}): Promise<{ id: string; blobUrl: string; publicSlug: string; version: number }> {
+  const existing = await db
+    .select({ version: schema.documents.version })
+    .from(schema.documents)
+    .where(
+      and(
+        eq(schema.documents.applicationId, params.applicationId),
+        eq(schema.documents.kind, "interview-prep"),
+      ),
+    );
+  const nextVersion = existing.length === 0 ? 1 : Math.max(...existing.map((r) => r.version)) + 1;
+  const slug = `interview-prep-${params.applicationId.slice(0, 8)}-v${nextVersion}-${Date.now().toString(36)}`;
+
+  const blob = await put(
+    `interview-prep/${slug}.md`,
+    params.markdown,
+    {
+      access: "public",
+      contentType: "text/markdown; charset=utf-8",
+      addRandomSuffix: false,
+    },
+  );
+
+  const [row] = await db
+    .insert(schema.documents)
+    .values({
+      applicationId: params.applicationId,
+      kind: "interview-prep",
+      version: nextVersion,
+      blobUrlPdf: null,
+      blobUrlDocx: blob.url,
+      publicSlug: slug,
+      generatedByTier: params.tier,
+      tokenCost: String(params.tokenCostEur),
+    })
+    .returning({ id: schema.documents.id });
+
+  return { id: row.id, blobUrl: blob.url, publicSlug: slug, version: nextVersion };
+}
+
+/**
+ * Delete all interview-prep documents for an application (blob + DB rows).
+ * Used by the regenerate flow to start clean before creating a fresh doc.
+ */
+export async function deleteInterviewPrep(applicationId: string): Promise<void> {
+  const rows = await db
+    .select({ id: schema.documents.id, blobUrlDocx: schema.documents.blobUrlDocx })
+    .from(schema.documents)
+    .where(
+      and(
+        eq(schema.documents.applicationId, applicationId),
+        eq(schema.documents.kind, "interview-prep"),
+      ),
+    );
+
+  for (const row of rows) {
+    if (row.blobUrlDocx) {
+      try {
+        await del(row.blobUrlDocx);
+      } catch (err) {
+        console.warn("[deleteInterviewPrep] blob delete failed, continuing:", err);
+      }
+    }
+  }
+
+  if (rows.length > 0) {
+    await db
+      .delete(schema.documents)
+      .where(
+        and(
+          eq(schema.documents.applicationId, applicationId),
+          eq(schema.documents.kind, "interview-prep"),
+        ),
+      );
+  }
 }
