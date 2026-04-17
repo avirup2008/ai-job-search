@@ -196,7 +196,10 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
   2. When user marks an application as rejected, interview, or offer, the system updates a feedback multiplier in the profile and the next nightly run scores similar roles with the adjusted weights.
   3. When a job's tier changes between scoring runs (T2 to T1, or T1 to T2), a score drift alert appears in the triage inbox listing the old tier, new tier, and the score delta.
   4. After CV generation in the nightly cron, the generated CV text is compared against the JD and exact-match keywords missing from the CV are injected into the skills section — no additional LLM calls beyond those already budgeted.
-**Plans:** TBD
+**Plans:** 3 plans
+- [ ] 13-01-PLAN.md — Schema migration (jobs.previous_tier) + scoring multipliers/drift primitives + orchestrator re-score pass (R-79 core, R-80 core)
+- [ ] 13-02-PLAN.md — Score breakdown panel, drift badge in inbox, outcome feedback hook in updateApplicationStatus (R-78, R-79, R-80 UI)
+- [ ] 13-03-PLAN.md — ATS keyword post-pass + nightly batch CV generation for T1/T2 jobs (R-84)
 **UI hint:** yes
 
 ### Phase 14: Enhanced Discovery
