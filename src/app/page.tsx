@@ -127,32 +127,39 @@ export default async function RootPage() {
 
       {/* Narrative column */}
       <div className="home-narrative">
-        <div className="home-date">{fmtDate(new Date())}</div>
 
-        <h1 className="home-greeting">
-          {greeting()},<br />
-          {d.name}<span className="home-accent-dot">.</span>
-        </h1>
+        {/* Row 1 — centered date + greeting */}
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
+          <div className="home-date" style={{ fontSize: 13, letterSpacing: "0.18em", marginBottom: 20 }}>
+            {fmtDate(new Date())}
+          </div>
+          <h1 className="home-greeting" style={{ fontSize: "clamp(56px, 6.5vw, 84px)" }}>
+            {greeting()},<br />
+            {d.name}<span className="home-accent-dot">.</span>
+          </h1>
+        </div>
 
-        {d.strongCount > 0 || d.totalInbox > 0 ? (
-          <p className="home-sub">
-            You have <strong>{d.strongCount}</strong> strong match{d.strongCount === 1 ? "" : "es"} waiting.{" "}
-            <strong>{d.newToday}</strong> new roles arrived overnight.
-          </p>
-        ) : (
-          <p className="home-sub">Discovery runs overnight. Check back in the morning.</p>
-        )}
-
-        {/* Section 2: login left, featured card right */}
+        {/* Row 2 — left: callout + login card  |  right: featured job card */}
         <div style={{
           display: "grid",
           gridTemplateColumns: f ? "1fr 1fr" : "1fr",
-          gap: 20,
+          gap: 24,
           alignItems: "start",
-          marginTop: 28,
         }}>
-          {/* Left: password prompt */}
-          <LoginCard />
+          {/* Left: callout text sits above the login card */}
+          <div>
+            {d.strongCount > 0 || d.totalInbox > 0 ? (
+              <p className="home-sub" style={{ marginTop: 0, marginBottom: 20 }}>
+                You have <strong>{d.strongCount}</strong> strong match{d.strongCount === 1 ? "" : "es"} waiting.{" "}
+                <strong>{d.newToday}</strong> new roles arrived overnight.
+              </p>
+            ) : (
+              <p className="home-sub" style={{ marginTop: 0, marginBottom: 20 }}>
+                Discovery runs overnight. Check back in the morning.
+              </p>
+            )}
+            <LoginCard />
+          </div>
 
           {/* Right: featured job card (dimmed, non-interactive) */}
           {f && (
@@ -177,12 +184,24 @@ export default async function RootPage() {
           )}
         </div>
 
-        {/* Section 3: KPI pills */}
-        <div className="home-pills" style={{ pointerEvents: "none", opacity: 0.6, marginTop: 20 }}>
-          <span className="home-pill"><strong>{d.totalInbox}</strong> in your inbox</span>
-          <span className="home-pill home-pill-accent"><strong>{d.strongCount}</strong> strong matches</span>
-          <span className="home-pill"><strong>{d.newToday}</strong> discovered</span>
+        {/* Row 3 — centered, larger KPI pills */}
+        <div className="home-pills" style={{
+          pointerEvents: "none",
+          opacity: 0.7,
+          marginTop: 32,
+          justifyContent: "center",
+        }}>
+          <span className="home-pill" style={{ fontSize: 15, padding: "10px 22px" }}>
+            <strong>{d.totalInbox}</strong> in your inbox
+          </span>
+          <span className="home-pill home-pill-accent" style={{ fontSize: 15, padding: "10px 22px" }}>
+            <strong>{d.strongCount}</strong> strong matches
+          </span>
+          <span className="home-pill" style={{ fontSize: 15, padding: "10px 22px" }}>
+            <strong>{d.newToday}</strong> discovered
+          </span>
         </div>
+
       </div>
     </div>
   );
