@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-
-const COOKIE_NAME = "disha_session";
+import { COOKIE_NAME } from "@/lib/auth/constants";
 
 /**
  * Edge middleware — gates (app) route group pages and LLM generation APIs.
@@ -24,6 +23,7 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
   const cookieValue = request.cookies.get(COOKIE_NAME)?.value;
   if (!cookieValue) return false;
 
+  // Edge runtime — uses Web Crypto; see src/lib/auth/constants.ts for Node runtime equivalent.
   const encoded = new TextEncoder().encode(pw);
   const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
