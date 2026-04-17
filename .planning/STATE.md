@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-04-17
 **Current milestone:** v1 (1-month job search) · **Week 1 ✅ shipped**
-**Current phase:** Phase 11 retention shipped · Phase 12 (A/B + Screening + Interview) next
+**Current phase:** All 12 phases complete (v1 feature-complete)
 
-Last activity: 2026-04-17 — Completed quick task 260417-f2f: Phase 11: 60-day data retention cron
+Last activity: 2026-04-17 — Completed quick task 260417-fiz: Phase 12 interview prep generation
 
 ## Progress
 
@@ -21,13 +21,14 @@ Last activity: 2026-04-17 — Completed quick task 260417-f2f: Phase 11: 60-day 
 | 9 Web App UI | ✅ complete | |
 | 10 Paste-JD + Auth | ✅ complete | Paste-a-role + profile editing + download pack (auth skipped — personal project) |
 | 11 Reveal & Live Ops | ⚠ partial | Retention cron shipped (quick 260417-f2f); reveal done live; GDPR + domain skipped by user |
-| 12 A/B + Screening + Interview | not started | ← next |
+| 12 A/B + Screening + Interview | ⚠ partial | Interview prep shipped (quick 260417-fiz); A/B + extra screening skipped by user (not valuable for n=1) |
 
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260417-f2f | Phase 11: 60-day data retention cron | 2026-04-17 | a8fd20d | [260417-f2f-phase-11-60-day-data-retention-cron](./quick/260417-f2f-phase-11-60-day-data-retention-cron/) |
+| 260417-fiz | Phase 12: interview prep generation | 2026-04-17 | 01423ab | [260417-fiz-phase-12-interview-prep-generation](./quick/260417-fiz-phase-12-interview-prep-generation/) |
 
 ## Completed before GSD init
 
