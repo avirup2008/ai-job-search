@@ -1,27 +1,41 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const COOKIE_NAME = "aijs_admin";
-const LOGIN_PATH = "/admin/login";
+const COOKIE_NAME = "disha_session";
 
 /**
  * Edge middleware — gates (app) route group pages and LLM generation APIs.
  *
- * Cookie name and comparison pattern are identical to src/lib/auth/admin.ts
- * but re-implemented here because next/headers is not available on the Edge
- * runtime.
+ * Uses disha_session cookie whose value is sha256(DISHA_PASSWORD) in hex.
+ * Web Crypto (crypto.subtle) is used here because the Edge runtime does not
+ * have access to Node's crypto module.
  *
  * Paths NOT matched by config.matcher are never processed here:
- *   - /p/:slug*  (public artifact viewer)
- *   - /admin/*   (has its own layout-level isAdmin() gate)
- *   - /api/cron/* (Bearer-token auth, not cookie)
+ *   - /                (login page — public)
+ *   - /api/auth/*      (login/logout — public)
+ *   - /api/cron/*      (Bearer-token auth, not cookie)
+ *   - /p/:slug*        (public artifact viewer)
+ *   - /api/health      (public)
  *   - Everything else
  */
-export function middleware(request: NextRequest) {
-  const secret = process.env.ADMIN_SECRET;
+async function isAuthenticated(request: NextRequest): Promise<boolean> {
+  const pw = process.env.DISHA_PASSWORD;
+  if (!pw) return false;
 
-  // Fail closed if env var is absent at edge time.
   const cookieValue = request.cookies.get(COOKIE_NAME)?.value;
-  const authenticated = secret !== undefined && cookieValue === secret;
+  if (!cookieValue) return false;
+
+  const encoded = new TextEncoder().encode(pw);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const expectedHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return cookieValue === expectedHex;
+}
+
+export async function middleware(request: NextRequest) {
+  const authenticated = await isAuthenticated(request);
 
   if (authenticated) {
     return NextResponse.next();
@@ -34,9 +48,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // Page route — redirect to login, preserving the intended destination.
+  // Page route — redirect to login page.
   const loginUrl = request.nextUrl.clone();
-  loginUrl.pathname = LOGIN_PATH;
+  loginUrl.pathname = "/";
   return NextResponse.redirect(loginUrl);
 }
 
