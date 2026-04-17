@@ -73,3 +73,37 @@ None — all surfaces were in the plan's threat model.
 - src/components/app-shell/TopBar.tsx: FOUND (updated)
 - Commits bd47cf2, a10697f, c430e50: all present in git log
 - `npx tsc --noEmit`: zero errors
+
+---
+
+## Update — 2026-04-17: Polished login page as app home
+
+**One-liner:** Root `/` now renders the full Today aesthetic with live DB data plus an embedded password login card; authenticated users redirect to `/inbox`; Today nav entry removed.
+
+### Additional tasks completed
+
+| # | Task | Commit | Files |
+|---|------|--------|-------|
+| 1 | Add LoginCard component | f5fbced | src/components/login/LoginCard.tsx |
+| 2 | Rewrite root page as server component with live DB data | df0233e | src/app/page.tsx |
+| 3 | Replace today page with redirect to /inbox | cd1b3f1 | src/app/(app)/page.tsx |
+| 4 | Remove Today from TopBar nav, simplify active logic | 47ad093 | src/components/app-shell/TopBar.tsx |
+
+### What was built
+
+**`LoginCard` (`src/components/login/LoginCard.tsx`):** Client component with inline scoped styles — shake animation on wrong password, focus ring, error state border, disabled button state. Posts to `/api/auth/login`, navigates to `/inbox` on success.
+
+**Root page (`src/app/page.tsx`):** Converted to async Server Component. Auth check via `crypto.timingSafeEqual` against `disha_session` cookie — redirects to `/inbox` if already logged in. Live DB queries: featured job, strong match count, new-today count, total inbox count. Full Today aesthetic (floating SVGs, growth curve, greeting, featured job card dimmed pre-login, KPI pills dimmed pre-login) with `LoginCard` embedded. `.home` wrapper overridden to `min-height: 100vh` since there is no app shell on the login page.
+
+**Today page (`src/app/(app)/page.tsx`):** Replaced with 3-line redirect to `/inbox`. Route is unreachable from nav and auto-redirects if hit directly.
+
+**TopBar:** Removed `{ href: "/", label: "Today" }` entry. Simplified active-link condition — dead `item.href === "/"` branch removed.
+
+### Deviations
+
+- Simplified the TopBar `active` condition as a bonus cleanup (dead branch). No behavior change.
+
+### Verification
+
+- `npx tsc --noEmit`: zero errors
+- `git push origin main`: succeeded at 47ad093
