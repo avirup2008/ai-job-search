@@ -144,19 +144,20 @@ export default async function RootPage() {
           <p className="home-sub">Discovery runs overnight. Check back in the morning.</p>
         )}
 
-        {/* Login card — sits where the transition + featured card would be */}
-        <div style={{ marginTop: 36 }}>
+        {/* Section 2: login left, featured card right */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: f ? "1fr 1fr" : "1fr",
+          gap: 24,
+          alignItems: "start",
+          marginTop: 36,
+        }}>
+          {/* Left: password prompt */}
           <LoginCard />
-        </div>
 
-        {/* Featured job — shown but links disabled pre-login */}
-        {f && (
-          <>
-            <div className="home-transition" style={{ marginTop: 32 }}>
-              <span className="home-transition-line" />
-              One stands out
-            </div>
-            <div className="home-featured" style={{ cursor: "default", pointerEvents: "none", opacity: 0.7 }}>
+          {/* Right: featured job card (dimmed, non-interactive) */}
+          {f && (
+            <div className="home-featured" style={{ cursor: "default", pointerEvents: "none", opacity: 0.72, margin: 0 }}>
               <div className="home-featured-left">
                 <div className="home-featured-company">{f.companyName ?? "Unknown"}</div>
                 <h2 className="home-featured-title">{f.title}</h2>
@@ -174,11 +175,11 @@ export default async function RootPage() {
                 </div>
               )}
             </div>
-          </>
-        )}
+          )}
+        </div>
 
-        {/* KPI pills — non-interactive pre-login */}
-        <div className="home-pills" style={{ pointerEvents: "none", opacity: 0.6 }}>
+        {/* Section 3: KPI pills */}
+        <div className="home-pills" style={{ pointerEvents: "none", opacity: 0.6, marginTop: 28 }}>
           <span className="home-pill"><strong>{d.totalInbox}</strong> in your inbox</span>
           <span className="home-pill home-pill-accent"><strong>{d.strongCount}</strong> strong matches</span>
           <span className="home-pill"><strong>{d.newToday}</strong> discovered</span>
