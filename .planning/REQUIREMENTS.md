@@ -1,4 +1,4 @@
-# REQUIREMENTS — AI Job Search v1
+# REQUIREMENTS — AI Job Search v1 + v2
 
 Derived from `docs/superpowers/specs/2026-04-14-ai-job-search-design.md`. Authoritative source is the spec; this file groups requirements by capability for GSD phase mapping.
 
@@ -133,3 +133,50 @@ Derived from `docs/superpowers/specs/2026-04-14-ai-job-search-design.md`. Author
 ## Requirements-to-phase mapping
 
 See `.planning/ROADMAP.md`. Each phase lists the R-ids it satisfies.
+
+---
+
+# v2.0 Requirements — Smarter Disha
+
+**Hard constraints:** No new paid API keys. No new direct LLM calls outside nightly cron. Rules engine, free scraping, or existing cron budget only.
+
+---
+
+## P. Smarter Scoring
+
+- **R-78** User can see a score breakdown for any job: which profile fields matched, which were missing, and the weighted contribution of each component (skills, tools, seniority, geo, industry).
+- **R-79** When user records an outcome (rejected, interview, offer) on an application, the system adjusts future fit scoring weights for similar roles using a simple feedback multiplier stored in the profile.
+- **R-80** When a job's tier changes on rescore (T2→T1 or T1→T2), a score drift alert is surfaced in the triage inbox with the old and new tier.
+
+## Q. Enhanced Discovery
+
+- **R-81** Indeed Netherlands added as a discovery source via free HTML scraping; normalises to `RawJob` shape; polite delay; fixture-based tests.
+- **R-82** User can paste a non-LinkedIn job URL into the app; Disha scrapes the page, extracts JD text, creates a job record, and queues it for the next nightly scoring run.
+
+## R. Analytics
+
+- **R-83** Source quality chart on the analytics page: for each discovery source, shows count of T1 jobs discovered and T1 conversion rate, enabling comparison across sources.
+
+## S. Application Quality
+
+- **R-84** After CV generation in the nightly pipeline, a rules-based ATS keyword post-pass compares the generated CV text against the JD, identifies high-frequency exact-match keywords that are missing, and injects them naturally into the skills section — within the existing nightly cron budget, no additional LLM calls outside that window.
+
+## T. Candidate Intelligence
+
+- **R-85** Profile Gap Coach: a page or panel that shows T2 jobs ranked by "closeness to T1", with the specific keywords and profile fields that are holding each job back — so Upashana knows exactly what to strengthen.
+- **R-86** When a job moves to "interview" status, Disha generates a structured research prompt (using company name, role, JD text, dossier fields) and displays it with a one-click copy button — she pastes it into her Claude.ai subscription to get company research at zero API cost.
+
+## U. Reporting
+
+- **R-87** Weekly Strategy Brief: a rules-based summary card (or email-ready block) generated each Monday showing: applications sent this week vs target pace, T1 jobs available vs applied, top source this week, and one actionable callout derived from the data.
+- **R-88** Market Pulse panel on the analytics page: shows average days-to-response across her applications, T1 job volume trend (this week vs last 4-week average), and source response rate — all derived from internal data, no external API.
+
+## V. Documents
+
+- **R-89** Pre-interview brief: a single formatted PDF combining the existing interview prep document and company dossier for a job, downloadable from the job detail view — formatting only, no new LLM generation.
+
+---
+
+## v2 Requirements-to-phase mapping
+
+See `.planning/ROADMAP.md` (v2 phases start at Phase 13).
