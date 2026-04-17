@@ -2,10 +2,10 @@ import { describe, it, expect } from "vitest";
 import { allSources } from "@/lib/sources";
 
 describe("allSources", () => {
-  it("returns the 4 live sources", () => {
+  it("returns the 5 live sources", () => {
     const sources = allSources();
     const names = sources.map((s) => s.name).sort();
-    expect(names).toEqual(["adzuna", "jooble", "magnetme", "nvb"]);
+    expect(names).toEqual(["adzuna", "indeed-nl", "jooble", "magnetme", "nvb"]);
   });
 
   it("each source implements the JobSource contract", () => {

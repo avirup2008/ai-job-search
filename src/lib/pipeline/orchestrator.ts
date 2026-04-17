@@ -28,6 +28,8 @@ export interface RunSummary {
     drifted: number;     // jobs whose tier changed after re-score
     cvGenerated: number; // R-84: CVs batch-generated for new T1/T2 jobs
     cvFailed: number;    // R-84: CV generation failures this run
+    queuedScored: number; // R-82: url_paste queued rows scored this run
+    queuedFailed: number; // R-82: url_paste queued rows that failed scoring (will retry)
   };
   perSource: Record<string, number>;
   errors: Record<string, string>;
@@ -80,10 +82,7 @@ export async function runNightly(): Promise<RunSummary> {
       console.log(`[orchestrator] cleaned ${retryCount} rank-failed rows from prior runs — will re-attempt`);
     }
 
-    // 1. Discover + cluster + load profile
-    const disc = await discover();
-    const clusters = clusterJobs(disc.jobs);
-
+    // 0.5 pre-req: load profile (needed by both Step 0.5 and Step 6 rank pass)
     const [profileRow] = await db.select().from(schema.profile).limit(1);
     if (!profileRow) throw new Error("No profile row found — run scripts/seed-profile.ts first");
     const profile: Profile = {
@@ -103,6 +102,72 @@ export async function runNightly(): Promise<RunSummary> {
     };
 
     const multipliers: ScoringMultipliers = readMultipliersFromProfile(profileRow.preferences);
+
+    // 0.5: Score queued URL-paste rows (R-82).
+    // These rows have source='url_paste' AND hard_filter_reason='queued' — inserted
+    // synchronously by /api/queue-url and deferred to the nightly budget.
+    // They survive Step 0's DELETE because hard_filter_reason IS NOT NULL.
+    const queuedRows = await db
+      .select({
+        id: schema.jobs.id,
+        title: schema.jobs.title,
+        jdText: schema.jobs.jdText,
+      })
+      .from(schema.jobs)
+      .where(and(
+        eq(schema.jobs.source, "url_paste"),
+        eq(schema.jobs.hardFilterReason, "queued"),
+      ));
+
+    let queuedScored = 0;
+    let queuedFailed = 0;
+    const queuedLimit = pLimit(RANK_CONCURRENCY);
+    await Promise.all(
+      queuedRows.map((row) =>
+        queuedLimit(async () => {
+          try {
+            const rank = await assessJob({
+              jdText: row.jdText,
+              jobTitle: row.title,
+              profile,
+            });
+            const tier = assignTier(rank.fitScore);
+            await db
+              .update(schema.jobs)
+              .set({
+                fitScore: String(rank.fitScore),
+                fitBreakdown: rank.components,
+                gapAnalysis: {
+                  strengths: rank.assessment.strengths,
+                  gaps: rank.assessment.gaps,
+                  recommendation: rank.assessment.recommendation,
+                  recommendationReason: rank.assessment.recommendationReason,
+                },
+                tier,
+                seniority: rank.assessment.seniorityLevel,
+                hardFilterReason: null,
+              })
+              .where(eq(schema.jobs.id, row.id));
+            if (tier !== null) {
+              await db.insert(schema.applications).values({
+                jobId: row.id,
+                status: "new",
+              });
+            }
+            queuedScored++;
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            console.error(`[queue-url-rank-failed] jobId=${row.id}: ${msg.slice(0, 200)}`);
+            queuedFailed++;
+            // Leave hardFilterReason='queued' — next nightly will retry
+          }
+        }),
+      ),
+    );
+
+    // 1. Discover + cluster
+    const disc = await discover();
+    const clusters = clusterJobs(disc.jobs);
 
     // 2. Pre-pass: idempotency check across the whole batch
     const existingRows = await db
@@ -379,6 +444,8 @@ export async function runNightly(): Promise<RunSummary> {
         drifted: driftedCount,
         cvGenerated,
         cvFailed,
+        queuedScored,
+        queuedFailed,
       },
       perSource: disc.perSource,
       errors: disc.errors,
