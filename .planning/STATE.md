@@ -1,8 +1,10 @@
 # STATE — AI Job Search
 
-**Last updated:** 2026-04-15
+**Last updated:** 2026-04-17
 **Current milestone:** v1 (1-month job search) · **Week 1 ✅ shipped**
-**Current phase:** Phase 7 — Company Research Stage (next)
+**Current phase:** Phase 11 retention shipped · Phase 12 (A/B + Screening + Interview) next
+
+Last activity: 2026-04-17 — Completed quick task 260417-f2f: Phase 11: 60-day data retention cron
 
 ## Progress
 
@@ -14,12 +16,18 @@
 | 4 Pipeline Logic | ✅ complete | filters + dedupe + tier + profile seeded to Neon |
 | 5 Orchestration + Admin + Cron | ✅ complete | GH Actions cron + admin UI live in prod |
 | 6 Week-1 Deploy & Acceptance | ✅ complete | Live at ai-job-search-eta.vercel.app; ~508 jobs in DB, ~15 T1 |
-| 7 Company Research | in progress | ← next |
-| 8 Generation Pipeline | not started | |
-| 9 Web App UI | not started | |
-| 10 Paste-JD + Auth | not started | |
-| 11 Reveal & Live Ops | not started | |
-| 12 A/B + Screening + Interview | not started | |
+| 7 Company Research | ✅ complete | |
+| 8 Generation Pipeline | ✅ complete | |
+| 9 Web App UI | ✅ complete | |
+| 10 Paste-JD + Auth | ✅ complete | Paste-a-role + profile editing + download pack (auth skipped — personal project) |
+| 11 Reveal & Live Ops | ⚠ partial | Retention cron shipped (quick 260417-f2f); reveal done live; GDPR + domain skipped by user |
+| 12 A/B + Screening + Interview | not started | ← next |
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260417-f2f | Phase 11: 60-day data retention cron | 2026-04-17 | a8fd20d | [260417-f2f-phase-11-60-day-data-retention-cron](./quick/260417-f2f-phase-11-60-day-data-retention-cron/) |
 
 ## Completed before GSD init
 
