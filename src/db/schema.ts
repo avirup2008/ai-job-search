@@ -56,6 +56,7 @@ export const jobs = pgTable(
     fitBreakdown: jsonb("fit_breakdown").$type<unknown>(),
     gapAnalysis: jsonb("gap_analysis").$type<unknown>(),
     tier: smallint("tier"),
+    previousTier: smallint("previous_tier"),
     hardFilterReason: text("hard_filter_reason"),
   },
   (table) => ({
