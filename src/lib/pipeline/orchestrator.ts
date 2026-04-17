@@ -1,6 +1,6 @@
 import pLimit from "p-limit";
 import { db, schema } from "@/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, inArray, and } from "drizzle-orm";
 import { discover } from "./discover";
 import { clusterJobs, computeDedupeHash } from "./dedupe";
 import { applyHardFilters, type FilterReason } from "./filters";
@@ -10,6 +10,9 @@ import type { Profile } from "@/lib/profile/types";
 import type { RawJob } from "@/lib/sources/types";
 import { readMultipliersFromProfile, blendFitScoreWithMultipliers, type ScoringMultipliers } from "@/lib/scoring/multipliers";
 import { detectDrift } from "@/lib/scoring/drift";
+import { generateCV } from "@/lib/generate/cv";
+import { renderCvDocx } from "@/lib/generate/cv-docx";
+import { storeCv } from "@/lib/generate/storage";
 
 export interface RunSummary {
   runId: string;
@@ -23,6 +26,8 @@ export interface RunSummary {
     byTier: Record<string, number>;
     rescored: number;    // existing jobs re-scored via multipliers (no LLM)
     drifted: number;     // jobs whose tier changed after re-score
+    cvGenerated: number; // R-84: CVs batch-generated for new T1/T2 jobs
+    cvFailed: number;    // R-84: CV generation failures this run
   };
   perSource: Record<string, number>;
   errors: Record<string, string>;
@@ -34,6 +39,8 @@ export interface RunSummary {
 // under the common 50K ITPM limit. Observed run at 10 concurrent had 73%
 // silent failure rate due to rate limits; 3 keeps ~100% success.
 const RANK_CONCURRENCY = 3;
+const MAX_CV_PER_RUN = 5;
+const CV_CONCURRENCY = 2;
 
 interface ClassifiedJob {
   j: RawJob;
@@ -314,6 +321,50 @@ export async function runNightly(): Promise<RunSummary> {
       }
     }
 
+    // 8. Nightly CV generation — batch generate for new T1/T2 jobs (cap MAX_CV_PER_RUN)
+    // R-84: every CV produced here runs through the ATS keyword pass inside generateCV().
+    let cvGenerated = 0;
+    let cvFailed = 0;
+    const needsCv = await db
+      .select({
+        applicationId: schema.applications.id,
+        jobId: schema.jobs.id,
+        tier: schema.jobs.tier,
+      })
+      .from(schema.applications)
+      .innerJoin(schema.jobs, eq(schema.applications.jobId, schema.jobs.id))
+      .leftJoin(
+        schema.documents,
+        and(
+          eq(schema.documents.applicationId, schema.applications.id),
+          eq(schema.documents.kind, "cv"),
+        ),
+      )
+      .where(and(inArray(schema.jobs.tier, [1, 2]), sql`${schema.documents.id} IS NULL`))
+      .limit(MAX_CV_PER_RUN);
+
+    const cvLimit = pLimit(CV_CONCURRENCY);
+    await Promise.all(
+      needsCv.map((row) =>
+        cvLimit(async () => {
+          try {
+            const gen = await generateCV(row.jobId);
+            const docxBuffer = await renderCvDocx(gen.cv);
+            await storeCv({
+              applicationId: row.applicationId,
+              docxBuffer,
+              tokenCostEur: gen.costEur,
+              tier: row.tier ?? null,
+            });
+            cvGenerated++;
+          } catch (err) {
+            cvFailed++;
+            console.error(`[nightly-cv] jobId=${row.jobId}`, err);
+          }
+        }),
+      ),
+    );
+
     const summary: RunSummary = {
       runId,
       counts: {
@@ -326,6 +377,8 @@ export async function runNightly(): Promise<RunSummary> {
         byTier,
         rescored: rescoredCount,
         drifted: driftedCount,
+        cvGenerated,
+        cvFailed,
       },
       perSource: disc.perSource,
       errors: disc.errors,
