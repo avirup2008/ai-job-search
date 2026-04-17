@@ -98,8 +98,13 @@ export const documents = pgTable("documents", {
   kind: text("kind").notNull(),
   artifactType: text("artifact_type"),
   version: integer("version").notNull().default(1),
+  /** @deprecated Use storageUrl + format instead. Kept for backward compat. Remove in next schema migration. */
   blobUrlDocx: text("blob_url_docx"),
   blobUrlPdf: text("blob_url_pdf"),
+  storageUrl: text("storage_url"),
+  format: text("format"),      // "docx" | "pdf" | "markdown" | "html"
+  mimeType: text("mime_type"),
+  renderKind: text("render_kind"), // "download" | "viewer" | "copy"
   publicSlug: text("public_slug").unique(),
   generatedByTier: smallint("generated_by_tier"),
   tokenCost: numeric("token_cost", { precision: 10, scale: 4 }),

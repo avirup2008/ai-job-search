@@ -33,9 +33,13 @@ export async function storeArtifact(params: {
       kind: "artifact",
       artifactType: params.artifactType,
       version: nextVersion,
-      // Blob column is repurposed to hold the HTML url so it can be surfaced in the UI
+      // blobUrlDocx is kept for backward compat; storageUrl holds the canonical URL
       blobUrlDocx: blob.url,
       blobUrlPdf: null,
+      storageUrl: blob.url,
+      format: "html",
+      mimeType: "text/html",
+      renderKind: "viewer",
       publicSlug: slug,
       generatedByTier: params.tier,
       tokenCost: String(params.tokenCostEur),
@@ -82,8 +86,12 @@ export async function storeCv(params: {
       applicationId: params.applicationId,
       kind: "cv",
       version: nextVersion,
-      blobUrlDocx: docxBlob.url,
+      blobUrlDocx: docxBlob.url,   // @deprecated — use storageUrl
       blobUrlPdf: null,
+      storageUrl: docxBlob.url,
+      format: "docx",
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      renderKind: "download",
       publicSlug: slug,
       generatedByTier: params.tier,
       tokenCost: String(params.tokenCostEur),
@@ -140,8 +148,12 @@ export async function storeCoverLetter(params: {
       applicationId: params.applicationId,
       kind: "cover",
       version: nextVersion,
-      blobUrlPdf: null, // PDF comes in Plan 8.2
-      blobUrlDocx: blob.url, // repurposing this column to hold the markdown URL until we have formal DOCX/PDF
+      blobUrlPdf: null, // PDF rendering not yet implemented
+      blobUrlDocx: blob.url, // blobUrlDocx kept for backward compat; storageUrl holds the canonical URL
+      storageUrl: blob.url,
+      format: "markdown",
+      mimeType: "text/markdown",
+      renderKind: "copy",
       publicSlug: slug,
       generatedByTier: params.tier,
       tokenCost: String(params.tokenCostEur),
@@ -190,8 +202,12 @@ export async function storeScreeningQA(params: {
       kind: "screening",
       version: nextVersion,
       blobUrlPdf: null,
-      // repurpose blobUrlDocx to hold the markdown URL, matching the cover-letter pattern
+      // blobUrlDocx kept for backward compat; storageUrl holds the canonical URL
       blobUrlDocx: blob.url,
+      storageUrl: blob.url,
+      format: "markdown",
+      mimeType: "text/markdown",
+      renderKind: "copy",
       publicSlug: slug,
       generatedByTier: params.tier,
       tokenCost: String(params.tokenCostEur),
@@ -240,7 +256,12 @@ export async function storeInterviewPrep(params: {
       kind: "interview-prep",
       version: nextVersion,
       blobUrlPdf: null,
+      // blobUrlDocx kept for backward compat; storageUrl holds the canonical URL
       blobUrlDocx: blob.url,
+      storageUrl: blob.url,
+      format: "markdown",
+      mimeType: "text/markdown",
+      renderKind: "copy",
       publicSlug: slug,
       generatedByTier: params.tier,
       tokenCost: String(params.tokenCostEur),
@@ -256,7 +277,7 @@ export async function storeInterviewPrep(params: {
  */
 export async function deleteInterviewPrep(applicationId: string): Promise<void> {
   const rows = await db
-    .select({ id: schema.documents.id, blobUrlDocx: schema.documents.blobUrlDocx })
+    .select({ id: schema.documents.id, storageUrl: schema.documents.storageUrl, blobUrlDocx: schema.documents.blobUrlDocx })
     .from(schema.documents)
     .where(
       and(
@@ -266,9 +287,10 @@ export async function deleteInterviewPrep(applicationId: string): Promise<void> 
     );
 
   for (const row of rows) {
-    if (row.blobUrlDocx) {
+    const urlToDelete = row.storageUrl ?? row.blobUrlDocx;
+    if (urlToDelete) {
       try {
-        await del(row.blobUrlDocx);
+        await del(urlToDelete);
       } catch (err) {
         console.warn("[deleteInterviewPrep] blob delete failed, continuing:", err);
       }
