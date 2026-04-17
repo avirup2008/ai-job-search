@@ -45,13 +45,14 @@ Last activity: 2026-04-17
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260417-f2f | Phase 11: 60-day data retention cron | 2026-04-17 | a8fd20d | [260417-f2f-phase-11-60-day-data-retention-cron](./quick/260417-f2f-phase-11-60-day-data-retention-cron/) |
-| 260417-fiz | Phase 12: interview prep generation | 2026-04-17 | 01423ab | [260417-fiz-phase-12-interview-prep-generation](./quick/260417-fiz-phase-12-interview-prep-generation/) |
-| 260417-g4p | Wire real data into analytics page charts | 2026-04-17 | 181e977 | [260417-g4p-wire-real-data-into-analytics-page-chart](./quick/260417-g4p-wire-real-data-into-analytics-page-chart/) |
-| 260417-kgd | Fix auth gap, fire-and-forget async, and retention of filtered jobs | 2026-04-17 | 6307d67 | [260417-kgd-fix-auth-gap-fire-and-forget-async-and-r](./quick/260417-kgd-fix-auth-gap-fire-and-forget-async-and-r/) |
-| 260417-kqy | Build polished Disha login page as app homepage | 2026-04-17 | c430e50 | [260417-kqy-build-polished-disha-login-page-as-app-h](./quick/260417-kqy-build-polished-disha-login-page-as-app-h/) |
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260417-f2f | Phase 11: 60-day data retention cron | 2026-04-17 | a8fd20d | — | [260417-f2f-phase-11-60-day-data-retention-cron](./quick/260417-f2f-phase-11-60-day-data-retention-cron/) |
+| 260417-fiz | Phase 12: interview prep generation | 2026-04-17 | 01423ab | — | [260417-fiz-phase-12-interview-prep-generation](./quick/260417-fiz-phase-12-interview-prep-generation/) |
+| 260417-g4p | Wire real data into analytics page charts | 2026-04-17 | 181e977 | — | [260417-g4p-wire-real-data-into-analytics-page-chart](./quick/260417-g4p-wire-real-data-into-analytics-page-chart/) |
+| 260417-kgd | Fix auth gap, fire-and-forget async, and retention of filtered jobs | 2026-04-17 | 6307d67 | — | [260417-kgd-fix-auth-gap-fire-and-forget-async-and-r](./quick/260417-kgd-fix-auth-gap-fire-and-forget-async-and-r/) |
+| 260417-kqy | Build polished Disha login page as app homepage | 2026-04-17 | c430e50 | — | [260417-kqy-build-polished-disha-login-page-as-app-h](./quick/260417-kqy-build-polished-disha-login-page-as-app-h/) |
+| 260417-o87 | Close Codex review gap 93→97+ (auth tests, diagnostics, storage contract, cleanup) | 2026-04-17 | 298f513 | Verified | [260417-o87-close-codex-review-gap-93-97-auth-tests-](./quick/260417-o87-close-codex-review-gap-93-97-auth-tests-/) |
 
 ## Completed before GSD init
 
