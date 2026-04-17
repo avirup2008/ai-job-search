@@ -175,7 +175,7 @@ export default async function HomePage() {
           <Link href="/inbox?filter=strong" className="home-pill home-pill-accent">
             <strong>{d.strongCount}</strong> strong matches
           </Link>
-          <Link href="/dashboard" className="home-pill">
+          <Link href="/analytics" className="home-pill">
             <strong>{d.newToday}</strong> discovered
           </Link>
         </div>
