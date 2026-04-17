@@ -1,7 +1,8 @@
 import { db, schema } from "@/db";
-import { eq, sql, inArray, isNotNull } from "drizzle-orm";
+import { eq, sql, inArray, isNotNull, gte, and } from "drizzle-orm";
 import { PIPELINE_STAGES } from "@/app/(app)/pipeline/stages";
 import { aggregateByNormalizedLocation } from "@/lib/location/normalize";
+import { KEYWORDS, extractKeywordCounts, profileKeywordSet } from "@/lib/analytics/keywords";
 import "@/components/dashboard/dashboard.css";
 
 function currentPeriod(): string {
@@ -20,6 +21,10 @@ async function loadData() {
     scoreDistribution,
     locationDistribution,
     budget,
+    matchQualityTrend,
+    applicationsPerDay,
+    jdTextsForKeywords,
+    profileRows,
   ] = await Promise.all([
     // KPI: total jobs
     db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs),
@@ -75,6 +80,56 @@ async function loadData() {
       .from(schema.llmBudget)
       .where(eq(schema.llmBudget.period, currentPeriod()))
       .limit(1),
+    // Match quality trend: daily avg fitScore, tier 1-3, last 30 days
+    db
+      .select({
+        date: sql<string>`to_char(date_trunc('day', ${schema.jobs.discoveredAt}), 'YYYY-MM-DD')`.as("date"),
+        avgScore: sql<number>`round(avg(${schema.jobs.fitScore}::numeric), 1)::float`,
+      })
+      .from(schema.jobs)
+      .where(
+        and(
+          inArray(schema.jobs.tier, [1, 2, 3]),
+          gte(schema.jobs.discoveredAt, sql`now() - interval '30 days'`),
+        ),
+      )
+      .groupBy(sql`date_trunc('day', ${schema.jobs.discoveredAt})`)
+      .orderBy(sql`date_trunc('day', ${schema.jobs.discoveredAt})`),
+    // Applications sent per day, last 90 days
+    db
+      .select({
+        date: sql<string>`to_char(date_trunc('day', ${schema.applications.appliedAt}), 'YYYY-MM-DD')`.as("date"),
+        count: sql<number>`count(*)::int`,
+      })
+      .from(schema.applications)
+      .where(
+        and(
+          isNotNull(schema.applications.appliedAt),
+          gte(schema.applications.appliedAt, sql`now() - interval '90 days'`),
+        ),
+      )
+      .groupBy(sql`date_trunc('day', ${schema.applications.appliedAt})`),
+    // Tier 1-3 jdText corpus for keyword extraction
+    db
+      .select({ jdText: schema.jobs.jdText })
+      .from(schema.jobs)
+      .where(
+        and(
+          inArray(schema.jobs.tier, [1, 2, 3]),
+          isNotNull(schema.jobs.jdText),
+        ),
+      ),
+    // Profile row for strengths matching
+    db
+      .select({
+        headline: schema.profile.headline,
+        roles: schema.profile.roles,
+        toolStack: schema.profile.toolStack,
+        achievements: schema.profile.achievements,
+        industries: schema.profile.industries,
+      })
+      .from(schema.profile)
+      .limit(1),
   ]);
 
   const totalJobs = totalJobsRow[0]?.count ?? 0;
@@ -91,6 +146,79 @@ async function loadData() {
   // "Amsterdam, NL" → "Amsterdam") then take the top 6 by count.
   const normalizedLocations = aggregateByNormalizedLocation(locationDistribution).slice(0, 6);
 
+  // ── Match quality: 30-day carry-forward fill ──────────────────────────────
+  // Build an ISO-date → avgScore map from the query results.
+  const trendMap = new Map<string, number>();
+  for (const row of matchQualityTrend) {
+    trendMap.set(row.date, row.avgScore ?? 0);
+  }
+  // Build 30-day grid from today back (UTC), carry-forward for missing days.
+  const matchQuality: { date: string; score: number }[] = [];
+  let lastKnown = 0;
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86_400_000);
+    const iso = d.toISOString().slice(0, 10); // YYYY-MM-DD
+    const label = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+    if (trendMap.has(iso)) {
+      lastKnown = trendMap.get(iso)!;
+    }
+    matchQuality.push({ date: label, score: lastKnown });
+  }
+  // Trim leading zeros (no data before first job discovered) — keep at least
+  // 2 points so the SVG path doesn't degenerate.
+  const firstNonZero = matchQuality.findIndex((p) => p.score > 0);
+  const trimmedMatchQuality =
+    firstNonZero > 0 && matchQuality.length - firstNonZero >= 2
+      ? matchQuality.slice(firstNonZero)
+      : matchQuality;
+
+  // ── Activity heatmap: 13 weeks × 7 days ──────────────────────────────────
+  const appMap = new Map<string, number>();
+  for (const row of applicationsPerDay) {
+    appMap.set(row.date, row.count ?? 0);
+  }
+  // Build 91-day array (today + 90 prior), then fold into 13×7.
+  // Day 0 = 90 days ago; day 90 = today.
+  // Week rows run oldest-first; within each week, index 0=Mon … 6=Sun (UTC).
+  const NUM_WEEKS = 13;
+  const TOTAL_DAYS = NUM_WEEKS * 7; // 91
+  const heatmapCounts: number[] = [];
+  for (let i = TOTAL_DAYS - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86_400_000);
+    const iso = d.toISOString().slice(0, 10);
+    heatmapCounts.push(appMap.get(iso) ?? 0);
+  }
+  const maxCount = Math.max(1, ...heatmapCounts);
+  const heatmap: number[][] = [];
+  for (let w = 0; w < NUM_WEEKS; w++) {
+    const week: number[] = [];
+    for (let d = 0; d < 7; d++) {
+      const c = heatmapCounts[w * 7 + d];
+      let level = 0;
+      if (c > 0) {
+        const ratio = c / maxCount;
+        if (ratio <= 0.25) level = 1;
+        else if (ratio <= 0.5) level = 2;
+        else if (ratio <= 0.75) level = 3;
+        else level = 4;
+      }
+      week.push(level);
+    }
+    heatmap.push(week);
+  }
+
+  // ── Skills: keyword extraction from tier 1-3 JD corpus ───────────────────
+  const jdTexts = jdTextsForKeywords.map((r) => r.jdText);
+  const kwCounts = extractKeywordCounts(jdTexts);
+  const profileRow = profileRows[0] ?? null;
+  const inProfile = profileKeywordSet(profileRow ?? {});
+
+  const skills = Array.from(kwCounts.entries())
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .map(([name, count]) => ({ name, count, inProfile: inProfile.has(name) }));
+
   return {
     totalJobs,
     matchedCount,
@@ -102,35 +230,10 @@ async function loadData() {
     locationDistribution: normalizedLocations,
     eurSpent,
     capEur,
+    matchQuality: trimmedMatchQuality,
+    heatmap,
+    skills,
   };
-}
-
-/* ── Mock data generators (replace with real queries in production) ── */
-
-/** Mock: daily avg fitScore over past 30 days, trending upward */
-function mockMatchQualityData(): { date: string; score: number }[] {
-  const points: { date: string; score: number }[] = [];
-  const now = Date.now();
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now - i * 86400_000);
-    const label = `${d.getMonth() + 1}/${d.getDate()}`;
-    // upward trend from ~58 to ~74 with noise
-    const base = 58 + ((29 - i) / 29) * 16;
-    const noise = (Math.sin(i * 1.7) * 4) + (Math.cos(i * 0.9) * 2);
-    points.push({ date: label, score: Math.round(Math.max(45, Math.min(90, base + noise))) });
-  }
-  return points;
-}
-
-/** Mock: 4 weeks x 7 days activity heatmap */
-function mockHeatmapData(): number[][] {
-  // 4 weeks, 7 days each. Values 0-4 intensity.
-  return [
-    [0, 1, 2, 0, 3, 1, 0],
-    [1, 2, 3, 1, 4, 2, 0],
-    [0, 3, 2, 4, 3, 1, 1],
-    [2, 4, 3, 2, 4, 3, 0],
-  ];
 }
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -180,10 +283,6 @@ export default async function DashboardPage() {
   // Conversion rate for interviews
   const conversionPct = d.appliedCount > 0 ? ((d.interviewCount / d.appliedCount) * 100).toFixed(0) : "0";
 
-  // Mock data
-  const matchQuality = mockMatchQualityData();
-  const heatmap = mockHeatmapData();
-
   // SVG chart dimensions — compact to reduce page height
   const chartW = 560;
   const chartH = 140;
@@ -193,28 +292,32 @@ export default async function DashboardPage() {
   const padB = 28;
   const plotW = chartW - padL - padR;
   const plotH = chartH - padT - padB;
-  const scores = matchQuality.map((p) => p.score);
-  const minY = Math.min(...scores) - 5;
-  const maxY = Math.max(...scores) + 5;
 
-  const points = matchQuality.map((p, i) => {
-    const x = padL + (i / (matchQuality.length - 1)) * plotW;
-    const y = padT + plotH - ((p.score - minY) / (maxY - minY)) * plotH;
-    return { x, y, ...p };
-  });
+  // Match quality SVG: only compute if we have >= 2 data points with score > 0
+  const hasMatchData = d.matchQuality.length >= 2 && d.matchQuality.some((p) => p.score > 0);
+  const scores = hasMatchData ? d.matchQuality.map((p) => p.score) : [];
+  const minY = hasMatchData ? Math.min(...scores) - 5 : 0;
+  const maxY = hasMatchData ? Math.max(...scores) + 5 : 100;
+
+  const points = hasMatchData
+    ? d.matchQuality.map((p, i) => {
+        const x = padL + (i / (d.matchQuality.length - 1)) * plotW;
+        const y = padT + plotH - ((p.score - minY) / (maxY - minY)) * plotH;
+        return { x, y, ...p };
+      })
+    : [];
+
   const lineD = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-  const areaD = `${lineD} L${points[points.length - 1].x.toFixed(1)},${padT + plotH} L${points[0].x.toFixed(1)},${padT + plotH} Z`;
+  const areaD = points.length > 0
+    ? `${lineD} L${points[points.length - 1].x.toFixed(1)},${padT + plotH} L${points[0].x.toFixed(1)},${padT + plotH} Z`
+    : "";
 
-  // Skills data (hardcoded for now — in production, parse from gapAnalysis or JD extraction)
-  const skills = [
-    { name: "CRM / HubSpot", count: 38 },
-    { name: "Campaign mgmt", count: 32 },
-    { name: "Analytics / GA4", count: 27 },
-    { name: "Paid media", count: 21 },
-    { name: "SEO / Content", count: 16 },
-    { name: "A/B testing", count: 12 },
-  ];
-  const maxSkill = Math.max(1, ...skills.map((s) => s.count));
+  // Skills
+  const maxSkill = Math.max(1, ...d.skills.map((s) => s.count));
+
+  // Suppress unused-import TS warning: PIPELINE_STAGES is used below if funnel ever
+  // references named stages — keep the import in case of future use.
+  void PIPELINE_STAGES;
 
   return (
     <>
@@ -267,29 +370,34 @@ export default async function DashboardPage() {
         {/* 1. Match quality over time (span 2) */}
         <section className="panel span-2">
           <h2>Match quality over time</h2>
-          {/* TODO: Replace mock data with real daily avg fitScore query */}
-          <svg viewBox={`0 0 ${chartW} ${chartH}`} className="chart-svg" aria-label="Match quality area chart">
-            {/* Y-axis labels */}
-            {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
-              const val = Math.round(minY + frac * (maxY - minY));
-              const y = padT + plotH - frac * plotH;
-              return (
-                <g key={frac}>
-                  <line x1={padL} x2={chartW - padR} y1={y} y2={y} stroke="var(--border)" strokeWidth="0.5" />
-                  <text x={padL - 6} y={y + 3} className="chart-axis-label" textAnchor="end">{val}%</text>
-                </g>
-              );
-            })}
-            {/* X-axis labels (every 5th) */}
-            {points.filter((_, i) => i % 7 === 0 || i === points.length - 1).map((p) => (
-              <text key={p.date} x={p.x} y={chartH - 4} className="chart-axis-label" textAnchor="middle">{p.date}</text>
-            ))}
-            {/* Area fill */}
-            <path d={areaD} fill="var(--accent-wash)" />
-            {/* Line */}
-            <path d={lineD} fill="none" stroke="var(--accent)" strokeWidth="2" />
-          </svg>
-          <p className="chart-caption">Daily average fitScore over 30 days</p>
+          {hasMatchData ? (
+            <>
+              <svg viewBox={`0 0 ${chartW} ${chartH}`} className="chart-svg" aria-label="Match quality area chart">
+                {/* Y-axis labels */}
+                {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
+                  const val = Math.round(minY + frac * (maxY - minY));
+                  const y = padT + plotH - frac * plotH;
+                  return (
+                    <g key={frac}>
+                      <line x1={padL} x2={chartW - padR} y1={y} y2={y} stroke="var(--border)" strokeWidth="0.5" />
+                      <text x={padL - 6} y={y + 3} className="chart-axis-label" textAnchor="end">{val}%</text>
+                    </g>
+                  );
+                })}
+                {/* X-axis labels (every 7th) */}
+                {points.filter((_, i) => i % 7 === 0 || i === points.length - 1).map((p) => (
+                  <text key={p.date} x={p.x} y={chartH - 4} className="chart-axis-label" textAnchor="middle">{p.date}</text>
+                ))}
+                {/* Area fill */}
+                <path d={areaD} fill="var(--accent-wash)" />
+                {/* Line */}
+                <path d={lineD} fill="none" stroke="var(--accent)" strokeWidth="2" />
+              </svg>
+              <p className="chart-caption">Daily average fitScore over 30 days</p>
+            </>
+          ) : (
+            <p className="chart-caption">Not enough data yet — check back after more jobs are discovered.</p>
+          )}
         </section>
 
         {/* 2. Score distribution */}
@@ -313,20 +421,30 @@ export default async function DashboardPage() {
           <p className="chart-caption">Most roles cluster at 60-75%.</p>
         </section>
 
-        {/* 3. Most requested skills */}
+        {/* 3. Top skills in your matches */}
         <section className="panel">
-          <h2>Most requested skills</h2>
-          {/* TODO: In production, parse from gapAnalysis or JD tool extraction */}
+          <h2>Top skills in your matches</h2>
+          <p className="chart-caption">Orange = gap in your profile · Green = strength</p>
           <div className="hbar-list">
-            {skills.map((s) => (
-              <div key={s.name} className="hbar-row">
-                <span className="hbar-name">{s.name}</span>
-                <div className="hbar-track">
-                  <div className="hbar-fill" style={{ width: `${(s.count / maxSkill) * 100}%` }} />
+            {d.skills.length === 0 ? (
+              <p className="chart-caption">No tier 1-3 matches yet — skills will appear once jobs are scored.</p>
+            ) : (
+              d.skills.map((s) => (
+                <div key={s.name} className="hbar-row" data-skill-kind={s.inProfile ? "strength" : "gap"}>
+                  <span className="hbar-name">{s.name}</span>
+                  <div className="hbar-track">
+                    <div
+                      className="hbar-fill"
+                      style={{
+                        width: `${(s.count / maxSkill) * 100}%`,
+                        background: s.inProfile ? "var(--accent)" : "var(--warn, #e08a3b)",
+                      }}
+                    />
+                  </div>
+                  <span className="hbar-count">{s.count}</span>
                 </div>
-                <span className="hbar-count">{s.count}</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
 
@@ -349,7 +467,6 @@ export default async function DashboardPage() {
         {/* 5. Activity heatmap */}
         <section className="panel">
           <h2>Activity heatmap</h2>
-          {/* TODO: Replace mock data with real activity query */}
           <div className="heatmap">
             <div className="heatmap-labels">
               {DAY_LABELS.filter((_, i) => i % 2 === 0).map((lbl) => (
@@ -357,7 +474,7 @@ export default async function DashboardPage() {
               ))}
             </div>
             <div className="heatmap-grid">
-              {heatmap.map((week, wi) => (
+              {d.heatmap.map((week, wi) => (
                 <div key={wi} className="heatmap-week">
                   {week.map((level, di) => (
                     <div key={di} className={`heatmap-cell ${HEATMAP_LEVELS[level]}`} title={`${DAY_LABELS[di]}: level ${level}`} />
