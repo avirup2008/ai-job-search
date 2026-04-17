@@ -180,7 +180,7 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
 
 - [x] **Phase 13: Smarter Scoring + ATS Keyword Pass** - Score breakdowns visible, feedback loop active, ATS keyword injection in pipeline (completed 2026-04-17)
 - [x] **Phase 14: Enhanced Discovery** - Indeed NL scraper live, manual URL paste queues jobs for scoring (completed 2026-04-17)
-- [ ] **Phase 15: Candidate Intelligence UI** - Gap coach panel, interview research prompt, pre-interview brief PDF
+- [x] **Phase 15: Candidate Intelligence UI** - Gap coach panel, interview research prompt, pre-interview brief PDF (completed 2026-04-17)
 - [ ] **Phase 16: Analytics & Reporting** - Source quality chart, Market Pulse panel, Weekly Strategy Brief
 
 ---
@@ -222,10 +222,10 @@ See spec §18 (was §17 pre-A/B-rename). Key ongoing:
   1. A Gap Coach panel (page or sidebar) lists T2 jobs ranked by closeness-to-T1, and for each job shows the specific keywords and profile fields preventing T1 tier assignment.
   2. When a job moves to "interview" status, a structured research prompt (using company name, role, JD text, and dossier) appears on the job detail view with a one-click copy button — no API call is made; she pastes it into Claude.ai herself.
   3. From any job in "interview" status, user can download a single formatted PDF that combines the existing interview prep document and the company dossier for that job — no new generation, formatting only.
-**Plans:** 3 plans
-- [ ] 15-01-PLAN.md — Gap Coach page + nav link (R-85)
-- [ ] 15-02-PLAN.md — Interview research prompt panel (R-86)
-- [ ] 15-03-PLAN.md — Pre-interview brief PDF download (R-89)
+**Plans:** 3/3 plans complete
+- [x] 15-01-PLAN.md — Gap Coach page + nav link (R-85)
+- [x] 15-02-PLAN.md — Interview research prompt panel (R-86)
+- [x] 15-03-PLAN.md — Pre-interview brief PDF download (R-89)
 **UI hint:** yes
 
 ### Phase 16: Analytics & Reporting
