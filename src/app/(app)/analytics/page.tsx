@@ -3,6 +3,8 @@ import { eq, sql, inArray, isNotNull, gte, and } from "drizzle-orm";
 import { PIPELINE_STAGES } from "@/app/(app)/pipeline/stages";
 import { aggregateByNormalizedLocation } from "@/lib/location/normalize";
 import { KEYWORDS, extractKeywordCounts, profileKeywordSet } from "@/lib/analytics/keywords";
+import { querySourceQuality } from "@/lib/analytics/source-quality";
+import { queryMarketPulse } from "@/lib/analytics/market-pulse";
 import "@/components/dashboard/dashboard.css";
 
 function currentPeriod(): string {
@@ -25,6 +27,8 @@ async function loadData() {
     applicationsPerDay,
     jdTextsForKeywords,
     profileRows,
+    sourceQuality,
+    marketPulse,
   ] = await Promise.all([
     // KPI: total jobs
     db.select({ count: sql<number>`count(*)::int` }).from(schema.jobs),
@@ -130,6 +134,10 @@ async function loadData() {
       })
       .from(schema.profile)
       .limit(1),
+    // Source quality: T1 jobs discovered per source + conversion rate
+    querySourceQuality(),
+    // Market pulse: avg days-to-response, T1 trend, source response rates
+    queryMarketPulse(),
   ]);
 
   const totalJobs = totalJobsRow[0]?.count ?? 0;
@@ -233,6 +241,8 @@ async function loadData() {
     matchQuality: trimmedMatchQuality,
     heatmap,
     skills,
+    sourceQuality,
+    marketPulse,
   };
 }
 
@@ -294,6 +304,7 @@ export default async function DashboardPage() {
 
   // Skills
   const maxSkill = Math.max(1, ...d.skills.map((s) => s.count));
+  const maxT1 = Math.max(1, ...d.sourceQuality.map((s) => s.t1Count));
 
   // Suppress unused-import TS warning: PIPELINE_STAGES is used below if funnel ever
   // references named stages — keep the import in case of future use.
@@ -447,6 +458,61 @@ export default async function DashboardPage() {
           <div className="budget-meta">
             <span>{budgetPct.toFixed(0)}% used</span>
             <span className="mono">&euro;{budgetRemaining.toFixed(2)} left</span>
+          </div>
+        </section>
+
+        {/* Source quality */}
+        <section className="panel">
+          <h2>Source quality</h2>
+          <p className="chart-caption">T1 jobs discovered per source · bar = count · label = conversion rate</p>
+          <div className="hbar-list">
+            {d.sourceQuality.length === 0 ? (
+              <p className="chart-caption">No jobs discovered yet.</p>
+            ) : (
+              d.sourceQuality.map((s) => (
+                <div key={s.source} className="hbar-row">
+                  <span className="hbar-name">{s.label}</span>
+                  <div className="hbar-track">
+                    <div
+                      className="hbar-fill"
+                      style={{ width: `${(s.t1Count / maxT1) * 100}%` }}
+                    />
+                  </div>
+                  <span className="hbar-count">{s.t1Count} T1 ({s.conversionRate.toFixed(1)}%)</span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* Market Pulse */}
+        <section className="panel">
+          <h2>Market pulse</h2>
+          <p className="chart-caption">Derived from your application history</p>
+          <div className="hbar-list">
+            <div className="hbar-row">
+              <span className="hbar-name">Avg days to response</span>
+              <span className="hbar-count">
+                {d.marketPulse.avgDaysToResponse !== null
+                  ? `${d.marketPulse.avgDaysToResponse} days`
+                  : "No responses yet"}
+              </span>
+            </div>
+            <div className="hbar-row">
+              <span className="hbar-name">T1 volume trend</span>
+              <span className="hbar-count" data-trend={d.marketPulse.t1TrendDirection}>
+                {d.marketPulse.t1TrendLabel}
+              </span>
+            </div>
+            {d.marketPulse.sourceResponseRate.map((r) => (
+              <div key={r.source} className="hbar-row">
+                <span className="hbar-name">{r.label} response rate</span>
+                <div className="hbar-track">
+                  <div className="hbar-fill" style={{ width: `${r.rate}%` }} />
+                </div>
+                <span className="hbar-count">{r.rate.toFixed(1)}%</span>
+              </div>
+            ))}
           </div>
         </section>
       </div>
