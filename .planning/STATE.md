@@ -4,7 +4,7 @@
 **Current milestone:** v1 (1-month job search) · **Week 1 ✅ shipped**
 **Current phase:** All 12 phases complete (v1 feature-complete)
 
-Last activity: 2026-04-17 — Completed quick task 260417-fiz: Phase 12 interview prep generation
+Last activity: 2026-04-17 — Completed quick task 260417-g4p: Wire real data into analytics page charts
 
 ## Progress
 
@@ -29,6 +29,7 @@ Last activity: 2026-04-17 — Completed quick task 260417-fiz: Phase 12 intervie
 |---|-------------|------|--------|-----------|
 | 260417-f2f | Phase 11: 60-day data retention cron | 2026-04-17 | a8fd20d | [260417-f2f-phase-11-60-day-data-retention-cron](./quick/260417-f2f-phase-11-60-day-data-retention-cron/) |
 | 260417-fiz | Phase 12: interview prep generation | 2026-04-17 | 01423ab | [260417-fiz-phase-12-interview-prep-generation](./quick/260417-fiz-phase-12-interview-prep-generation/) |
+| 260417-g4p | Wire real data into analytics page charts | 2026-04-17 | 181e977 | [260417-g4p-wire-real-data-into-analytics-page-chart](./quick/260417-g4p-wire-real-data-into-analytics-page-chart/) |
 
 ## Completed before GSD init
 
