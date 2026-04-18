@@ -9,6 +9,12 @@
   margin: 0;
 }
 
+.inbox-subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
 .inbox-toolbar {
   display: flex;
   gap: var(--s-2);

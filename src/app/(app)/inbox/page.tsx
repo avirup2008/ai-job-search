@@ -160,9 +160,7 @@ export default async function InboxPage({
       <header className="app-header">
         <div>
           <h1 className="inbox-title">Your matches</h1>
-        </div>
-        <div className="app-header-meta">
-          {counts.all} role{counts.all === 1 ? "" : "s"}, sorted by fit
+          <p className="inbox-subtitle">{counts.all} role{counts.all === 1 ? "" : "s"}, sorted by fit</p>
         </div>
       </header>
 
