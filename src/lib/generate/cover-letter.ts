@@ -31,7 +31,7 @@ const SYSTEM_PROMPT = `You are writing a cover letter for a single, specific can
 Your output will be compared against known LLM tells. You must avoid them. Reviewers read a lot of ChatGPT. Sound human.
 
 BANNED WORDS AND PHRASES (do not use any of these, even once):
-- delve, crucial, pivotal, underscore, underscores, highlight (as verb), showcase (as verb), leverage (as verb), foster, fostering, garner, resonate, resonates, align with, alignment, tapestry, landscape (figurative), intricate, enduring, vibrant, robust, robustly, seamless, seamlessly, elevate, unlock, unlocking, testament, ever-evolving, dynamic, transformative, empower, navigate the (figurative), at the intersection of, sits at the heart of, in the heart of, nestled, nestle, stand as, stands as, serves as, marks a, represents a shift, paving the way, shaping the future, in today's (landscape|world|market), additionally, moreover, furthermore, it is worth noting, it's worth noting, it is important to note, notably, ultimately, indeed, truly, genuinely, arguably
+- delve, crucial, vital, pivotal, underscore, underscores, highlight (as verb), showcase (as verb), leverage (as verb), foster, fostering, garner, resonate, resonates, align with, alignment, tapestry, landscape (figurative), intricate, enduring, vibrant, robust, robustly, seamless, seamlessly, elevate, unlock, unlocking, testament, ever-evolving, dynamic, transformative, empower, comprehensive, holistic, facilitate, ensure, navigate (figurative), at the intersection of, sits at the heart of, in the heart of, nestled, nestle, stand as, stands as, serves as, marks a, represents a shift, paving the way, shaping the future, in today's (landscape|world|market), additionally, moreover, furthermore, it is worth noting, it's worth noting, it is important to note, it goes without saying, needless to say, in many cases, in most scenarios, one might argue, notably, ultimately, indeed, truly, genuinely, arguably
 
 BANNED RHETORICAL MOVES:
 - **ZERO em-dashes (—). None. Not one. Use commas, periods, colons, or parentheses.** The em-dash is one of the strongest LLM tells. If you feel the urge to use an em-dash, rewrite the sentence. This rule is absolute: a single em-dash in the output counts as a failure.
@@ -50,6 +50,12 @@ PREFERRED PATTERNS:
 - It's OK to start a sentence with a conjunction (And, But, So) occasionally if it reads naturally.
 - One slightly human imperfection is good: a mild opinion, a candid phrase, a specific-not-generic observation. Not cute, not flippant — just unvarnished.
 - Contractions are allowed (I'm, I've, it's) where tone permits.
+
+HUMANIZER WRITING STYLE:
+- Vary sentence length deliberately. Mix short punchy sentences with longer ones. Uniform sentence length is the clearest AI fingerprint.
+- Preserve all real metrics exactly as they appear in the profile. Never replace specific numbers with vague claims like "significantly improved" or "considerable growth".
+- No identical opening structure across paragraphs — vary how each one starts.
+- Write like a person who actually read the JD, not a machine producing smooth prose about it.
 
 ======= LENGTH AND STRUCTURE =======
 - Target 230-280 words across the body paragraphs. Tight.

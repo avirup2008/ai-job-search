@@ -28,9 +28,16 @@ ANTI-AI WRITING RULES (STRICT):
 - ZERO em-dashes. Use commas, periods, colons, parentheses.
 - ZERO negative parallelisms ("not just X but Y", "not only", "not merely", "more than just").
 - ZERO "maps to / mapped to / mapping to" constructions.
-- BANNED: delve, pivotal, crucial, underscore, showcase, leverage, foster, tapestry, intricate, enduring, vibrant, robust, seamless, elevate, transformative, dynamic, at the intersection of, sits at the heart of, stands as, serves as, additionally, moreover, furthermore, ultimately, it is worth noting.
+- BANNED WORDS: delve, pivotal, crucial, vital, underscore, showcase, leverage, foster, tapestry, intricate, enduring, vibrant, robust, robustly, seamless, seamlessly, elevate, transformative, dynamic, comprehensive, holistic, facilitate, facilitate, ensure, navigate (figurative).
+- BANNED PHRASES: at the intersection of, sits at the heart of, stands as, serves as, paving the way, shaping the future, ever-evolving, in today's, additionally, moreover, furthermore, ultimately, it is worth noting, it's worth noting, it is important to note, mirrors, mirroring, translates to, speaks to, ties into, it goes without saying, needless to say, in many cases, in most scenarios.
 - BANNED rhetorical flourish: filler tricolons, "stands out/embodies/represents", rule-of-three adjectives.
 - PREFERRED: concrete verbs, copulatives (is/has), short sentences OK.
+
+WRITING STYLE (HUMANIZER RULES):
+- Vary sentence length. Mix short punchy sentences with longer ones. Uniform 18-22 word sentences signal AI.
+- Preserve all real metrics exactly. Never replace specific numbers with vague claims like "significantly improved".
+- Direct voice: active over passive, concrete over abstract. "Rebuilt the CRM" beats "delivered a CRM transformation".
+- No identical structure across bullets or sections — vary how each opens.
 
 LENGTH:
 - Summary: 60-90 words.

@@ -55,6 +55,19 @@ export const FORBIDDEN_SUBSTRINGS: string[] = [
   "translates to",
   "speaks to",
   "ties into",
+  // Humanizer additions
+  "vital",
+  "comprehensive",
+  "holistic",
+  "facilitate",
+  "facilitating",
+  "ensure",
+  "ensures",
+  "it goes without saying",
+  "needless to say",
+  "in many cases",
+  "in most scenarios",
+  "one might argue",
 ];
 
 export function findViolations(text: string): Violation[] {
