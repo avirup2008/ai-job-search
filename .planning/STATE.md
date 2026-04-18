@@ -63,6 +63,7 @@ Last activity: 2026-04-18
 | 260418-topbar | Fix Paste a role alignment — group nav+button in .topbar-center | 2026-04-18 | 9311df3 | — | — |
 | 260418-pipeline-flag | Add Not a fit option to pipeline stage dropdown | 2026-04-18 | 5ab49df | — | — |
 | 260418-dd27 | LinkedIn Profile Optimizer — PDF upload → Sonnet rewrites, headline/about/experience/skills + copy buttons | 2026-04-18 | 72c2509 | Verified | [260418-dd27-linkedin-profile-optimizer](./quick/260418-dd27-linkedin-profile-optimizer/) |
+| 260418-0332 | Wire full anti-AI guardrails into LinkedIn optimizer — retry loop, sanitize, expanded humanizer prompt | 2026-04-18 | 9b1ba33 | — | [260418-0332-linkedin-optimizer-anti-ai-guardrails](./quick/260418-0332-linkedin-optimizer-anti-ai-guardrails/) |
 
 ## Completed before GSD init
 
