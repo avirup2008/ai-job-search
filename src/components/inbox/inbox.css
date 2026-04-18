@@ -253,6 +253,31 @@
   cursor: default;
 }
 
+.flag-btn {
+  /* muted ghost style — visually secondary to save-btn */
+  background: transparent;
+  border: 1px solid var(--color-muted, #94a3b8);
+  color: var(--color-muted, #94a3b8);
+  border-radius: var(--r-md);
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: opacity var(--dur-150) var(--ease-io);
+  white-space: nowrap;
+  opacity: 0.55;
+}
+.job-card:hover .flag-btn,
+.flag-btn:focus-visible {
+  opacity: 1;
+}
+.flag-btn:hover:not(:disabled) {
+  opacity: 0.7;
+}
+.flag-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .inbox-empty {
   background: var(--surface);
   border: 1px dashed var(--border);
