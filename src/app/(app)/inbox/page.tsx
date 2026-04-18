@@ -48,7 +48,7 @@ async function loadJobs(band: Band): Promise<JobCardData[]> {
     })
     .from(schema.jobs)
     .leftJoin(schema.companies, sql`${schema.jobs.companyId} = ${schema.companies.id}`)
-    .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+    .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId} AND ${schema.applications.status} != 'new'`)
     .where(and(bandFilter(band), isNull(schema.applications.id)))
     .orderBy(desc(schema.jobs.fitScore), desc(schema.jobs.postedAt))
     .limit(200);
@@ -79,17 +79,17 @@ async function loadBandCounts(): Promise<Record<Band, number>> {
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.jobs)
-      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId} AND ${schema.applications.status} != 'new'`)
       .where(and(bandFilter("strong"), isNull(schema.applications.id))),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.jobs)
-      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId} AND ${schema.applications.status} != 'new'`)
       .where(and(bandFilter("medium"), isNull(schema.applications.id))),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.jobs)
-      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId} AND ${schema.applications.status} != 'new'`)
       .where(and(bandFilter("stretch"), isNull(schema.applications.id))),
   ]);
 
