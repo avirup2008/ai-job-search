@@ -29,25 +29,27 @@ export function TopBar() {
           Disha<span className="topbar-name-dot">.</span>
         </span>
       </Link>
-      <nav className="topbar-nav">
-        {NAV.map((item) => {
-          const active =
-            pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`topbar-link${active ? " topbar-link-active" : ""}`}
-              aria-current={active ? "page" : undefined}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-      <button className="topbar-paste" onClick={() => setPasteOpen(true)}>
-        + Paste a role
-      </button>
+      <div className="topbar-center">
+        <nav className="topbar-nav">
+          {NAV.map((item) => {
+            const active =
+              pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`topbar-link${active ? " topbar-link-active" : ""}`}
+                aria-current={active ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <button className="topbar-paste" onClick={() => setPasteOpen(true)}>
+          + Paste a role
+        </button>
+      </div>
       <button
         className="btn-ghost"
         onClick={handleSignOut}

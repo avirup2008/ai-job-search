@@ -42,6 +42,12 @@
   color: var(--accent);
 }
 
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .topbar-nav {
   display: flex;
   gap: 4px;
