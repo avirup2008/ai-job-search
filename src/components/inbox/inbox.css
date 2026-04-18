@@ -260,51 +260,46 @@
 }
 
 .flag-btn {
-  /* muted ghost style — visually secondary to save-btn */
-  background: transparent;
-  border: 1px solid var(--color-muted, #94a3b8);
-  color: var(--color-muted, #94a3b8);
+  background: #fef3f2;
+  border: 1px solid #f5c6c2;
+  color: #b54a42;
   border-radius: var(--r-md);
   padding: 6px 12px;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
-  transition: opacity var(--dur-150) var(--ease-io);
+  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
   white-space: nowrap;
-  opacity: 0.55;
-}
-.job-card:hover .flag-btn,
-.flag-btn:focus-visible {
-  opacity: 1;
 }
 .flag-btn:hover:not(:disabled) {
-  opacity: 0.7;
+  background: #fde8e6;
+  border-color: #e8948e;
 }
 .flag-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 .expired-btn {
-  background: transparent;
-  border: 1px solid var(--color-muted, #94a3b8);
-  color: var(--color-muted, #94a3b8);
+  background: #f5f4f1;
+  border: 1px solid #d4cfc7;
+  color: #6b6560;
   border-radius: var(--r-md);
   padding: 6px 12px;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
-  transition: opacity var(--dur-150) var(--ease-io);
+  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
   white-space: nowrap;
-  opacity: 0.55;
 }
 .job-card:hover .expired-btn,
 .expired-btn:focus-visible {
   opacity: 1;
 }
 .expired-btn:hover:not(:disabled) {
-  opacity: 0.7;
+  background: #eceae5;
+  border-color: #b8b0a6;
 }
 .expired-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
