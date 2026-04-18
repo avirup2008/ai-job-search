@@ -69,6 +69,7 @@ async function loadPipelineData() {
       and(
         ne(schema.applications.status, "new"),
         ne(schema.applications.status, "rejected"),
+        ne(schema.applications.status, "flagged"),
       ),
     )
     .orderBy(desc(schema.applications.lastEventAt));

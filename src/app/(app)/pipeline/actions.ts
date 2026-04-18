@@ -33,6 +33,11 @@ export async function updateApplicationStatus(applicationId: string, status: Pip
     .where(eq(schema.applications.id, applicationId));
 
   revalidatePath("/pipeline");
+  // Flagging from pipeline should also clear the job from inbox
+  if (status === "flagged") {
+    revalidatePath("/inbox");
+    revalidatePath(`/inbox/${app?.jobId ?? ""}`);
+  }
 
   // R-79: outcome feedback hook — adjust scoring multipliers on terminal outcomes.
   if ((status === "rejected" || status === "interview" || status === "offer") && app) {

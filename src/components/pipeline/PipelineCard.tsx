@@ -23,7 +23,11 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
   interview: "Interview",
   offer: "Offer",
   rejected: "Rejected",
+  flagged: "Not a fit",
 };
+
+// Stages shown as normal options; "flagged" is rendered separately below a divider
+const NORMAL_STAGES: PipelineStage[] = ["saved", "applied", "interview", "offer", "rejected"];
 
 function fmtDate(d: Date | string | null): string {
   if (!d) return "";
@@ -72,9 +76,11 @@ function GhostSelect({ data }: { data: PipelineCardData }) {
       }}
       aria-label="Move to stage"
     >
-      {PIPELINE_STAGES.map((s) => (
+      {NORMAL_STAGES.map((s) => (
         <option key={s} value={s}>{STAGE_LABEL[s]}</option>
       ))}
+      <option disabled>──────────</option>
+      <option value="flagged">Not a fit</option>
     </select>
   );
 }
