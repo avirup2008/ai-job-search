@@ -27,9 +27,16 @@ export async function getCompanyDossier(params: {
 
   if (domain) {
     try {
-      const scrape = await scrapeCompany(domain);
-      scrapedPages = scrape.pagesScraped;
-      marketingStack = fingerprintStack(scrape.rawHtmlHome);
+      // Hard 10s total cap — scraper can try up to 9 URLs at 8s each which
+      // would blow the Vercel Hobby 60s function limit. On timeout we fall
+      // through with empty pages and synthesize a low-signal dossier from
+      // the company name alone, which is good enough for artifact generation.
+      const scrapeTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000));
+      const scrape = await Promise.race([scrapeCompany(domain), scrapeTimeout]);
+      if (scrape) {
+        scrapedPages = scrape.pagesScraped;
+        marketingStack = fingerprintStack(scrape.rawHtmlHome);
+      }
     } catch {
       // scrape failed — fall through to low-signal
     }
