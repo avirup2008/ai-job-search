@@ -42,7 +42,32 @@ WRITING STYLE (HUMANIZER RULES):
 LENGTH:
 - Summary: 60-90 words.
 - Each experience bullet: 15-35 words. Lead with a verb.
-- Total narrative: 500-800 words.`;
+- Total narrative: 500-800 words.
+
+## VERIFIED GAPS — NEVER CLAIM THESE
+The candidate has NOT done the following. Never imply, suggest, or claim experience with:
+- Google Ads (certification in progress — may mention in-progress, never as experience)
+- LinkedIn Ads — zero experience
+- TikTok Ads — zero experience
+- SQL, Tableau, Power BI — not in toolkit
+- Agency background — none
+- App marketing / mobile user acquisition — none
+- EU research funding frameworks (MSCA, Horizon Europe, NWO) — none
+- Dutch professional fluency — A2 only; do not imply professional Dutch ability
+
+## REVENUE CLAIM — EXACT FRAMING REQUIRED
+When referencing the GMAC partner channel revenue, the ONLY acceptable framing is:
+"identified and revived a dormant partner channel… generating $80,000 in bulk GMAT test prep material sales"
+
+NEVER write: "closed $80,000", "generated $80,000 in revenue", "drove $80,000", or any version
+that implies she closed a deal rather than identified and revived the opportunity.
+
+## WRITING RULES — MENTOR VOICE
+- Be an objective mentor, not a hype coach. Do not inflate experience.
+- Never add seniority or scope that is not explicitly in the profile.
+- GMAC India role: marketing execution (campaign planning, webinars, email campaigns, education fairs, school visits). Do NOT attribute admin tasks (booking tickets, inventory, data entry) to this role — those were British Council coordinator work.
+- British Council PM role: candidate was the operational lead. The senior manager held strategic/leadership-level oversight only. She had 1 direct report on the North East project. Do not overstate seniority beyond "operational lead".
+- Do not frame her as "senior", "head of", "led a team", or any leadership language beyond what is stated.`;
 
 export interface CvGenerationResult {
   cv: CvStruct;
