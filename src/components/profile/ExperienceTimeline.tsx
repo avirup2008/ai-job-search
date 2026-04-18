@@ -10,35 +10,13 @@ type Role = {
 };
 
 const VISIBLE_ROLES = 2;
-const VISIBLE_BULLETS = 3;
 
-function RoleItem({ role, isCurrent }: { role: Role; isCurrent: boolean }) {
-  const [expanded, setExpanded] = useState(false);
-  const bullets = role.achievements ?? [];
-  const shown = expanded ? bullets : bullets.slice(0, VISIBLE_BULLETS);
-  const hidden = bullets.length - VISIBLE_BULLETS;
-
+function RoleItem({ role }: { role: Role }) {
   return (
     <div className="profile-timeline-content">
       <div className="profile-timeline-company">{role.company}</div>
       <div className="profile-timeline-role">{role.title}</div>
       <div className="profile-timeline-period">{role.dates}</div>
-      {bullets.length > 0 && (
-        <>
-          <ul className="profile-timeline-highlights">
-            {shown.map((a, j) => <li key={j}>{a}</li>)}
-          </ul>
-          {hidden > 0 && (
-            <button
-              className="profile-timeline-more"
-              type="button"
-              onClick={() => setExpanded((p) => !p)}
-            >
-              {expanded ? "↑ Show less" : `↓ ${hidden} more bullet${hidden !== 1 ? "s" : ""}`}
-            </button>
-          )}
-        </>
-      )}
     </div>
   );
 }
@@ -64,7 +42,7 @@ export function ExperienceTimeline({ roles }: { roles: Role[] }) {
             <span className={`profile-timeline-dot${i === 0 ? " profile-timeline-dot--current" : ""}`} />
             <span className="profile-timeline-connector" />
           </div>
-          <RoleItem role={r} isCurrent={i === 0} />
+          <RoleItem role={r} />
         </div>
       ))}
 

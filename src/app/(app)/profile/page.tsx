@@ -5,7 +5,16 @@ import { EditableChipList } from "@/components/profile/EditableChipList";
 import { EditableAchievements } from "@/components/profile/EditableAchievements";
 import { ExperienceTimeline } from "@/components/profile/ExperienceTimeline";
 import { addTool, removeTool, addAchievement, removeAchievement } from "./actions";
+import { StarStoriesPanel } from "@/components/profile/StarStoriesPanel";
 import LinkedinPage from "./linkedin/page";
+
+type StarStory = {
+  headline: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+};
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +134,7 @@ export default async function ProfilePage({
 
   const roles = (row.roles ?? []) as Role[];
   const achievements = (row.achievements ?? []) as Achievement[];
+  const stories = (row.stories ?? []) as StarStory[];
   const toolStack = (row.toolStack ?? {}) as Record<string, string>;
   const constraints = (row.constraints ?? {}) as Record<string, unknown>;
   const preferences = (row.preferences ?? {}) as Record<string, unknown>;
@@ -235,6 +245,9 @@ export default async function ProfilePage({
               onRemove={removeAchievement}
             />
           </section>
+
+          {/* STAR interview stories */}
+          <StarStoriesPanel stories={stories} />
 
           {/* Education + certifications */}
           <div className="profile-education-card">
