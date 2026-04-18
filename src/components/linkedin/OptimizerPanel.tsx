@@ -73,7 +73,7 @@ export function OptimizerPanel({ initial }: OptimizerPanelProps) {
           </span>
           <button
             type="button"
-            className="btn btn-ghost linkedin-reupload-btn"
+            className="linkedin-reupload-btn"
             onClick={() => fileInputRef.current?.click()}
           >
             Re-upload
@@ -117,10 +117,9 @@ export function OptimizerPanel({ initial }: OptimizerPanelProps) {
         {rewrites.experience.map((exp, i) => (
           <section key={i} className="linkedin-section">
             <div className="linkedin-section-header">
-              <h3 className="linkedin-section-title">
-                Experience — {exp.company}
-              </h3>
-              <span className="linkedin-role-label">{exp.role}</span>
+              <h3 className="linkedin-section-title">Experience</h3>
+              <p className="linkedin-company-label">{exp.company}</p>
+              <p className="linkedin-role-label">{exp.role}</p>
             </div>
             <ul className="linkedin-bullets">
               {exp.bullets.map((bullet, j) => (

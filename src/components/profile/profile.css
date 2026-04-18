@@ -605,57 +605,84 @@
 
 .linkedin-reupload-btn {
   font-size: 13px;
+  color: var(--accent, #1D4A35);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.8;
+}
+.linkedin-reupload-btn:hover {
+  opacity: 1;
 }
 
 .linkedin-section {
   border-top: 1px solid var(--border, #E4E0D8);
-  padding: var(--s-6, 24px) 0;
+  padding: 28px 0;
 }
 
 .linkedin-section-header {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .linkedin-section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-2);
+  margin: 0 0 6px;
+}
+
+.linkedin-company-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1, inherit);
   margin: 0 0 2px;
 }
 
 .linkedin-role-label {
   font-size: 13px;
   color: var(--text-2);
+  margin: 0;
 }
 
+/* Headline / single-line: text left, Copy right */
 .linkedin-rewrite-row {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-bottom: 12px;
 }
 
+/* About / Skills / multi-line: text full width, Copy below right */
 .linkedin-rewrite-row--block {
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.linkedin-rewrite-row--block .linkedin-copy-btn {
+  align-self: flex-end;
 }
 
 .linkedin-rewrite-text {
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.6;
   margin: 0;
   flex: 1;
 }
 
 .linkedin-reasoning {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-2);
   font-style: italic;
-  margin: 0;
-  padding-left: 12px;
+  margin: 4px 0 0;
+  padding: 8px 0 0 14px;
   border-left: 2px solid var(--border, #E4E0D8);
+  line-height: 1.55;
 }
 
 .linkedin-bullets {
