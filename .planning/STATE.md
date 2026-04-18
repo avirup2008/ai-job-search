@@ -55,6 +55,13 @@ Last activity: 2026-04-18
 | 260417-o87 | Close Codex review gap 93→97+ (auth tests, diagnostics, storage contract, cleanup) | 2026-04-17 | 298f513 | Verified | [260417-o87-close-codex-review-gap-93-97-auth-tests-](./quick/260417-o87-close-codex-review-gap-93-97-auth-tests-/) |
 | 260418-apify | Replace indeed-nl RSS with Apify scraper (Cloudflare bypass) | 2026-04-18 | 3d939f1 | — | — |
 | 260418-hk3 | Add flag-as-bad-match button to inbox job cards | 2026-04-18 | e76b7df | — | [260418-hk3-add-flag-as-bad-match-button-to-inbox-jo](./quick/260418-hk3-add-flag-as-bad-match-button-to-inbox-jo/) |
+| 260418-inbox-join | Fix inbox showing 0 jobs — LEFT JOIN excludes status='new' apps | 2026-04-18 | 8bedb32 | — | — |
+| 260418-migration | Apply migration 0004 manually (storage_url/format/mime_type/render_kind columns missing from Neon) | 2026-04-18 | — | — | — |
+| 260418-artifacts-fix | Fix proof artifacts 504 timeout — retries 5→2, skip secondary, 10s scrape cap | 2026-04-18 | c32e740+52fd39c | — | — |
+| 260418-parallel-gen | Refactor GeneratePanel to per-row state so all 5 can generate in parallel | 2026-04-18 | 75e0a68 | — | — |
+| 260418-inbox-ui | Fix inbox header alignment (count as subtitle) + QueueUrlForm fixed 240px width | 2026-04-18 | d23ac55 | — | — |
+| 260418-topbar | Fix Paste a role alignment — group nav+button in .topbar-center | 2026-04-18 | 9311df3 | — | — |
+| 260418-pipeline-flag | Add Not a fit option to pipeline stage dropdown | 2026-04-18 | 5ab49df | — | — |
 
 ## Completed before GSD init
 
@@ -98,3 +105,5 @@ Last activity: 2026-04-18
 **2026-04-17** Quick tasks: login page (260417-kqy), auth gap fix (260417-kgd), analytics real data (260417-g4p), Codex review closure (260417-o87).
 
 **2026-04-18** Diagnosed Indeed NL source failure: Cloudflare 403 on RSS endpoint. Replaced with Apify `misceres/indeed-scraper` actor (free tier, ~$4.50/mo). `APIFY_API_TOKEN` set in Vercel + GitHub secrets. 5 sources live again. v2.0 milestone confirmed complete.
+
+**2026-04-18 (session 2)** Bug fix sprint: (1) Inbox showing 0 jobs — LEFT JOIN was excluding status='new' apps created by generate routes; fixed with AND condition in JOIN. (2) Migration 0004 (storage_url/format/mime_type/render_kind columns) was recorded as applied in Drizzle journal but never actually ran against Neon — applied manually via node+neon SDK. (3) Proof artifacts 504 timeout — reduced anti-AI loop retries 5→2, disabled secondary artifact generation, added 10s total cap on company scraper. (4) GeneratePanel refactored from shared state to per-row GenRow components enabling parallel generation. (5) Inbox header alignment + QueueUrlForm fixed width. (6) TopBar Paste a role button grouped with nav links. (7) Not a fit option added to pipeline stage dropdown (same flagged status as inbox button). v3 brainstorm started: LinkedIn Profile Optimizer — PDF upload → one Sonnet call → stored rewrites (headline, about, experience bullets, skills) + reasoning. Layout B chosen (rewrite only + copy button + reasoning, no side-by-side).
