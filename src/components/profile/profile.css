@@ -825,7 +825,7 @@
 
 /* ── Hero card ─────────────────────────────────────────────── */
 .profile-hero {
-  background: #1D4A35;
+  background: var(--accent);
   border-radius: var(--r-xl);
   padding: 28px 32px;
   display: grid;
