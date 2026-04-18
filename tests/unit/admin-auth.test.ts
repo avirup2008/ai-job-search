@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createHash } from "node:crypto";
 
 const cookieStore = {
   get: vi.fn(),
@@ -10,15 +11,13 @@ vi.mock("next/headers", () => ({
   cookies: async () => cookieStore,
 }));
 
-vi.mock("@/lib/env", () => ({
-  loadAdminEnv: () => ({ ADMIN_SECRET: "x".repeat(32) }),
-}));
+const TEST_PASSWORD = "hunter2";
+const CORRECT_HASH = createHash("sha256").update(TEST_PASSWORD).digest("hex");
 
 describe("admin auth", () => {
   beforeEach(() => {
     cookieStore.get.mockReset();
-    cookieStore.set.mockReset();
-    cookieStore.delete.mockReset();
+    vi.stubEnv("DISHA_PASSWORD", TEST_PASSWORD);
   });
 
   it("isAdmin returns false when cookie missing", async () => {
@@ -27,26 +26,22 @@ describe("admin auth", () => {
     expect(await isAdmin()).toBe(false);
   });
 
-  it("isAdmin returns true when cookie matches ADMIN_SECRET", async () => {
-    cookieStore.get.mockReturnValue({ value: "x".repeat(32) });
+  it("isAdmin returns false when DISHA_PASSWORD not set", async () => {
+    vi.stubEnv("DISHA_PASSWORD", "");
+    cookieStore.get.mockReturnValue({ value: CORRECT_HASH });
+    const { isAdmin } = await import("@/lib/auth/admin");
+    expect(await isAdmin()).toBe(false);
+  });
+
+  it("isAdmin returns true when disha_session cookie matches sha256(DISHA_PASSWORD)", async () => {
+    cookieStore.get.mockReturnValue({ value: CORRECT_HASH });
     const { isAdmin } = await import("@/lib/auth/admin");
     expect(await isAdmin()).toBe(true);
   });
 
-  it("setAdminCookie returns false on wrong secret", async () => {
-    const { setAdminCookie } = await import("@/lib/auth/admin");
-    expect(await setAdminCookie("wrong")).toBe(false);
-    expect(cookieStore.set).not.toHaveBeenCalled();
-  });
-
-  it("setAdminCookie sets the cookie on correct secret", async () => {
-    const { setAdminCookie } = await import("@/lib/auth/admin");
-    const ok = await setAdminCookie("x".repeat(32));
-    expect(ok).toBe(true);
-    expect(cookieStore.set).toHaveBeenCalledWith(
-      "aijs_admin",
-      "x".repeat(32),
-      expect.objectContaining({ httpOnly: true, secure: true, sameSite: "lax" }),
-    );
+  it("isAdmin returns false when cookie value does not match", async () => {
+    cookieStore.get.mockReturnValue({ value: "wrong-hash" });
+    const { isAdmin } = await import("@/lib/auth/admin");
+    expect(await isAdmin()).toBe(false);
   });
 });

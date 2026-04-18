@@ -1,27 +1,21 @@
 import { cookies } from "next/headers";
-import { loadAdminEnv } from "@/lib/env";
+import { createHash } from "node:crypto";
+import { COOKIE_NAME } from "@/lib/auth/constants";
 
-const COOKIE = "aijs_admin";
-
+/**
+ * Server-side auth check for Server Actions and API routes.
+ * Validates the disha_session cookie (sha256 of DISHA_PASSWORD).
+ * Uses Node.js crypto — safe in serverless functions, not in Edge runtime.
+ * Middleware (Edge) has its own equivalent using Web Crypto.
+ */
 export async function isAdmin(): Promise<boolean> {
-  const jar = await cookies();
-  return jar.get(COOKIE)?.value === loadAdminEnv().ADMIN_SECRET;
-}
+  const pw = process.env.DISHA_PASSWORD;
+  if (!pw) return false;
 
-export async function setAdminCookie(secret: string): Promise<boolean> {
-  if (secret !== loadAdminEnv().ADMIN_SECRET) return false;
   const jar = await cookies();
-  jar.set(COOKIE, secret, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
-  return true;
-}
+  const cookieValue = jar.get(COOKIE_NAME)?.value;
+  if (!cookieValue) return false;
 
-export async function clearAdminCookie(): Promise<void> {
-  const jar = await cookies();
-  jar.delete(COOKIE);
+  const expected = createHash("sha256").update(pw).digest("hex");
+  return cookieValue === expected;
 }
