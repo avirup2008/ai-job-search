@@ -13,6 +13,7 @@ import { detectDrift } from "@/lib/scoring/drift";
 import { generateCV } from "@/lib/generate/cv";
 import { renderCvDocx } from "@/lib/generate/cv-docx";
 import { storeCv } from "@/lib/generate/storage";
+import { applyAvoidPenalty } from "./avoid-patterns";
 
 export interface SourceSummaryEntry {
   source: string;
@@ -139,17 +140,22 @@ export async function runNightly(): Promise<RunSummary> {
               jobTitle: row.title,
               profile,
             });
-            const tier = assignTier(rank.fitScore);
+            const avoidPenalty = applyAvoidPenalty(row.title, row.jdText ?? "");
+            const finalFitScore = Math.max(0, rank.fitScore - avoidPenalty.penalty);
+            const tier = assignTier(finalFitScore);
             await db
               .update(schema.jobs)
               .set({
-                fitScore: String(rank.fitScore),
+                fitScore: String(finalFitScore),
                 fitBreakdown: rank.components,
                 gapAnalysis: {
                   strengths: rank.assessment.strengths,
-                  gaps: rank.assessment.gaps,
+                  gaps: avoidPenalty.reason
+                    ? [...rank.assessment.gaps, avoidPenalty.reason]
+                    : rank.assessment.gaps,
                   recommendation: rank.assessment.recommendation,
                   recommendationReason: rank.assessment.recommendationReason,
+                  penaltyReason: avoidPenalty.reason,
                 },
                 tier,
                 seniority: rank.assessment.seniorityLevel,
@@ -292,7 +298,9 @@ export async function runNightly(): Promise<RunSummary> {
             return;
           }
 
-          const tier = assignTier(rank.fitScore);
+          const avoidPenalty = applyAvoidPenalty(e.j.title, e.j.jdText ?? "");
+          const finalFitScore = Math.max(0, rank.fitScore - avoidPenalty.penalty);
+          const tier = assignTier(finalFitScore);
           const [insertedJob] = await db
             .insert(schema.jobs)
             .values({
@@ -306,13 +314,16 @@ export async function runNightly(): Promise<RunSummary> {
               postedAt: e.j.postedAt ?? null,
               dedupeHash: e.dedupeHash,
               seniority: rank.assessment.seniorityLevel,
-              fitScore: String(rank.fitScore),
+              fitScore: String(finalFitScore),
               fitBreakdown: rank.components,
               gapAnalysis: {
                 strengths: rank.assessment.strengths,
-                gaps: rank.assessment.gaps,
+                gaps: avoidPenalty.reason
+                  ? [...rank.assessment.gaps, avoidPenalty.reason]
+                  : rank.assessment.gaps,
                 recommendation: rank.assessment.recommendation,
                 recommendationReason: rank.assessment.recommendationReason,
+                penaltyReason: avoidPenalty.reason,
               },
               tier,
             })
@@ -340,6 +351,7 @@ export async function runNightly(): Promise<RunSummary> {
     const existingRanked = await db
       .select({
         id: schema.jobs.id,
+        title: schema.jobs.title,
         tier: schema.jobs.tier,
         fitScore: schema.jobs.fitScore,
         fitBreakdown: schema.jobs.fitBreakdown,
@@ -364,14 +376,16 @@ export async function runNightly(): Promise<RunSummary> {
       // will not see industry signal until a dedicated column is added.
       const seniorityStr = row.seniority ?? "";
       const newScore = blendFitScoreWithMultipliers(components, multipliers, { industries: [], seniority: seniorityStr });
-      const newTier = assignTier(newScore);
+      const avoidPenalty = applyAvoidPenalty(row.title, "");
+      const finalNewScore = Math.max(0, newScore - avoidPenalty.penalty);
+      const newTier = assignTier(finalNewScore);
       const drift = detectDrift(row.tier, newTier);
       rescoredCount++;
       if (drift.drifted) {
         driftedCount++;
         await db
           .update(schema.jobs)
-          .set({ previousTier: row.tier, tier: newTier, fitScore: String(newScore) })
+          .set({ previousTier: row.tier, tier: newTier, fitScore: String(finalNewScore) })
           .where(eq(schema.jobs.id, row.id));
         // Emit tier_drift event if an application row exists for this job
         const [app] = await db
@@ -386,10 +400,10 @@ export async function runNightly(): Promise<RunSummary> {
             payload: { jobId: row.id, oldTier: row.tier, newTier, delta: drift.delta },
           });
         }
-      } else if (Math.abs(Number(row.fitScore ?? 0) - newScore) > 0.5) {
+      } else if (Math.abs(Number(row.fitScore ?? 0) - finalNewScore) > 0.5) {
         await db
           .update(schema.jobs)
-          .set({ fitScore: String(newScore) })
+          .set({ fitScore: String(finalNewScore) })
           .where(eq(schema.jobs.id, row.id));
       }
     }
