@@ -123,3 +123,23 @@ export async function saveJobToPipeline(jobId: string) {
   revalidatePath("/inbox");
   revalidatePath(`/inbox/${jobId}`);
 }
+
+export async function flagJobAsBadMatch(jobId: string) {
+  if (!(await isAdmin())) throw new Error("forbidden");
+  const existing = await db
+    .select()
+    .from(schema.applications)
+    .where(eq(schema.applications.jobId, jobId))
+    .limit(1);
+  if (existing.length > 0) {
+    await db
+      .update(schema.applications)
+      .set({ status: "flagged", lastEventAt: new Date() })
+      .where(eq(schema.applications.id, existing[0].id));
+  } else {
+    await db.insert(schema.applications).values({ jobId, status: "flagged" });
+  }
+  revalidatePath("/pipeline");
+  revalidatePath("/inbox");
+  revalidatePath(`/inbox/${jobId}`);
+}
