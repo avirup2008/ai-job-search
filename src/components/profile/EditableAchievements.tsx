@@ -45,25 +45,35 @@ export function EditableAchievements({ items, onAdd, onRemove }: EditableAchieve
             No achievements yet. Add a few — they power every match score.
           </p>
         )}
+        {/* Metric achievements — 2-column scorecard grid */}
+        {items.some((a) => a.metric) && (
+          <div className="profile-metric-grid">
+            {items.map((a, i) =>
+              a.metric ? (
+                <div key={i} className="profile-metric-card">
+                  <button
+                    type="button"
+                    className="profile-achievement-remove profile-metric-remove"
+                    aria-label="Remove achievement"
+                    disabled={isPending}
+                    onClick={() => remove(i)}
+                  >
+                    &times;
+                  </button>
+                  <div className="profile-metric-value">{a.metric}</div>
+                  <div className="profile-metric-body">
+                    <div className="profile-metric-title">{a.description}</div>
+                    {a.context && <div className="profile-metric-context">{a.context}</div>}
+                  </div>
+                </div>
+              ) : null
+            )}
+          </div>
+        )}
+
+        {/* Plain achievements without a metric */}
         {items.map((a, i) =>
-          a.metric ? (
-            <div key={i} className="profile-metric-card">
-              <div className="profile-metric-value">{a.metric}</div>
-              <div className="profile-metric-body">
-                <div className="profile-metric-title">{a.description}</div>
-                {a.context && <div className="profile-metric-context">{a.context}</div>}
-              </div>
-              <button
-                type="button"
-                className="profile-achievement-remove profile-metric-remove"
-                aria-label="Remove achievement"
-                disabled={isPending}
-                onClick={() => remove(i)}
-              >
-                &times;
-              </button>
-            </div>
-          ) : (
+          !a.metric ? (
             <div key={i} className="profile-achievement">
               <span className="profile-achievement-desc">{a.description}</span>
               <button
@@ -76,7 +86,7 @@ export function EditableAchievements({ items, onAdd, onRemove }: EditableAchieve
                 &times;
               </button>
             </div>
-          )
+          ) : null
         )}
 
         {adding ? (

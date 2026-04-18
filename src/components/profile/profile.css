@@ -246,9 +246,9 @@
   gap: 4px;
 }
 .profile-timeline-highlights li {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
-  line-height: 1.5;
+  line-height: 1.4;
   padding-left: 14px;
   position: relative;
 }
@@ -947,8 +947,8 @@
 
 /* ── Achievement metric cards ────────────────────────────────── */
 .profile-metric-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--s-3);
   margin-bottom: var(--s-4);
 }
@@ -957,41 +957,44 @@
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   border-radius: var(--r-md);
-  padding: 12px 16px;
+  padding: 14px 16px 14px 14px;
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
 }
 .profile-metric-value {
   font-size: 22px;
   font-weight: 700;
   color: var(--accent);
-  min-width: 58px;
-  flex-shrink: 0;
-  line-height: 1;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 .profile-metric-body {
   min-width: 0;
-  flex: 1;
 }
 .profile-metric-remove {
-  flex-shrink: 0;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   opacity: 0;
-  margin-left: auto;
 }
 .profile-metric-card:hover .profile-metric-remove,
 .profile-metric-card:focus-within .profile-metric-remove {
   opacity: 1;
 }
 .profile-metric-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-1);
-  margin-bottom: 2px;
+  line-height: 1.35;
 }
 .profile-metric-context {
   font-size: 11px;
   color: var(--text-2);
+}
+@media (max-width: 900px) {
+  .profile-metric-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Education + certifications card ─────────────────────────── */
