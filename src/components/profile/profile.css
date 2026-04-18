@@ -854,36 +854,34 @@
 }
 .profile-hero-name {
   font-weight: 700;
-  font-size: 20px;
+  font-size: 24px;
   color: #fff;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.6px;
   margin-bottom: 6px;
 }
 .profile-hero-title {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
-  margin-bottom: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 16px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .profile-hero-meta {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 20px;
   align-items: center;
 }
-.profile-hero-meta-item {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-}
 .profile-hero-meta-link {
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
   text-decoration: none;
+  background: rgba(255,255,255,0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
 }
-.profile-hero-meta-link:hover { color: #fff; }
+.profile-hero-meta-link:hover { background: rgba(255,255,255,0.18); color: #fff; }
 .profile-hero-right {
   text-align: right;
   flex-shrink: 0;

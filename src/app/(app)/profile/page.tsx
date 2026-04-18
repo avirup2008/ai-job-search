@@ -179,34 +179,30 @@ export default async function ProfilePage({
         <div className="profile-hero-body">
           <div className="profile-hero-name">{row.fullName ?? "Unnamed"}</div>
           {row.headline && <div className="profile-hero-title">{row.headline}</div>}
-          <div className="profile-hero-meta">
-            {Boolean(constraints.location) && (
-              <span className="profile-hero-meta-item">📍 {String(constraints.location)}</span>
-            )}
-            {dutchLevel && (
-              <span className="profile-hero-meta-item">🇳🇱 {dutchLevel}</span>
-            )}
-            {row.linkedinUrl && (
-              <a
-                href={row.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="profile-hero-meta-link"
-              >
-                🔗 LinkedIn ↗
-              </a>
-            )}
-            {row.portfolioUrl && (
-              <a
-                href={row.portfolioUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="profile-hero-meta-link"
-              >
-                🌐 Portfolio ↗
-              </a>
-            )}
-          </div>
+          {(row.linkedinUrl || row.portfolioUrl) && (
+            <div className="profile-hero-meta">
+              {row.linkedinUrl && (
+                <a
+                  href={row.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="profile-hero-meta-link"
+                >
+                  LinkedIn ↗
+                </a>
+              )}
+              {row.portfolioUrl && (
+                <a
+                  href={row.portfolioUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="profile-hero-meta-link"
+                >
+                  Portfolio ↗
+                </a>
+              )}
+            </div>
+          )}
         </div>
         <div className="profile-hero-right">
           <div className="profile-hero-score">{profileStrength}%</div>
