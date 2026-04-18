@@ -207,7 +207,7 @@
   margin-top: 4px;
 }
 .profile-timeline-content {
-  padding-bottom: 28px;
+  padding-bottom: 36px;
 }
 .profile-timeline-item:last-child .profile-timeline-content { padding-bottom: 0; }
 .profile-timeline-item:last-child .profile-timeline-connector { display: none; }
@@ -236,15 +236,15 @@
 .profile-timeline-highlights {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 6px 0 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 .profile-timeline-highlights li {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-2);
-  line-height: 1.4;
+  line-height: 1.55;
   padding-left: 14px;
   position: relative;
 }
