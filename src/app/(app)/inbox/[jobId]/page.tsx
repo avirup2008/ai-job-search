@@ -7,6 +7,7 @@ import { GeneratePanel, type DocSummary } from "@/components/job-detail/Generate
 import { ScoreBreakdown } from "@/components/job-detail/ScoreBreakdown";
 import { InterviewPromptPanel } from "@/components/job-detail/InterviewPromptPanel";
 import { InterviewBriefDownload } from "@/components/job-detail/InterviewBriefDownload";
+import { InterviewWeakPoints } from "@/components/job-detail/InterviewWeakPoints";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
@@ -158,6 +159,8 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
           {status === "interview" && (
             <InterviewBriefDownload jobId={jobId} />
           )}
+
+          {status === "interview" && <InterviewWeakPoints />}
 
           {/* 3. Your application — doc cards */}
           <section className="detail-section detail-section-docs">
