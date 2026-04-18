@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: milestone
+milestone_name: Smarter Disha
 current_phase: 16
 status: Milestone complete
-last_updated: "2026-04-17T20:45:31.443Z"
-last_activity: 2026-04-17
+last_updated: "2026-04-18T10:45:00.000Z"
+last_activity: 2026-04-18
 progress:
   total_phases: 16
-  completed_phases: 4
+  completed_phases: 16
   total_plans: 11
   completed_plans: 11
   percent: 100
@@ -16,11 +16,11 @@ progress:
 
 # STATE — AI Job Search
 
-**Last updated:** 2026-04-17
-**Current milestone:** v2.0 Smarter Disha
+**Last updated:** 2026-04-18
+**Current milestone:** v2.0 Smarter Disha — COMPLETE
 **Current phase:** 16
 
-Last activity: 2026-04-17
+Last activity: 2026-04-18
 
 ## Progress
 
@@ -31,7 +31,7 @@ Last activity: 2026-04-17
 | 3 Discovery Sources | ✅ complete | 4 sources live; Werk.nl replaced with Magnet.me |
 | 4 Pipeline Logic | ✅ complete | filters + dedupe + tier + profile seeded to Neon |
 | 5 Orchestration + Admin + Cron | ✅ complete | GH Actions cron + admin UI live in prod |
-| 6 Week-1 Deploy & Acceptance | ✅ complete | Live at ai-job-search-eta.vercel.app; ~508 jobs in DB, ~15 T1 |
+| 6 Week-1 Deploy & Acceptance | ✅ complete | Live at disha-cloud.vercel.app; ~508 jobs in DB, ~15 T1 |
 | 7 Company Research | ✅ complete | |
 | 8 Generation Pipeline | ✅ complete | |
 | 9 Web App UI | ✅ complete | |
@@ -39,9 +39,9 @@ Last activity: 2026-04-17
 | 11 Reveal & Live Ops | ⚠ partial | Retention cron shipped (quick 260417-f2f); reveal done live; GDPR + domain skipped by user |
 | 12 A/B + Screening + Interview | ⚠ partial | Interview prep shipped (quick 260417-fiz); A/B + extra screening skipped by user (not valuable for n=1) |
 | 13 Smarter Scoring + ATS Keyword Pass | ✅ complete | R-78 ✅ R-79 ✅ R-80 ✅ R-84 ✅ — all 3 plans done |
-| 14 Enhanced Discovery | Not started | v2.0 — R-81, R-82 |
-| 15 Candidate Intelligence UI | 📋 planned | v2.0 — R-85, R-86, R-89 — 3 plans, Wave 1-2 |
-| 16 Analytics & Reporting | 📋 planned | v2.0 — R-83, R-87, R-88 — 2 plans, Wave 1-2 |
+| 14 Enhanced Discovery | ✅ complete | R-81 ✅ Indeed NL restored via Apify (Cloudflare bypass); R-82 ✅ URL paste already built |
+| 15 Candidate Intelligence UI | ✅ complete | R-85 ✅ Gap Coach; R-86 ✅ Interview research prompt + clipboard; R-89 ✅ PDF interview brief |
+| 16 Analytics & Reporting | ✅ complete | R-83 ✅ Source Quality panel; R-88 ✅ Market Pulse panel; R-87 ✅ Weekly Strategy Brief cron |
 
 ### Quick Tasks Completed
 
@@ -53,6 +53,7 @@ Last activity: 2026-04-17
 | 260417-kgd | Fix auth gap, fire-and-forget async, and retention of filtered jobs | 2026-04-17 | 6307d67 | — | [260417-kgd-fix-auth-gap-fire-and-forget-async-and-r](./quick/260417-kgd-fix-auth-gap-fire-and-forget-async-and-r/) |
 | 260417-kqy | Build polished Disha login page as app homepage | 2026-04-17 | c430e50 | — | [260417-kqy-build-polished-disha-login-page-as-app-h](./quick/260417-kqy-build-polished-disha-login-page-as-app-h/) |
 | 260417-o87 | Close Codex review gap 93→97+ (auth tests, diagnostics, storage contract, cleanup) | 2026-04-17 | 298f513 | Verified | [260417-o87-close-codex-review-gap-93-97-auth-tests-](./quick/260417-o87-close-codex-review-gap-93-97-auth-tests-/) |
+| 260418-apify | Replace indeed-nl RSS with Apify scraper (Cloudflare bypass) | 2026-04-18 | 3d939f1 | — | — |
 
 ## Completed before GSD init
 
@@ -70,12 +71,12 @@ Last activity: 2026-04-17
 - Single-user (owner + admin); no multi-tenant
 - Claude writes all code via subagents; Avi approves at phase gates + provides secrets
 - v2.0: No new paid API keys; no new direct LLM calls outside nightly cron
+- Indeed NL: RSS blocked by Cloudflare April 2026; replaced with Apify free tier ($5/mo credit)
 
 ## Open questions
 
 - Commute tolerance value (will capture from Avi during Phase 1 profile intake)
-- Reveal-day scheduling (planned end of Phase 10)
-- Final domain name (TBD; default to `*.vercel.app` until decided)
+- Final domain name (TBD; default to `disha-cloud.vercel.app` until decided)
 
 ## Session log
 
@@ -87,7 +88,12 @@ Last activity: 2026-04-17
 
 **2026-04-17** Executed 13-03: ATS keyword post-pass module (R-84), wired into generateCV(), nightly batch CV generation for T1/T2 (cap 5, p-limit 2). 10 unit tests, zero new LLM calls. 209 tests pass.
 
-**2026-04-17** Phase 13 complete. All 4 requirements satisfied (R-78, R-79, R-80, R-84). 9 commits total. Next: Phase 14 Enhanced Discovery (R-81 Indeed NL, R-82 URL paste).
+**2026-04-17** Phase 13 complete. All 4 requirements satisfied (R-78, R-79, R-80, R-84). 9 commits total.
 
----
-**Pre-compact 2026-04-17T12:54:52+02:00**
+**2026-04-17** Phase 15 executed: Gap Coach UI (R-85), interview research prompt + clipboard (R-86), PDF interview brief via pdf-lib (R-89). 307 tests pass.
+
+**2026-04-17** Phase 16 executed: Source Quality panel (R-83), Market Pulse panel (R-88), Weekly Strategy Brief cron via GitHub Actions (R-87). 307 tests pass.
+
+**2026-04-17** Quick tasks: login page (260417-kqy), auth gap fix (260417-kgd), analytics real data (260417-g4p), Codex review closure (260417-o87).
+
+**2026-04-18** Diagnosed Indeed NL source failure: Cloudflare 403 on RSS endpoint. Replaced with Apify `misceres/indeed-scraper` actor (free tier, ~$4.50/mo). `APIFY_API_TOKEN` set in Vercel + GitHub secrets. 5 sources live again. v2.0 milestone confirmed complete.
