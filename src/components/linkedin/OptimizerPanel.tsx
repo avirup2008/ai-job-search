@@ -7,7 +7,7 @@ import type { LinkedinRewrites } from "@/db/schema";
 interface OptimizerPanelProps {
   initial: {
     rewrites: LinkedinRewrites;
-    createdAt: string; // ISO string
+    createdAt: string;
   } | null;
 }
 
@@ -19,11 +19,28 @@ function timeAgo(isoString: string): string {
   return `${diffDays} days ago`;
 }
 
+type SectionId = "headline" | "about" | `exp-${number}` | "skills";
+
+function buildSections(rewrites: LinkedinRewrites): Array<{ id: SectionId; label: string; sublabel?: string }> {
+  const sections: Array<{ id: SectionId; label: string; sublabel?: string }> = [
+    { id: "headline", label: "Headline" },
+    { id: "about", label: "About" },
+    ...rewrites.experience.map((exp, i) => ({
+      id: `exp-${i}` as SectionId,
+      label: exp.company,
+      sublabel: exp.role,
+    })),
+    { id: "skills", label: "Skills" },
+  ];
+  return sections;
+}
+
 export function OptimizerPanel({ initial }: OptimizerPanelProps) {
   const [rewrites, setRewrites] = useState<LinkedinRewrites | null>(initial?.rewrites ?? null);
   const [createdAt, setCreatedAt] = useState<string | null>(initial?.createdAt ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<SectionId>("headline");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleUpload(file: File) {
@@ -48,6 +65,7 @@ export function OptimizerPanel({ initial }: OptimizerPanelProps) {
       } else {
         setRewrites(data.rewrites);
         setCreatedAt(new Date().toISOString());
+        setActiveId("headline");
       }
     } catch {
       setError("Network error — please try again.");
@@ -59,21 +77,142 @@ export function OptimizerPanel({ initial }: OptimizerPanelProps) {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) handleUpload(file);
-    // Reset input so re-uploading same file triggers onChange
     e.target.value = "";
   }
 
-  // Loaded state
-  if (rewrites && !loading) {
+  // Upload / loading state
+  if (!rewrites || loading) {
     return (
-      <div className="linkedin-panel">
-        <div className="linkedin-panel-meta">
-          <span className="linkedin-last-optimised">
-            Last optimised {createdAt ? timeAgo(createdAt) : "—"}
+      <div className="li-empty-wrap">
+        {loading ? (
+          <div className="li-loading-card">
+            <div className="li-spinner" aria-hidden="true" />
+            <p className="li-loading-title">Disha is reading your LinkedIn profile…</p>
+            <p className="li-loading-sub">Usually takes 15–25 seconds.</p>
+          </div>
+        ) : (
+          <div className="li-upload-card">
+            <div className="li-upload-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <h3 className="li-upload-title">Optimise your LinkedIn profile</h3>
+            <p className="li-upload-body">
+              Upload your LinkedIn PDF export. Disha will rewrite your headline, about section,
+              top roles, and skills list to improve recruiter discoverability in the NL market.
+            </p>
+            <label className="li-upload-btn">
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+              Upload PDF export
+            </label>
+            {error && <p className="li-error">{error}</p>}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const sections = buildSections(rewrites);
+
+  function renderContent() {
+    if (activeId === "headline") {
+      return (
+        <div className="li-content-pane">
+          <div className="li-content-eyebrow">Headline</div>
+          <p className="li-content-headline">{rewrites!.headline.text}</p>
+          <div className="li-content-actions">
+            <CopyButton text={rewrites!.headline.text} />
+          </div>
+          <div className="li-reasoning-block">
+            <span className="li-reasoning-label">Why this works</span>
+            <p className="li-reasoning-text">{rewrites!.headline.reasoning}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeId === "about") {
+      return (
+        <div className="li-content-pane">
+          <div className="li-content-eyebrow">About</div>
+          <p className="li-content-body">{rewrites!.about.text}</p>
+          <div className="li-content-actions">
+            <CopyButton text={rewrites!.about.text} />
+          </div>
+          <div className="li-reasoning-block">
+            <span className="li-reasoning-label">Why this works</span>
+            <p className="li-reasoning-text">{rewrites!.about.reasoning}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeId === "skills") {
+      return (
+        <div className="li-content-pane">
+          <div className="li-content-eyebrow">Skills</div>
+          <p className="li-content-body">{rewrites!.skills.text}</p>
+          <div className="li-content-actions">
+            <CopyButton text={rewrites!.skills.text} />
+          </div>
+          <div className="li-reasoning-block">
+            <span className="li-reasoning-label">Why this works</span>
+            <p className="li-reasoning-text">{rewrites!.skills.reasoning}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeId.startsWith("exp-")) {
+      const idx = parseInt(activeId.replace("exp-", ""), 10);
+      const exp = rewrites!.experience[idx];
+      if (!exp) return null;
+      return (
+        <div className="li-content-pane">
+          <div className="li-content-eyebrow">Experience</div>
+          <div className="li-exp-header">
+            <p className="li-exp-company">{exp.company}</p>
+            <p className="li-exp-role">{exp.role}</p>
+          </div>
+          <ul className="li-bullets">
+            {exp.bullets.map((bullet, j) => (
+              <li key={j} className="li-bullet-row">
+                <span className="li-bullet-dot" />
+                <span className="li-bullet-text">{bullet}</span>
+                <CopyButton text={bullet} />
+              </li>
+            ))}
+          </ul>
+          <div className="li-reasoning-block">
+            <span className="li-reasoning-label">Why this works</span>
+            <p className="li-reasoning-text">{exp.reasoning}</p>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  }
+
+  return (
+    <div className="li-panel">
+      {/* Left nav */}
+      <nav className="li-nav" aria-label="LinkedIn sections">
+        <div className="li-nav-meta">
+          <span className="li-nav-timestamp">
+            Optimised {createdAt ? timeAgo(createdAt) : "—"}
           </span>
           <button
             type="button"
-            className="linkedin-reupload-btn"
+            className="li-nav-reupload"
             onClick={() => fileInputRef.current?.click()}
           >
             Re-upload
@@ -87,98 +226,24 @@ export function OptimizerPanel({ initial }: OptimizerPanelProps) {
           />
         </div>
 
-        {error && <p className="linkedin-error">{error}</p>}
-
-        {/* Headline */}
-        <section className="linkedin-section">
-          <div className="linkedin-section-header">
-            <h3 className="linkedin-section-title">Headline</h3>
-          </div>
-          <div className="linkedin-rewrite-row">
-            <p className="linkedin-rewrite-text">{rewrites.headline.text}</p>
-            <CopyButton text={rewrites.headline.text} />
-          </div>
-          <p className="linkedin-reasoning">{rewrites.headline.reasoning}</p>
-        </section>
-
-        {/* About */}
-        <section className="linkedin-section">
-          <div className="linkedin-section-header">
-            <h3 className="linkedin-section-title">About</h3>
-          </div>
-          <div className="linkedin-rewrite-row linkedin-rewrite-row--block">
-            <p className="linkedin-rewrite-text">{rewrites.about.text}</p>
-            <CopyButton text={rewrites.about.text} />
-          </div>
-          <p className="linkedin-reasoning">{rewrites.about.reasoning}</p>
-        </section>
-
-        {/* Experience */}
-        {rewrites.experience.map((exp, i) => (
-          <section key={i} className="linkedin-section">
-            <div className="linkedin-section-header">
-              <h3 className="linkedin-section-title">Experience</h3>
-              <p className="linkedin-company-label">{exp.company}</p>
-              <p className="linkedin-role-label">{exp.role}</p>
-            </div>
-            <ul className="linkedin-bullets">
-              {exp.bullets.map((bullet, j) => (
-                <li key={j} className="linkedin-bullet-row">
-                  <span className="linkedin-bullet-text">{bullet}</span>
-                  <CopyButton text={bullet} />
-                </li>
-              ))}
-            </ul>
-            <p className="linkedin-reasoning">{exp.reasoning}</p>
-          </section>
+        {sections.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            className={`li-nav-item${activeId === s.id ? " li-nav-item--active" : ""}`}
+            onClick={() => setActiveId(s.id)}
+          >
+            <span className="li-nav-label">{s.label}</span>
+            {s.sublabel && <span className="li-nav-sublabel">{s.sublabel}</span>}
+          </button>
         ))}
+      </nav>
 
-        {/* Skills */}
-        <section className="linkedin-section">
-          <div className="linkedin-section-header">
-            <h3 className="linkedin-section-title">Skills</h3>
-          </div>
-          <div className="linkedin-rewrite-row linkedin-rewrite-row--block">
-            <p className="linkedin-rewrite-text">{rewrites.skills.text}</p>
-            <CopyButton text={rewrites.skills.text} />
-          </div>
-          <p className="linkedin-reasoning">{rewrites.skills.reasoning}</p>
-        </section>
-      </div>
-    );
-  }
-
-  // Upload state (no rewrites, or loading)
-  return (
-    <div className="linkedin-panel linkedin-panel--upload">
-      {loading ? (
-        <div className="linkedin-loading">
-          <div className="linkedin-spinner" aria-hidden="true" />
-          <p className="linkedin-loading-text">Disha is reading your profile…</p>
-          <p className="linkedin-loading-sub">Usually takes 15–25 seconds.</p>
-        </div>
-      ) : (
-        <>
-          <p className="linkedin-upload-prompt">
-            Upload your LinkedIn PDF export to get Disha&apos;s suggestions.
-          </p>
-          <label className="linkedin-upload-label">
-            <input
-              type="file"
-              accept=".pdf,application/pdf"
-              onChange={handleFileChange}
-              className="linkedin-upload-input"
-              disabled={loading}
-            />
-            <span className="linkedin-upload-btn">Upload PDF</span>
-          </label>
-          <p className="linkedin-upload-hint">
-            Disha will rewrite your headline, about section, top 3 roles,
-            and skills list for recruiter discoverability in the NL market.
-          </p>
-          {error && <p className="linkedin-error">{error}</p>}
-        </>
-      )}
+      {/* Right content */}
+      <main className="li-main">
+        {error && <p className="li-error">{error}</p>}
+        {renderContent()}
+      </main>
     </div>
   );
 }
