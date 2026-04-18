@@ -822,3 +822,277 @@
   color: var(--accent, #1D4A35);
   border-bottom-color: var(--accent, #1D4A35);
 }
+
+/* ── Hero card ─────────────────────────────────────────────── */
+.profile-hero {
+  background: #1D4A35;
+  border-radius: var(--r-xl);
+  padding: 28px 32px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: var(--s-8);
+}
+.profile-hero-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.profile-hero-body {
+  min-width: 0;
+}
+.profile-hero-name {
+  font-weight: 700;
+  font-size: 20px;
+  color: #fff;
+  letter-spacing: -0.4px;
+  margin-bottom: 3px;
+}
+.profile-hero-title {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 10px;
+}
+.profile-hero-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.profile-hero-meta-item {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.profile-hero-meta-link {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  text-decoration: none;
+}
+.profile-hero-meta-link:hover { color: #fff; }
+.profile-hero-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+.profile-hero-score {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.profile-hero-score-label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+}
+.profile-hero-edit {
+  display: inline-block;
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background var(--dur-150) var(--ease-io);
+}
+.profile-hero-edit:hover { background: rgba(255, 255, 255, 0.2); }
+@media (max-width: 900px) {
+  .profile-hero {
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    padding: 20px 22px;
+  }
+  .profile-hero-right { display: none; }
+  .profile-hero-name { font-size: 17px; }
+  .profile-hero-avatar { width: 48px; height: 48px; font-size: 20px; }
+}
+
+/* ── Timeline — current-role dot + show-more button ─────────── */
+.profile-timeline-dot--current {
+  background: var(--accent) !important;
+}
+.profile-timeline-more {
+  background: none;
+  border: none;
+  padding: 8px 0 0 0;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-body);
+  display: block;
+  margin-left: 0;
+}
+.profile-timeline-more:hover { text-decoration: underline; }
+
+/* ── Achievement metric cards ────────────────────────────────── */
+.profile-metric-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+.profile-metric-card {
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-a15);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.profile-metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 58px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.profile-metric-body {
+  min-width: 0;
+}
+.profile-metric-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 2px;
+}
+.profile-metric-context {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+/* ── Education + certifications card ─────────────────────────── */
+.profile-education-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+  margin-bottom: var(--s-8);
+}
+.profile-education-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+.profile-edu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.profile-edu-degree {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.profile-edu-institution {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-top: 1px;
+}
+.profile-edu-year {
+  font-size: 11px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.profile-cert-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* ── Sidebar — skill tags ────────────────────────────────────── */
+.profile-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── Sidebar — pipeline snapshot ─────────────────────────────── */
+.profile-pipeline-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-pipeline-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+.profile-pipeline-stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.profile-pipeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.profile-pipeline-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.profile-pipeline-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+.profile-pipeline-avg {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-2);
+  padding-top: 2px;
+}
+.profile-pipeline-avg-value {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ── Sidebar — next action nudge ─────────────────────────────── */
+.profile-next-action {
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-a15);
+  border-radius: var(--r-lg);
+  padding: 14px 18px;
+}
+.profile-next-action-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 5px;
+}
+.profile-next-action-text {
+  font-size: 12px;
+  color: #3D6B55;
+  line-height: 1.5;
+}
