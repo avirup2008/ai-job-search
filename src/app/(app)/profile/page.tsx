@@ -271,7 +271,6 @@ export default async function ProfilePage({
             <div className="profile-skill-tags">
               <EditableChipList
                 items={toolNames}
-                primaryCount={3}
                 addLabel="Add skill"
                 placeholder="e.g. Figma"
                 onAdd={addTool}

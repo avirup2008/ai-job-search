@@ -112,18 +112,14 @@
   gap: 8px;
 }
 .profile-chip {
-  padding: 5px 14px;
+  padding: 4px 12px;
   border-radius: var(--r-pill);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  color: var(--text-1);
-}
-.profile-chip-primary {
-  background: var(--accent-wash);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: 0.01em;
 }
 .profile-chip-add {
   padding: 5px 14px;
