@@ -120,5 +120,6 @@ export async function saveJobToPipeline(jobId: string) {
     await db.insert(schema.applications).values({ jobId, status: "saved" });
   }
   revalidatePath("/pipeline");
+  revalidatePath("/inbox");
   revalidatePath(`/inbox/${jobId}`);
 }

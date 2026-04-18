@@ -1,5 +1,5 @@
 import { db, schema } from "@/db";
-import { and, desc, gte, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 import { JobCard, type JobCardData } from "@/components/inbox/JobCard";
 import { QueueUrlForm } from "@/components/inbox/QueueUrlForm";
 import "@/components/inbox/inbox.css";
@@ -48,7 +48,8 @@ async function loadJobs(band: Band): Promise<JobCardData[]> {
     })
     .from(schema.jobs)
     .leftJoin(schema.companies, sql`${schema.jobs.companyId} = ${schema.companies.id}`)
-    .where(bandFilter(band))
+    .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+    .where(and(bandFilter(band), isNull(schema.applications.id)))
     .orderBy(desc(schema.jobs.fitScore), desc(schema.jobs.postedAt))
     .limit(200);
 
@@ -78,15 +79,18 @@ async function loadBandCounts(): Promise<Record<Band, number>> {
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.jobs)
-      .where(bandFilter("strong")),
+      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+      .where(and(bandFilter("strong"), isNull(schema.applications.id))),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.jobs)
-      .where(bandFilter("medium")),
+      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+      .where(and(bandFilter("medium"), isNull(schema.applications.id))),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.jobs)
-      .where(bandFilter("stretch")),
+      .leftJoin(schema.applications, sql`${schema.jobs.id} = ${schema.applications.jobId}`)
+      .where(and(bandFilter("stretch"), isNull(schema.applications.id))),
   ]);
 
   const strong = strongRows[0]?.count ?? 0;
