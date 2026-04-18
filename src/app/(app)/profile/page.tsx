@@ -3,6 +3,7 @@ import "@/components/profile/profile.css";
 import { EditableChipList } from "@/components/profile/EditableChipList";
 import { EditableAchievements } from "@/components/profile/EditableAchievements";
 import { addTool, removeTool, addAchievement, removeAchievement } from "./actions";
+import LinkedinPage from "./linkedin/page";
 
 export const dynamic = "force-dynamic";
 
@@ -42,18 +43,53 @@ function yearsFromRoles(roles: Role[]): number {
   return Math.max(total, 0);
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  // Resolve searchParams BEFORE any early return (Next.js 15 async API)
+  const params = await searchParams;
+  const activeTab = params.tab === "linkedin" ? "linkedin" : "profile";
+
+  // If LinkedIn tab, skip profile-row requirement entirely
+  if (activeTab === "linkedin") {
+    return (
+      <div className="profile-page">
+        <header className="profile-header">
+          <h1>Your profile</h1>
+          <nav className="profile-tabs" aria-label="Profile sections">
+            <a href="/profile" className="profile-tab">
+              Your profile
+            </a>
+            <a href="/profile?tab=linkedin" className="profile-tab profile-tab--active">
+              LinkedIn
+            </a>
+          </nav>
+        </header>
+        <LinkedinPage />
+      </div>
+    );
+  }
 
   const row = await loadProfile();
 
   if (!row) {
     return (
-      <>
+      <div className="profile-page">
         <header className="profile-header">
           <h1>Your profile</h1>
+          <nav className="profile-tabs" aria-label="Profile sections">
+            <a href="/profile" className="profile-tab profile-tab--active">
+              Your profile
+            </a>
+            <a href="/profile?tab=linkedin" className="profile-tab">
+              LinkedIn
+            </a>
+          </nav>
           <p className="profile-header-meta">No profile found. Run the seed script to get started.</p>
         </header>
-      </>
+      </div>
     );
   }
 
@@ -85,6 +121,14 @@ export default async function ProfilePage() {
     <>
       <header className="profile-header">
         <h1>Your profile</h1>
+        <nav className="profile-tabs" aria-label="Profile sections">
+          <a href="/profile" className="profile-tab profile-tab--active">
+            Your profile
+          </a>
+          <a href="/profile?tab=linkedin" className="profile-tab">
+            LinkedIn
+          </a>
+        </nav>
         <p className="profile-header-meta">
           This is what Disha knows about you. It powers every match score and generated document.
         </p>

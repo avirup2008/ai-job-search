@@ -154,3 +154,27 @@ export const llmBudget = pgTable("llm_budget", {
   capEur: numeric("cap_eur", { precision: 6, scale: 2 }).notNull().default("20"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// LinkedIn Profile Optimizer types
+export type LinkedinRewriteSection = { text: string; reasoning: string };
+export type LinkedinExperienceSection = {
+  company: string;
+  role: string;
+  bullets: string[];
+  reasoning: string;
+};
+export type LinkedinRewrites = {
+  headline: LinkedinRewriteSection;
+  about: LinkedinRewriteSection;
+  experience: LinkedinExperienceSection[];
+  skills: LinkedinRewriteSection;
+};
+
+export const linkedinOptimizations = pgTable("linkedin_optimizations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  rawText: text("raw_text").notNull(),
+  rewrites: jsonb("rewrites").$type<LinkedinRewrites>().notNull(),
+  tokenCost: numeric("token_cost", { precision: 10, scale: 6 }),
+  model: text("model"),
+});

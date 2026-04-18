@@ -34,6 +34,7 @@
     "openai": "^4.67.0",
     "p-limit": "^6.0.0",
     "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "resend": "^4.0.0",
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@types/fast-levenshtein": "^0.0.4",
     "@types/node": "^22.0.0",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitest/ui": "^2.1.0",
