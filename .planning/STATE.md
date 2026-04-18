@@ -66,6 +66,7 @@ Last activity: 2026-04-18
 | 260418-0332 | Wire full anti-AI guardrails into LinkedIn optimizer — retry loop, sanitize, expanded humanizer prompt | 2026-04-18 | 9b1ba33 | — | [260418-0332-linkedin-optimizer-anti-ai-guardrails](./quick/260418-0332-linkedin-optimizer-anti-ai-guardrails/) |
 | 260418-57a9 | Add "No longer available" button to inbox — expired status, removed from inbox + pipeline | 2026-04-18 | 53f3494 | — | [260418-57a9-no-longer-available-inbox](./quick/260418-57a9-no-longer-available-inbox/) |
 | 260418-krm | Add Upashana handoff guardrails to generation prompts | 2026-04-18 | 4a84f16 | Verified | [260418-krm-add-upashana-handoff-guardrails-to-gener](./quick/260418-krm-add-upashana-handoff-guardrails-to-gener/) |
+| 260418-l5c | Add roles-to-avoid soft penalty to job scoring pipeline | 2026-04-18 | c378528 | — | [260418-l5c-add-roles-to-avoid-soft-penalty-to-job-s](./quick/260418-l5c-add-roles-to-avoid-soft-penalty-to-job-s/) |
 
 ## Completed before GSD init
 
