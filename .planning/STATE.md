@@ -54,6 +54,7 @@ Last activity: 2026-04-18
 | 260417-kqy | Build polished Disha login page as app homepage | 2026-04-17 | c430e50 | — | [260417-kqy-build-polished-disha-login-page-as-app-h](./quick/260417-kqy-build-polished-disha-login-page-as-app-h/) |
 | 260417-o87 | Close Codex review gap 93→97+ (auth tests, diagnostics, storage contract, cleanup) | 2026-04-17 | 298f513 | Verified | [260417-o87-close-codex-review-gap-93-97-auth-tests-](./quick/260417-o87-close-codex-review-gap-93-97-auth-tests-/) |
 | 260418-apify | Replace indeed-nl RSS with Apify scraper (Cloudflare bypass) | 2026-04-18 | 3d939f1 | — | — |
+| 260418-hk3 | Add flag-as-bad-match button to inbox job cards | 2026-04-18 | e76b7df | — | [260418-hk3-add-flag-as-bad-match-button-to-inbox-jo](./quick/260418-hk3-add-flag-as-bad-match-button-to-inbox-jo/) |
 
 ## Completed before GSD init
 
