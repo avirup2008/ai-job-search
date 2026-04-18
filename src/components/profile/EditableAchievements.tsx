@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { RescoreNotice } from "./RescoreNotice";
 
-type DisplayAchievement = { description: string; metric?: string };
+type DisplayAchievement = { description: string; metric?: string; context?: string };
 
 interface EditableAchievementsProps {
   items: DisplayAchievement[];
@@ -45,21 +45,39 @@ export function EditableAchievements({ items, onAdd, onRemove }: EditableAchieve
             No achievements yet. Add a few — they power every match score.
           </p>
         )}
-        {items.map((a, i) => (
-          <div key={i} className="profile-achievement">
-            <span className="profile-achievement-desc">{a.description}</span>
-            {a.metric && <span className="profile-achievement-metric">{a.metric}</span>}
-            <button
-              type="button"
-              className="profile-achievement-remove"
-              aria-label="Remove achievement"
-              disabled={isPending}
-              onClick={() => remove(i)}
-            >
-              &times;
-            </button>
-          </div>
-        ))}
+        {items.map((a, i) =>
+          a.metric ? (
+            <div key={i} className="profile-metric-card">
+              <div className="profile-metric-value">{a.metric}</div>
+              <div className="profile-metric-body">
+                <div className="profile-metric-title">{a.description}</div>
+                {a.context && <div className="profile-metric-context">{a.context}</div>}
+              </div>
+              <button
+                type="button"
+                className="profile-achievement-remove profile-metric-remove"
+                aria-label="Remove achievement"
+                disabled={isPending}
+                onClick={() => remove(i)}
+              >
+                &times;
+              </button>
+            </div>
+          ) : (
+            <div key={i} className="profile-achievement">
+              <span className="profile-achievement-desc">{a.description}</span>
+              <button
+                type="button"
+                className="profile-achievement-remove"
+                aria-label="Remove achievement"
+                disabled={isPending}
+                onClick={() => remove(i)}
+              >
+                &times;
+              </button>
+            </div>
+          )
+        )}
 
         {adding ? (
           <div className="profile-achievement-form">

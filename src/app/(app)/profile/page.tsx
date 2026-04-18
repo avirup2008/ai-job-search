@@ -142,8 +142,6 @@ export default async function ProfilePage({
     hasLinkedin: Boolean(row.linkedinUrl),
   });
 
-  const metricAchievements = achievements.filter((a) => a.metric);
-
   const prefRows: Array<{ label: string; value: string }> = [];
   if (constraints.location) prefRows.push({ label: "Location", value: String(constraints.location) });
   if (constraints.workMode) prefRows.push({ label: "Work mode", value: String(constraints.workMode) });
@@ -228,29 +226,14 @@ export default async function ProfilePage({
             <ExperienceTimeline roles={roles} />
           </section>
 
-          {/* Achievement metric cards + editable list */}
+          {/* Achievement metric cards (editable) */}
           <section className="profile-section">
             <h2 className="profile-section-title">Key achievements</h2>
-            {metricAchievements.length > 0 && (
-              <div className="profile-metric-grid">
-                {metricAchievements.map((a, i) => (
-                  <div key={i} className="profile-metric-card">
-                    <div className="profile-metric-value">{a.metric}</div>
-                    <div className="profile-metric-body">
-                      <div className="profile-metric-title">{a.description}</div>
-                      {a.context && (
-                        <div className="profile-metric-context">{a.context}</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
             <EditableAchievements
               items={achievements.map((a) =>
                 typeof a === "string"
                   ? { description: a }
-                  : { description: a.description, metric: a.metric },
+                  : { description: a.description, metric: a.metric, context: a.context },
               )}
               onAdd={addAchievement}
               onRemove={removeAchievement}

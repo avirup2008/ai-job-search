@@ -968,6 +968,16 @@
 }
 .profile-metric-body {
   min-width: 0;
+  flex: 1;
+}
+.profile-metric-remove {
+  flex-shrink: 0;
+  opacity: 0;
+  margin-left: auto;
+}
+.profile-metric-card:hover .profile-metric-remove,
+.profile-metric-card:focus-within .profile-metric-remove {
+  opacity: 1;
 }
 .profile-metric-title {
   font-size: 13px;
