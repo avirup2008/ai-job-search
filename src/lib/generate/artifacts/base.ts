@@ -59,7 +59,7 @@ export async function runAntiAiLoop<T>(params: {
   narrativeOf: (data: T) => string;
 }): Promise<{ data: T; tokens: { in: number; out: number; cached: number }; costEur: number; attempts: number }> {
   const llm = getLLM();
-  const MAX = 5;
+  const MAX = 2;
   const acc = { in: 0, out: 0, cached: 0, cost: 0 };
   let last: { data: T } | null = null;
   let viols: ReturnType<typeof findViolations> = [];

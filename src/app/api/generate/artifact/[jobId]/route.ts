@@ -25,24 +25,12 @@ export async function POST(_req: Request, ctx: { params: Promise<{ jobId: string
       tier: job.tier ?? null,
     });
 
-    let secondaryInfo: { type: string; htmlUrl: string; publicSlug: string } | null = null;
-    if (picker.secondary) {
-      const sec = await generateArtifact(jobId, picker.secondary);
-      const storedSec = await storeArtifact({
-        applicationId: app.id,
-        artifactType: picker.secondary,
-        html: sec.html,
-        tokenCostEur: sec.costEur,
-        tier: job.tier ?? null,
-      });
-      secondaryInfo = { type: picker.secondary, htmlUrl: storedSec.htmlUrl, publicSlug: storedSec.publicSlug };
-    }
-
+    // Secondary artifact skipped — Hobby plan 60s limit; primary alone can take 30-40s.
     return NextResponse.json({
       ok: true,
       picker,
       primary: { type: picker.primary, ...storedPrimary, attempts: primary.attempts, costEur: primary.costEur },
-      secondary: secondaryInfo,
+      secondary: null,
     });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
