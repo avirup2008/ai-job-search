@@ -11,7 +11,7 @@ export function SaveButton({ jobId }: { jobId: string }) {
   const anyPending = isSavePending || isFlagPending || isExpiredPending;
 
   return (
-    <>
+    <div className="job-card-btn-stack">
       <button
         className="save-btn"
         disabled={anyPending}
@@ -21,7 +21,7 @@ export function SaveButton({ jobId }: { jobId: string }) {
           startSaveTransition(() => saveJobToPipeline(jobId));
         }}
       >
-        {isSavePending ? "Saving\u2026" : "Save \u2192"}
+        {isSavePending ? "Saving…" : "Save →"}
       </button>
       <button
         className="flag-btn"
@@ -32,7 +32,7 @@ export function SaveButton({ jobId }: { jobId: string }) {
           startFlagTransition(() => flagJobAsBadMatch(jobId));
         }}
       >
-        {isFlagPending ? "Flagging\u2026" : "Not a fit"}
+        {isFlagPending ? "Flagging…" : "Not a fit"}
       </button>
       <button
         className="expired-btn"
@@ -43,8 +43,8 @@ export function SaveButton({ jobId }: { jobId: string }) {
           startExpiredTransition(() => markAsExpired(jobId));
         }}
       >
-        {isExpiredPending ? "Removing\u2026" : "No longer available"}
+        {isExpiredPending ? "Removing…" : "No longer available"}
       </button>
-    </>
+    </div>
   );
 }

@@ -234,28 +234,34 @@
   align-items: center;
   padding-right: 20px;
 }
+
+.job-card-btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  min-width: 148px;
+}
+
 .save-btn {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--accent);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px 8px;
+  background: #eef5f1;
+  border: 1px solid #b8d5c6;
+  color: #1D4A35;
   border-radius: var(--r-md);
+  padding: 6px 12px;
+  cursor: pointer;
   white-space: nowrap;
-  opacity: 0.55;           /* a11y: visible at rest on touch/keyboard */
-  transition: opacity var(--dur-150) var(--ease-io), background var(--dur-150) var(--ease-io);
+  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
+  text-align: center;
 }
-.job-card:hover .save-btn,
-.save-btn:focus-visible {
-  opacity: 1;
-}
-.save-btn:hover {
-  background: var(--accent-wash);
+.save-btn:hover:not(:disabled) {
+  background: #d9ede4;
+  border-color: #8dbfaa;
 }
 .save-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: default;
 }
 
@@ -267,8 +273,9 @@
   padding: 6px 12px;
   font-size: 0.8125rem;
   cursor: pointer;
-  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
   white-space: nowrap;
+  text-align: center;
+  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
 }
 .flag-btn:hover:not(:disabled) {
   background: #fde8e6;
@@ -287,12 +294,9 @@
   padding: 6px 12px;
   font-size: 0.8125rem;
   cursor: pointer;
-  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
   white-space: nowrap;
-}
-.job-card:hover .expired-btn,
-.expired-btn:focus-visible {
-  opacity: 1;
+  text-align: center;
+  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
 }
 .expired-btn:hover:not(:disabled) {
   background: #eceae5;
