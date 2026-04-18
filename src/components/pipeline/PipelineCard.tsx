@@ -24,6 +24,7 @@ const STAGE_LABEL: Record<PipelineStage, string> = {
   offer: "Offer",
   rejected: "Rejected",
   flagged: "Not a fit",
+  expired: "No longer available",
 };
 
 // Stages shown as normal options; "flagged" is rendered separately below a divider
