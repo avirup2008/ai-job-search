@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import { eq, isNotNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { assessJob } from "@/lib/pipeline/rank";
 import { assignTier } from "@/lib/pipeline/tier";
@@ -40,10 +40,11 @@ export async function rescoreMatchedJobs(): Promise<{ updated: number; costEur: 
     phone: profileRow.phone ?? undefined,
   };
 
+  // Fetch all jobs — tier may be null on first run (production DB may have no tier set yet).
+  // assessJob + assignTier will set the correct tier for every job.
   const jobs = await db
     .select({ id: schema.jobs.id, jdText: schema.jobs.jdText, title: schema.jobs.title })
-    .from(schema.jobs)
-    .where(isNotNull(schema.jobs.tier));
+    .from(schema.jobs);
 
   if (jobs.length === 0) return { updated: 0, costEur: 0 };
 
