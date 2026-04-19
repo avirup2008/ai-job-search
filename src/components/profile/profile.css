@@ -350,13 +350,18 @@
 .profile-pref-row:last-child { border-bottom: none; }
 .profile-pref-label { color: var(--text-2); }
 .profile-pref-value { color: var(--text-1); font-weight: 500; }
-.profile-pref-edit {
-  font-size: 12px;
-  color: var(--text-3);
-  margin-left: 8px;
-  cursor: not-allowed;
-  opacity: 0.5;
+.profile-pref-edit-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  opacity: 0.8;
 }
+.profile-pref-edit-btn:hover { opacity: 1; text-decoration: underline; text-underline-offset: 2px; }
 
 /* Explainer */
 .profile-explainer {
@@ -1288,4 +1293,75 @@
 .profile-star-text {
   color: var(--text-2);
   line-height: 1.55;
+}
+
+/* ── Hero edit mode ──────────────────────────────────────────── */
+.profile-hero--editing {
+  align-items: flex-start;
+}
+.profile-hero-edit-grid {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 8px 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.profile-hero-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.profile-hero-input {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: var(--r-md);
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--font-body);
+  padding: 6px 10px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.profile-hero-input::placeholder { color: rgba(255,255,255,0.35); }
+.profile-hero-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); }
+.profile-hero-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Search prefs edit mode ──────────────────────────────────── */
+.profile-prefs-edit {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 8px 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.profile-pref-edit-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.profile-pref-input {
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--text-1);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 6px 10px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.profile-pref-input:focus { border-color: var(--accent); }
+.profile-pref-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }

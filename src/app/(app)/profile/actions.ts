@@ -79,6 +79,54 @@ export async function removeAchievement(index: number): Promise<void> {
   await triggerRescore();
 }
 
+export async function updateHero(data: {
+  fullName: string;
+  headline: string;
+  linkedinUrl: string;
+  portfolioUrl: string;
+}): Promise<void> {
+  const row = await loadRow();
+  await db
+    .update(schema.profile)
+    .set({
+      fullName: data.fullName.trim() || null,
+      headline: data.headline.trim() || null,
+      linkedinUrl: data.linkedinUrl.trim() || null,
+      portfolioUrl: data.portfolioUrl.trim() || null,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.profile.id, row.id));
+  revalidatePath("/profile");
+  revalidatePath("/inbox");
+  await triggerRescore();
+}
+
+export async function updateSearchPrefs(data: {
+  location: string;
+  workMode: string;
+  salaryFloor: string;
+  availability: string;
+  dutchLevel: string;
+}): Promise<void> {
+  const row = await loadRow();
+  const constraints = { ...((row.constraints as Record<string, unknown>) ?? {}) };
+  const preferences = { ...((row.preferences as Record<string, unknown>) ?? {}) };
+
+  if (data.location.trim()) constraints.location = data.location.trim(); else delete constraints.location;
+  if (data.workMode.trim()) constraints.workMode = data.workMode.trim(); else delete constraints.workMode;
+  if (data.salaryFloor.trim()) constraints.salaryFloor = data.salaryFloor.trim(); else delete constraints.salaryFloor;
+  if (data.availability.trim()) constraints.availability = data.availability.trim(); else delete constraints.availability;
+  if (data.dutchLevel.trim()) preferences.dutchLevel = data.dutchLevel.trim(); else delete preferences.dutchLevel;
+
+  await db
+    .update(schema.profile)
+    .set({ constraints, preferences, updatedAt: new Date() })
+    .where(eq(schema.profile.id, row.id));
+  revalidatePath("/profile");
+  revalidatePath("/inbox");
+  await triggerRescore();
+}
+
 export async function generateStarStories(): Promise<void> {
   const row = await loadRow();
 

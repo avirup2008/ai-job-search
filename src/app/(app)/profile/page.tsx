@@ -6,6 +6,8 @@ import { EditableAchievements } from "@/components/profile/EditableAchievements"
 import { ExperienceTimeline } from "@/components/profile/ExperienceTimeline";
 import { addTool, removeTool, addAchievement, removeAchievement } from "./actions";
 import { StarStoriesPanel } from "@/components/profile/StarStoriesPanel";
+import { EditableHero } from "@/components/profile/EditableHero";
+import { EditableSearchPrefs } from "@/components/profile/EditableSearchPrefs";
 import LinkedinPage from "./linkedin/page";
 
 type StarStory = {
@@ -182,46 +184,14 @@ export default async function ProfilePage({
       </header>
 
       {/* Hero card */}
-      <div className="profile-hero">
-        <div className="profile-hero-avatar" aria-hidden="true">
-          {initial(row.fullName)}
-        </div>
-        <div className="profile-hero-body">
-          <div className="profile-hero-name">{row.fullName ?? "Unnamed"}</div>
-          {row.headline && <div className="profile-hero-title">{row.headline}</div>}
-          {(row.linkedinUrl || row.portfolioUrl) && (
-            <div className="profile-hero-meta">
-              {row.linkedinUrl && (
-                <a
-                  href={row.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="profile-hero-meta-link"
-                >
-                  LinkedIn ↗
-                </a>
-              )}
-              {row.portfolioUrl && (
-                <a
-                  href={row.portfolioUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="profile-hero-meta-link"
-                >
-                  Portfolio ↗
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="profile-hero-right">
-          <div className="profile-hero-score">{profileStrength}%</div>
-          <div className="profile-hero-score-label">Profile strength</div>
-          <button className="profile-hero-edit" disabled>
-            Edit profile
-          </button>
-        </div>
-      </div>
+      <EditableHero
+        fullName={row.fullName}
+        headline={row.headline}
+        linkedinUrl={row.linkedinUrl}
+        portfolioUrl={row.portfolioUrl}
+        profileStrength={profileStrength}
+        initial={initial(row.fullName)}
+      />
 
       <div className="profile-layout">
         {/* Left column */}
@@ -332,22 +302,13 @@ export default async function ProfilePage({
           </div>
 
           {/* Search preferences */}
-          {prefRows.length > 0 && (
-            <div className="profile-aside-card">
-              <h3 className="profile-section-title">Search preferences</h3>
-              <div className="profile-prefs">
-                {prefRows.map((p) => (
-                  <div key={p.label} className="profile-pref-row">
-                    <span className="profile-pref-label">{p.label}</span>
-                    <span>
-                      <span className="profile-pref-value">{p.value}</span>
-                      <span className="profile-pref-edit">edit</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <EditableSearchPrefs
+            location={String(constraints.location ?? "")}
+            workMode={String(constraints.workMode ?? "")}
+            salaryFloor={String(constraints.salaryFloor ?? "")}
+            availability={String(constraints.availability ?? "")}
+            dutchLevel={String(preferences.dutchLevel ?? "")}
+          />
         </aside>
       </div>
     </>
