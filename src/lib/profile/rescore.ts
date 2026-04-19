@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import { eq, isNull, sql } from "drizzle-orm";
+import { eq, isNull, and, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { assessJob } from "@/lib/pipeline/rank";
 import { assignTier } from "@/lib/pipeline/tier";
@@ -47,18 +47,22 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
     phone: profileRow.phone ?? undefined,
   };
 
-  // Count how many jobs still need scoring so we can report remaining.
+  // Only consider jobs that passed hard filters (no dutch_required / seniority_mismatch etc.)
+  const eligibleWhere = isNull(schema.jobs.hardFilterReason);
+
+  // Count how many eligible jobs still need scoring so we can report remaining.
   const [{ unscoredTotal }] = await db
     .select({ unscoredTotal: sql<number>`count(*)` })
     .from(schema.jobs)
-    .where(isNull(schema.jobs.fitScore));
+    .where(and(eligibleWhere, isNull(schema.jobs.fitScore)));
 
   const remaining = Math.max(0, Number(unscoredTotal) - BATCH_SIZE);
 
-  // Fetch next batch: unscored jobs first, then newest discovered.
+  // Fetch next batch: unscored eligible jobs first, then newest discovered.
   const jobs = await db
     .select({ id: schema.jobs.id, jdText: schema.jobs.jdText, title: schema.jobs.title })
     .from(schema.jobs)
+    .where(eligibleWhere)
     .orderBy(
       sql`${schema.jobs.fitScore} IS NOT NULL`,  // nulls (unscored) first
       sql`${schema.jobs.discoveredAt} DESC`,      // newest postings first
