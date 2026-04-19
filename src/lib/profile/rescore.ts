@@ -13,13 +13,14 @@ export interface RescoreResult {
   costEur: number;
   profileFound: boolean;
   jobCount: number;
+  firstError?: string;
 }
 
 /**
  * Rescore all jobs in the DB against the latest profile.
  *
  * Runs Haiku fit assessment on each job, updates fitScore/fitBreakdown/gapAnalysis/tier.
- * Returns diagnostic counts so callers can surface "no profile" vs "no jobs" to the UI.
+ * Returns diagnostic counts so callers can surface "no profile" vs "no jobs" vs errors.
  */
 export async function rescoreMatchedJobs(): Promise<RescoreResult> {
   const [profileRow] = await db.select().from(schema.profile).limit(1);
@@ -55,10 +56,20 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
     return { updated: 0, costEur: 0, profileFound: true, jobCount: 0 };
   }
 
+  // Probe: run assessJob on the first job outside the catch to surface the real error.
+  try {
+    await assessJob({ jdText: jobs[0].jdText, jobTitle: jobs[0].title, profile });
+  } catch (probeErr) {
+    const msg = probeErr instanceof Error ? probeErr.message : String(probeErr);
+    console.error(`[rescore-probe] assessJob failed on first job: ${msg}`);
+    return { updated: 0, costEur: 0, profileFound: true, jobCount: jobs.length, firstError: msg };
+  }
+
   // Track cost via budget delta — assessJob() records spend via gateway internally.
   const before = await getBudget(20);
   const limit = pLimit(RESCORE_CONCURRENCY);
   let updated = 0;
+  let firstError: string | undefined;
 
   await Promise.all(
     jobs.map((j) =>
@@ -85,6 +96,7 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
           updated++;
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
+          if (!firstError) firstError = msg;
           console.error(`[rescore-failed] ${j.id} "${j.title.slice(0, 50)}": ${msg.slice(0, 200)}`);
         }
       }),
@@ -93,5 +105,5 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
 
   const after = await getBudget(20);
   const costEur = Math.max(0, after.eurSpent - before.eurSpent);
-  return { updated, costEur, profileFound: true, jobCount: jobs.length };
+  return { updated, costEur, profileFound: true, jobCount: jobs.length, firstError };
 }
