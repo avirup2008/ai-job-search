@@ -9,10 +9,10 @@ export interface FitComponents {
 }
 
 export const WEIGHTS: FitComponents = {
-  skills: 0.40,
+  skills: 0.55,
   tools: 0.30,
-  seniority: 0.15,
-  industry: 0.15,
+  seniority: 0.10,
+  industry: 0.05,
 };
 
 function clamp01(v: number): number {
@@ -65,7 +65,12 @@ const SYSTEM_PROMPT = `You are an expert job-fit analyst for a single candidate 
 You assess how well a role matches THIS candidate. You MUST:
 - Rate each component 0..1 based on concrete signals in the JD vs the profile.
 - NEVER fabricate experience or claim tools the candidate doesn't have.
-- Mark seniority score high (>=0.8) for mid/senior/manager/lead; low (<=0.3) for director/VP/C-level or intern/junior.
+- Seniority score MUST follow these exact ranges — no exceptions:
+  • manager / lead / senior → 0.85–1.0
+  • mid-level → 0.65–0.80
+  • junior / intern → 0.05–0.25
+  • director / VP / C-level → 0.05–0.25
+  Do NOT score a manager or lead role below 0.85.
 - The candidate's commute has been pre-verified — do not re-evaluate geography. Score purely on skills/tools/seniority/industry fit.
 - Keep strengths/gaps concrete, not generic.
 - Recommendation will be derived from the overall fit score — you only need to populate components and strengths/gaps honestly.
