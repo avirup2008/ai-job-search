@@ -71,8 +71,10 @@ export default function TriggerRunClient() {
         runningLabel="Rescoring… (may take a minute)"
         endpoint="/api/admin/rescore-all"
         formatResult={(body) => {
-          const b = body as { updated?: number; costEur?: number; ms?: number };
-          return `Rescored ${b.updated ?? 0} jobs — €${(b.costEur ?? 0).toFixed(4)} — ${b.ms ?? 0}ms`;
+          const b = body as { updated?: number; costEur?: number; ms?: number; profileFound?: boolean; jobCount?: number };
+          if (b.profileFound === false) return `No profile found in DB — nothing to rescore`;
+          if (b.jobCount === 0) return `No jobs found in DB (jobCount=0)`;
+          return `Rescored ${b.updated ?? 0} / ${b.jobCount ?? "?"} jobs — €${(b.costEur ?? 0).toFixed(4)} — ${b.ms ?? 0}ms`;
         }}
       />
     </div>

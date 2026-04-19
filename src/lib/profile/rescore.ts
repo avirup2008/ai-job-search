@@ -8,20 +8,24 @@ import type { Profile } from "@/lib/profile/types";
 
 const RESCORE_CONCURRENCY = 3;
 
+export interface RescoreResult {
+  updated: number;
+  costEur: number;
+  profileFound: boolean;
+  jobCount: number;
+}
+
 /**
- * Rescore all currently-matched jobs (tier 1/2/3) against the latest profile.
+ * Rescore all jobs in the DB against the latest profile.
  *
- * Runs Haiku fit assessment on each job, updates fitScore/fitBreakdown/gapAnalysis/tier,
- * and returns the number of rows updated plus the EUR delta spent on this rescore pass.
- *
- * Designed to be invoked fire-and-forget from server actions after a profile edit —
- * does not throw on individual job failures (logs and continues).
+ * Runs Haiku fit assessment on each job, updates fitScore/fitBreakdown/gapAnalysis/tier.
+ * Returns diagnostic counts so callers can surface "no profile" vs "no jobs" to the UI.
  */
-export async function rescoreMatchedJobs(): Promise<{ updated: number; costEur: number }> {
+export async function rescoreMatchedJobs(): Promise<RescoreResult> {
   const [profileRow] = await db.select().from(schema.profile).limit(1);
   if (!profileRow) {
     console.warn("[rescore] no profile row — skipping");
-    return { updated: 0, costEur: 0 };
+    return { updated: 0, costEur: 0, profileFound: false, jobCount: 0 };
   }
 
   const profile: Profile = {
@@ -40,13 +44,16 @@ export async function rescoreMatchedJobs(): Promise<{ updated: number; costEur: 
     phone: profileRow.phone ?? undefined,
   };
 
-  // Fetch all jobs — tier may be null on first run (production DB may have no tier set yet).
-  // assessJob + assignTier will set the correct tier for every job.
+  // Fetch all jobs — no tier filter; first run in production has tier=null everywhere.
   const jobs = await db
     .select({ id: schema.jobs.id, jdText: schema.jobs.jdText, title: schema.jobs.title })
     .from(schema.jobs);
 
-  if (jobs.length === 0) return { updated: 0, costEur: 0 };
+  console.log(`[rescore] profile found, jobCount=${jobs.length}`);
+
+  if (jobs.length === 0) {
+    return { updated: 0, costEur: 0, profileFound: true, jobCount: 0 };
+  }
 
   // Track cost via budget delta — assessJob() records spend via gateway internally.
   const before = await getBudget(20);
@@ -86,5 +93,5 @@ export async function rescoreMatchedJobs(): Promise<{ updated: number; costEur: 
 
   const after = await getBudget(20);
   const costEur = Math.max(0, after.eurSpent - before.eurSpent);
-  return { updated, costEur };
+  return { updated, costEur, profileFound: true, jobCount: jobs.length };
 }
