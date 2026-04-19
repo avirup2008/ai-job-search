@@ -39,6 +39,19 @@ describe("env per-feature loaders", () => {
     expect(() => loadAdminEnv()).toThrow(/at least 32 characters/);
   });
 
+  it("loadRetentionEnv defaults RETENTION_DRY_RUN to 'true'", async () => {
+    delete process.env.RETENTION_DRY_RUN;
+    const { loadRetentionEnv } = await import("@/lib/env");
+    expect(loadRetentionEnv().RETENTION_DRY_RUN).toBe("true");
+  });
+
+  it("loadRetentionEnv accepts 'false' to enable real deletion", async () => {
+    process.env.RETENTION_DRY_RUN = "false";
+    const { loadRetentionEnv } = await import("@/lib/env");
+    expect(loadRetentionEnv().RETENTION_DRY_RUN).toBe("false");
+    delete process.env.RETENTION_DRY_RUN;
+  });
+
   it("loaders cache results — second call does not re-validate", async () => {
     process.env.DATABASE_URL = "postgres://first";
     const { loadDbEnv } = await import("@/lib/env");
