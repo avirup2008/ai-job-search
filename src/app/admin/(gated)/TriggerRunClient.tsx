@@ -67,6 +67,15 @@ export default function TriggerRunClient() {
         }
       />
       <ActionButton
+        label="Clean filtered jobs from inbox"
+        runningLabel="Cleaning…"
+        endpoint="/api/admin/clean-filtered"
+        formatResult={(body) => {
+          const b = body as { cleaned?: number };
+          return `Removed tier from ${b.cleaned ?? 0} filtered jobs ✓`;
+        }}
+      />
+      <ActionButton
         label="Rescore next 12 jobs"
         runningLabel="Rescoring batch… (~30s)"
         endpoint="/api/admin/rescore-all"
