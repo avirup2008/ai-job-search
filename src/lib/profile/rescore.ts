@@ -15,8 +15,9 @@ export interface RescoreResult {
   updated: number;
   costEur: number;
   profileFound: boolean;
-  jobCount: number;   // jobs processed this batch
-  remaining: number;  // unscored jobs still left after this batch
+  jobCount: number;    // jobs processed this batch
+  remaining: number;   // unscored eligible jobs still left after this batch
+  totalEligible: number; // total eligible jobs (no hard filter)
   firstError?: string;
 }
 
@@ -28,7 +29,7 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
   const [profileRow] = await db.select().from(schema.profile).limit(1);
   if (!profileRow) {
     console.warn("[rescore] no profile row — skipping");
-    return { updated: 0, costEur: 0, profileFound: false, jobCount: 0, remaining: 0 };
+    return { updated: 0, costEur: 0, profileFound: false, jobCount: 0, remaining: 0, totalEligible: 0 };
   }
 
   const profile: Profile = {
@@ -50,13 +51,18 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
   // Only consider jobs that passed hard filters (no dutch_required / seniority_mismatch etc.)
   const eligibleWhere = isNull(schema.jobs.hardFilterReason);
 
-  // Count how many eligible jobs still need scoring so we can report remaining.
-  const [{ unscoredTotal }] = await db
-    .select({ unscoredTotal: sql<number>`count(*)` })
-    .from(schema.jobs)
-    .where(and(eligibleWhere, isNull(schema.jobs.fitScore)));
+  // Count totals for reporting.
+  const [[{ unscoredTotal }], [{ totalEligible }]] = await Promise.all([
+    db.select({ unscoredTotal: sql<number>`count(*)` })
+      .from(schema.jobs)
+      .where(and(eligibleWhere, isNull(schema.jobs.fitScore))),
+    db.select({ totalEligible: sql<number>`count(*)` })
+      .from(schema.jobs)
+      .where(eligibleWhere),
+  ]);
 
-  const remaining = Math.max(0, Number(unscoredTotal) - BATCH_SIZE);
+  const unscored = Number(unscoredTotal);
+  const remaining = Math.max(0, unscored - BATCH_SIZE);
 
   // Fetch next batch: unscored eligible jobs first, then newest discovered.
   const jobs = await db
@@ -69,10 +75,10 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
     )
     .limit(BATCH_SIZE);
 
-  console.log(`[rescore] profile found, batch=${jobs.length}, unscoredTotal=${unscoredTotal}`);
+  console.log(`[rescore] profile found, batch=${jobs.length}, unscored=${unscored}, totalEligible=${totalEligible}`);
 
   if (jobs.length === 0) {
-    return { updated: 0, costEur: 0, profileFound: true, jobCount: 0, remaining: 0 };
+    return { updated: 0, costEur: 0, profileFound: true, jobCount: 0, remaining: 0, totalEligible: Number(totalEligible) };
   }
 
   const before = await getBudget(20);
@@ -114,5 +120,5 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
 
   const after = await getBudget(20);
   const costEur = Math.max(0, after.eurSpent - before.eurSpent);
-  return { updated, costEur, profileFound: true, jobCount: jobs.length, remaining, firstError };
+  return { updated, costEur, profileFound: true, jobCount: jobs.length, remaining, totalEligible: Number(totalEligible), firstError };
 }

@@ -80,13 +80,15 @@ export default function TriggerRunClient() {
         runningLabel="Rescoring batch… (~30s)"
         endpoint="/api/admin/rescore-all"
         formatResult={(body) => {
-          const b = body as { updated?: number; costEur?: number; ms?: number; profileFound?: boolean; jobCount?: number; remaining?: number; firstError?: string };
+          const b = body as { updated?: number; costEur?: number; ms?: number; profileFound?: boolean; jobCount?: number; remaining?: number; totalEligible?: number; firstError?: string };
           if (b.profileFound === false) return `No profile found in DB — nothing to rescore`;
-          if (b.jobCount === 0) return `All jobs already scored ✓`;
+          if (b.jobCount === 0) return `All ${b.totalEligible ?? 0} eligible jobs already scored ✓`;
           if (b.firstError) return `ERROR: ${b.firstError}`;
           const rem = b.remaining ?? 0;
-          const suffix = rem > 0 ? ` — ${rem} still unscored, click again` : ` — all done ✓`;
-          return `Scored ${b.updated ?? 0} / ${b.jobCount ?? "?"} — €${(b.costEur ?? 0).toFixed(4)} — ${b.ms ?? 0}ms${suffix}`;
+          const secs = ((b.ms ?? 0) / 1000).toFixed(1);
+          const progress = `${(b.totalEligible ?? 0) - rem} / ${b.totalEligible ?? "?"} scored`;
+          const suffix = rem > 0 ? ` — ${rem} remaining, click again` : ` — all done ✓`;
+          return `Batch: ${b.updated ?? 0} scored — €${(b.costEur ?? 0).toFixed(4)} — ${secs}s — ${progress}${suffix}`;
         }}
       />
     </div>
