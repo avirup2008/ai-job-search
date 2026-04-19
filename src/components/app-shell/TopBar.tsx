@@ -50,6 +50,14 @@ export function TopBar() {
           + Paste a role
         </button>
       </div>
+      <Link
+        href="/admin"
+        className="btn-ghost"
+        style={{ fontSize: 13, padding: "6px 12px" }}
+        title="Admin panel"
+      >
+        ⚙
+      </Link>
       <button
         className="btn-ghost"
         onClick={handleSignOut}
