@@ -68,12 +68,11 @@ const FitAssessmentSchema = z.object({
       "Score on what IS demonstrated — do not penalise for unlisted skills if core duties match."
     ),
     tools: z.number().min(0).max(1).describe(
-      "Tool/platform capability overlap — score on CAPABILITY not brand names. " +
-      "These are direct transfers: HubSpot↔Salesforce, GA↔Mixpanel, Meta Ads↔LinkedIn Ads, " +
-      "Mailchimp↔Klaviyo, Looker↔Tableau. " +
-      "0.80–1.0 = core tools match or directly transfer. " +
-      "0.55–0.80 = majority match or transfer; some new tooling needed. " +
-      "0.30–0.55 = significant new tooling required across most of the role."
+      "Tool/platform overlap. Score exact matches higher than transfers — switching platforms has a real ramp cost. " +
+      "0.85–1.0 = candidate uses the exact tools named in the JD. " +
+      "0.65–0.80 = same-category transfer (e.g. HubSpot→Salesforce, GA→Mixpanel, Meta Ads→LinkedIn Ads, Mailchimp→Klaviyo, Looker→Tableau) — capability transfers but there is a learning curve. " +
+      "0.40–0.65 = adjacent tooling; meaningful ramp required. " +
+      "0.10–0.40 = largely different toolset with little overlap."
     ),
     seniority: z.number().min(0).max(1).describe("Level match. 1 = mid/senior/manager. 0 = director+ or intern/junior."),
     industry: z.number().min(0).max(1).describe("Industry overlap with candidate's background."),
@@ -104,10 +103,9 @@ SKILLS scoring rules:
 - If >80% of core duties directly match, score 0.85–1.0. Don't let minor gaps drag a strong match below 0.75.
 
 TOOLS scoring rules:
-- Score on demonstrated CAPABILITY, not brand loyalty. Treat these as direct transfers:
-  HubSpot ↔ Salesforce, Google Analytics ↔ Mixpanel/Amplitude, Meta Ads ↔ LinkedIn Ads,
-  Mailchimp ↔ Klaviyo, Looker ↔ Tableau ↔ Power BI, WordPress ↔ Webflow.
-- A candidate who has mastered one platform in a category can learn the equivalent in weeks.
+- Exact tool match = highest score. Same-category platform transfer = partial credit (0.65–0.80) because there IS a real learning curve.
+- These count as same-category transfers (not exact matches): HubSpot↔Salesforce, GA↔Mixpanel/Amplitude, Meta Ads↔LinkedIn Ads, Mailchimp↔Klaviyo, Looker↔Tableau↔Power BI, WordPress↔Webflow.
+- Do NOT score a transfer the same as an exact match — the candidate still needs to ramp on the new tool.
 
 SENIORITY score MUST follow these exact ranges — no exceptions:
   • manager / lead / senior → 0.85–1.0
