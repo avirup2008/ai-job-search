@@ -290,6 +290,47 @@
   user-select: none;
 }
 
+/* 3-button vertical stack (SaveButton) */
+.job-card-btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 148px;
+}
+.save-btn,
+.flag-btn,
+.expired-btn {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  transition: opacity var(--dur-150) var(--ease-io), transform var(--dur-150) var(--ease-io);
+}
+.save-btn {
+  background: var(--accent);
+  color: #fff;
+}
+.save-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.flag-btn {
+  background: #ffe4e6;
+  color: #b91c1c;
+}
+.flag-btn:hover:not(:disabled) { opacity: 0.85; }
+.expired-btn {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.expired-btn:hover:not(:disabled) { background: var(--surface-3, #e5e7eb); }
+.save-btn:disabled,
+.flag-btn:disabled,
+.expired-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
 .inbox-empty {
   background: var(--surface);
   border: 1px dashed var(--border);
