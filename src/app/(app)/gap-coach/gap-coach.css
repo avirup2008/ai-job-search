@@ -139,8 +139,17 @@
 
 .gap-coach-score-delta {
   font-size: 11px;
-  color: var(--text-3);
+  font-weight: 600;
   white-space: nowrap;
+  margin-top: 4px;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.gap-coach-score-delta--ready {
+  background: #dcfce7;
+  color: #15803d;
 }
 
 /* Empty state */

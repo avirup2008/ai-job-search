@@ -82,7 +82,7 @@ export function GapCoachList({ rows }: { rows: GapCoachRow[] }) {
                 <div className="gap-coach-score-num mono">
                   {Math.round(r.fitScore)}%
                 </div>
-                <div className="gap-coach-score-delta">
+                <div className={`gap-coach-score-delta${r.closenessDelta === 0 ? " gap-coach-score-delta--ready" : ""}`}>
                   {r.closenessDelta === 0 ? "T1 ready" : `−${r.closenessDelta} to T1`}
                 </div>
               </div>
