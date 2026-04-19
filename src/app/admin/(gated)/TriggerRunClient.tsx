@@ -67,15 +67,17 @@ export default function TriggerRunClient() {
         }
       />
       <ActionButton
-        label="Rescore all jobs (new weights / prompt)"
-        runningLabel="Rescoring… (may take a minute)"
+        label="Rescore next 15 jobs"
+        runningLabel="Rescoring batch… (~15s)"
         endpoint="/api/admin/rescore-all"
         formatResult={(body) => {
-          const b = body as { updated?: number; costEur?: number; ms?: number; profileFound?: boolean; jobCount?: number; firstError?: string };
+          const b = body as { updated?: number; costEur?: number; ms?: number; profileFound?: boolean; jobCount?: number; remaining?: number; firstError?: string };
           if (b.profileFound === false) return `No profile found in DB — nothing to rescore`;
-          if (b.jobCount === 0) return `No jobs found in DB (jobCount=0)`;
-          if (b.firstError) return `ERROR (0 scored): ${b.firstError}`;
-          return `Rescored ${b.updated ?? 0} / ${b.jobCount ?? "?"} jobs — €${(b.costEur ?? 0).toFixed(4)} — ${b.ms ?? 0}ms`;
+          if (b.jobCount === 0) return `All jobs already scored ✓`;
+          if (b.firstError) return `ERROR: ${b.firstError}`;
+          const rem = b.remaining ?? 0;
+          const suffix = rem > 0 ? ` — ${rem} still unscored, click again` : ` — all done ✓`;
+          return `Scored ${b.updated ?? 0} / ${b.jobCount ?? "?"} — €${(b.costEur ?? 0).toFixed(4)} — ${b.ms ?? 0}ms${suffix}`;
         }}
       />
     </div>

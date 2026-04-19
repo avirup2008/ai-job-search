@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import { eq } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { assessJob } from "@/lib/pipeline/rank";
 import { assignTier } from "@/lib/pipeline/tier";
@@ -7,26 +7,27 @@ import { getBudget } from "@/lib/llm/budget";
 import type { Profile } from "@/lib/profile/types";
 
 const RESCORE_CONCURRENCY = 3;
+// Vercel Hobby cap is 60s. Each Haiku call ~2-3s, 3 concurrent → 15 jobs ≈ 15s. Safe.
+const BATCH_SIZE = 15;
 
 export interface RescoreResult {
   updated: number;
   costEur: number;
   profileFound: boolean;
-  jobCount: number;
+  jobCount: number;   // jobs processed this batch
+  remaining: number;  // unscored jobs still left after this batch
   firstError?: string;
 }
 
 /**
- * Rescore all jobs in the DB against the latest profile.
- *
- * Runs Haiku fit assessment on each job, updates fitScore/fitBreakdown/gapAnalysis/tier.
- * Returns diagnostic counts so callers can surface "no profile" vs "no jobs" vs errors.
+ * Rescore up to BATCH_SIZE jobs against the latest profile, prioritising
+ * unscored jobs (fitScore IS NULL) first. Call repeatedly until remaining=0.
  */
 export async function rescoreMatchedJobs(): Promise<RescoreResult> {
   const [profileRow] = await db.select().from(schema.profile).limit(1);
   if (!profileRow) {
     console.warn("[rescore] no profile row — skipping");
-    return { updated: 0, costEur: 0, profileFound: false, jobCount: 0 };
+    return { updated: 0, costEur: 0, profileFound: false, jobCount: 0, remaining: 0 };
   }
 
   const profile: Profile = {
@@ -45,35 +46,38 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
     phone: profileRow.phone ?? undefined,
   };
 
-  // Fetch all jobs — no tier filter; first run in production has tier=null everywhere.
+  // Count how many jobs still need scoring so we can report remaining.
+  const [{ unscoredTotal }] = await db
+    .select({ unscoredTotal: sql<number>`count(*)` })
+    .from(schema.jobs)
+    .where(isNull(schema.jobs.fitScore));
+
+  const remaining = Math.max(0, Number(unscoredTotal) - BATCH_SIZE);
+
+  // Fetch next batch: unscored jobs first, then oldest discovered.
   const jobs = await db
     .select({ id: schema.jobs.id, jdText: schema.jobs.jdText, title: schema.jobs.title })
-    .from(schema.jobs);
+    .from(schema.jobs)
+    .orderBy(
+      sql`${schema.jobs.fitScore} IS NOT NULL`,  // nulls (unscored) first
+      schema.jobs.discoveredAt,
+    )
+    .limit(BATCH_SIZE);
 
-  console.log(`[rescore] profile found, jobCount=${jobs.length}`);
+  console.log(`[rescore] profile found, batch=${jobs.length}, unscoredTotal=${unscoredTotal}`);
 
   if (jobs.length === 0) {
-    return { updated: 0, costEur: 0, profileFound: true, jobCount: 0 };
+    return { updated: 0, costEur: 0, profileFound: true, jobCount: 0, remaining: 0 };
   }
 
-  // Probe: run assessJob on the first job outside the catch to surface the real error.
-  try {
-    await assessJob({ jdText: jobs[0].jdText, jobTitle: jobs[0].title, profile });
-  } catch (probeErr) {
-    const msg = probeErr instanceof Error ? probeErr.message : String(probeErr);
-    console.error(`[rescore-probe] assessJob failed on first job: ${msg}`);
-    return { updated: 0, costEur: 0, profileFound: true, jobCount: jobs.length, firstError: msg };
-  }
-
-  // Track cost via budget delta — assessJob() records spend via gateway internally.
   const before = await getBudget(20);
-  const limit = pLimit(RESCORE_CONCURRENCY);
+  const limiter = pLimit(RESCORE_CONCURRENCY);
   let updated = 0;
   let firstError: string | undefined;
 
   await Promise.all(
     jobs.map((j) =>
-      limit(async () => {
+      limiter(async () => {
         try {
           const rank = await assessJob({ jdText: j.jdText, jobTitle: j.title, profile });
           const tier = assignTier(rank.fitScore);
@@ -105,5 +109,5 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
 
   const after = await getBudget(20);
   const costEur = Math.max(0, after.eurSpent - before.eurSpent);
-  return { updated, costEur, profileFound: true, jobCount: jobs.length, firstError };
+  return { updated, costEur, profileFound: true, jobCount: jobs.length, remaining, firstError };
 }
