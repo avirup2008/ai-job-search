@@ -81,7 +81,7 @@ const FitAssessmentSchema = z.object({
   strengths: z.array(z.string()).max(4).describe("What the candidate should lead with for this role"),
   gaps: z.array(z.string()).max(4).describe("Gaps weighted by JD emphasis"),
   recommendation: z.enum(["strong_apply", "apply_with_caveat", "stretch", "skip"]),
-  recommendationReason: z.string().max(800).describe("1-2 sentences explaining the recommendation"),
+  recommendationReason: z.string().describe("1-2 sentences explaining the recommendation"),
 });
 
 export type FitAssessment = z.infer<typeof FitAssessmentSchema>;
