@@ -27,7 +27,7 @@ export function shapeGapCoachRow(raw: GapCoachRaw): GapCoachRow {
     title: raw.title,
     companyName: raw.companyName ?? "Unknown company",
     fitScore: score,
-    closenessDelta: Math.max(0, 85 - score),
+    closenessDelta: Math.round(Math.max(0, 78 - score) * 10) / 10,
     gaps: Array.isArray(raw.gapAnalysis?.gaps) ? raw.gapAnalysis!.gaps! : [],
     breakdown: raw.fitBreakdown ?? {},
   };
@@ -83,7 +83,7 @@ export function GapCoachList({ rows }: { rows: GapCoachRow[] }) {
                   {Math.round(r.fitScore)}%
                 </div>
                 <div className="gap-coach-score-delta">
-                  &minus;{r.closenessDelta} pts to T1
+                  {r.closenessDelta === 0 ? "T1 ready" : `−${r.closenessDelta} to T1`}
                 </div>
               </div>
             </Link>
