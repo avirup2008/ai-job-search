@@ -11,6 +11,7 @@ const NAV = [
   { href: "/pipeline", label: "Pipeline" },
   { href: "/analytics", label: "Analytics" },
   { href: "/profile", label: "Profile" },
+  { href: "/admin", label: "Admin" },
 ] as const;
 
 export function TopBar() {
@@ -50,14 +51,6 @@ export function TopBar() {
           + Paste a role
         </button>
       </div>
-      <Link
-        href="/admin"
-        className="btn-ghost"
-        style={{ fontSize: 13, padding: "6px 12px" }}
-        title="Admin panel"
-      >
-        ⚙
-      </Link>
       <button
         className="btn-ghost"
         onClick={handleSignOut}

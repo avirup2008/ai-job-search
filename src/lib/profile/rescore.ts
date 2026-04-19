@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import { inArray, eq } from "drizzle-orm";
+import { eq, isNotNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { assessJob } from "@/lib/pipeline/rank";
 import { assignTier } from "@/lib/pipeline/tier";
@@ -43,7 +43,7 @@ export async function rescoreMatchedJobs(): Promise<{ updated: number; costEur: 
   const jobs = await db
     .select({ id: schema.jobs.id, jdText: schema.jobs.jdText, title: schema.jobs.title })
     .from(schema.jobs)
-    .where(inArray(schema.jobs.tier, [1, 2, 3]));
+    .where(isNotNull(schema.jobs.tier));
 
   if (jobs.length === 0) return { updated: 0, costEur: 0 };
 
