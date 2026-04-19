@@ -189,6 +189,19 @@ Rules:
   revalidatePath("/profile");
 }
 
+export async function updateRoles(
+  roles: Array<{ company: string; title: string; dates: string; achievements: string[] }>,
+): Promise<void> {
+  const row = await loadRow();
+  await db
+    .update(schema.profile)
+    .set({ roles, updatedAt: new Date() })
+    .where(eq(schema.profile.id, row.id));
+  revalidatePath("/profile");
+  revalidatePath("/inbox");
+  await triggerRescore();
+}
+
 export async function updateEducation(data: {
   degrees: Array<{ degree: string; institution: string; year: string }>;
   certifications: Array<{ name: string; status?: string }>;
