@@ -9,13 +9,13 @@ export default function Login() {
       style={{ padding: 24, maxWidth: 360 }}
       onSubmit={async (e) => {
         e.preventDefault();
-        const r = await fetch("/api/admin/login", {
+        const r = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ secret }),
+          body: JSON.stringify({ password: secret }),
         });
         if (r.ok) window.location.href = "/admin";
-        else setErr("Invalid secret");
+        else setErr("Invalid password");
       }}
     >
       <h1>Admin</h1>
