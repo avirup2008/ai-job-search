@@ -24,6 +24,9 @@ export default async function AdminHome() {
   const [s, insights] = await Promise.all([summary(), getFeedbackInsights()]);
   return (
     <main style={{ fontFamily: "system-ui, sans-serif", padding: 16 }}>
+      <div style={{ marginBottom: 16 }}>
+        <Link href="/inbox" style={{ fontSize: 13, color: "#666", textDecoration: "none" }}>← Back to Inbox</Link>
+      </div>
       <h1 style={{ fontSize: 22, marginBottom: 16 }}>AI Job Search — Admin</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 24 }}>
@@ -45,7 +48,7 @@ export default async function AdminHome() {
       <TriggerRunButton />
 
       <h2 style={{ fontSize: 16, marginTop: 24, marginBottom: 8 }}>Feedback Insights</h2>
-      <div style={{ fontSize: 13, background: "#f7f7f7", borderRadius: 6, padding: 12 }}>
+      <div style={{ fontSize: 13 }}>
         <div style={{ marginBottom: 8, color: "#333" }}>{insights.calibrationNote}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8 }}>
           <Stat label="Applied / Interview" value={String(insights.positiveCount)} />
@@ -72,7 +75,7 @@ export default async function AdminHome() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ padding: 12, background: "#f7f7f7", borderRadius: 4 }}>
+    <div style={{ padding: "10px 0" }}>
       <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
       <div style={{ fontSize: 18, fontWeight: 600, marginTop: 4 }}>{value}</div>
       {sub && <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{sub}</div>}
