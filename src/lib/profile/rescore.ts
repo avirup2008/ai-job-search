@@ -68,6 +68,8 @@ export async function rescoreMatchedJobs(): Promise<{ updated: number; costEur: 
                 gaps: rank.assessment.gaps,
                 recommendation: rank.assessment.recommendation,
                 recommendationReason: rank.assessment.recommendationReason,
+                hardRequirementsMet: rank.assessment.hardRequirementsMet,
+                dutchLanguageRequired: rank.assessment.dutchLanguageRequired,
               },
               tier,
             })

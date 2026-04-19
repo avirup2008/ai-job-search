@@ -21,31 +21,64 @@ function clamp01(v: number): number {
   return v;
 }
 
-export function blendFitScore(c: FitComponents): number {
+export function blendFitScore(
+  c: FitComponents,
+  flags?: { hardRequirementsMet?: boolean },
+): number {
   const raw =
     clamp01(c.skills) * WEIGHTS.skills +
     clamp01(c.tools) * WEIGHTS.tools +
     clamp01(c.seniority) * WEIGHTS.seniority +
     clamp01(c.industry) * WEIGHTS.industry;
-  return Math.round(raw * 1000) / 10; // 0..100 with 1 decimal
+  const base = Math.round(raw * 1000) / 10; // 0..100 with 1 decimal
+  // 15% penalty when candidate is missing a stated hard requirement
+  if (flags?.hardRequirementsMet === false) {
+    return Math.round(base * 0.85 * 10) / 10;
+  }
+  return base;
 }
 
 // Haiku returns enrichment + component scores in one call.
 const FitAssessmentSchema = z.object({
-  // Enrichment (needed for filters + UI)
+  // Enrichment
   tools: z.array(z.string()).describe("Tool/software names named in the JD"),
   seniorityLevel: z.enum([
     "intern", "junior", "mid", "senior", "lead", "manager", "director", "vp", "c_level", "unknown",
   ]),
   industries: z.array(z.string()),
+  // Hard requirements check (improvement 3)
+  hardRequirementsMet: z.boolean().describe(
+    "True if the candidate meets ALL hard requirements stated in the JD (look for words: " +
+    "'required', 'must have', 'essential', 'mandatory'). False if any hard requirement is " +
+    "clearly absent from the profile. Default true when JD has no explicit hard requirements."
+  ),
+  // Dutch language flag (improvement 4)
+  dutchLanguageRequired: z.boolean().describe(
+    "True ONLY if the JD explicitly states Dutch language proficiency is required or essential. " +
+    "False for 'nice to have Dutch', 'Dutch is a plus', or when language is not mentioned."
+  ),
   // Fit component scores 0..1
   components: z.object({
-    skills: z.number().min(0).max(1).describe("How well core responsibilities match candidate's demonstrated work. 1 = strong match."),
-    tools: z.number().min(0).max(1).describe("Overlap between JD tools and candidate's toolStack. 1 = strong overlap."),
+    skills: z.number().min(0).max(1).describe(
+      "Core responsibilities match. Use these exact ranges: " +
+      "0.85–1.0 = >80% of stated duties directly match candidate's demonstrated experience. " +
+      "0.65–0.80 = 60–75% match; some duties adjacent but transferable. " +
+      "0.40–0.65 = ~40% match; meaningful gaps in core duties. " +
+      "0.10–0.40 = <40% match; fundamentally different role type. " +
+      "Score on what IS demonstrated — do not penalise for unlisted skills if core duties match."
+    ),
+    tools: z.number().min(0).max(1).describe(
+      "Tool/platform capability overlap — score on CAPABILITY not brand names. " +
+      "These are direct transfers: HubSpot↔Salesforce, GA↔Mixpanel, Meta Ads↔LinkedIn Ads, " +
+      "Mailchimp↔Klaviyo, Looker↔Tableau. " +
+      "0.80–1.0 = core tools match or directly transfer. " +
+      "0.55–0.80 = majority match or transfer; some new tooling needed. " +
+      "0.30–0.55 = significant new tooling required across most of the role."
+    ),
     seniority: z.number().min(0).max(1).describe("Level match. 1 = mid/senior/manager. 0 = director+ or intern/junior."),
     industry: z.number().min(0).max(1).describe("Industry overlap with candidate's background."),
   }),
-  // Explanations (short, one line each)
+  // Explanations
   strengths: z.array(z.string()).max(4).describe("What the candidate should lead with for this role"),
   gaps: z.array(z.string()).max(4).describe("Gaps weighted by JD emphasis"),
   recommendation: z.enum(["strong_apply", "apply_with_caveat", "stretch", "skip"]),
@@ -65,15 +98,36 @@ const SYSTEM_PROMPT = `You are an expert job-fit analyst for a single candidate 
 You assess how well a role matches THIS candidate. You MUST:
 - Rate each component 0..1 based on concrete signals in the JD vs the profile.
 - NEVER fabricate experience or claim tools the candidate doesn't have.
-- Seniority score MUST follow these exact ranges — no exceptions:
+
+SKILLS scoring rules:
+- Score on what the candidate HAS demonstrated, not what they haven't mentioned.
+- If >80% of core duties directly match, score 0.85–1.0. Don't let minor gaps drag a strong match below 0.75.
+
+TOOLS scoring rules:
+- Score on demonstrated CAPABILITY, not brand loyalty. Treat these as direct transfers:
+  HubSpot ↔ Salesforce, Google Analytics ↔ Mixpanel/Amplitude, Meta Ads ↔ LinkedIn Ads,
+  Mailchimp ↔ Klaviyo, Looker ↔ Tableau ↔ Power BI, WordPress ↔ Webflow.
+- A candidate who has mastered one platform in a category can learn the equivalent in weeks.
+
+SENIORITY score MUST follow these exact ranges — no exceptions:
   • manager / lead / senior → 0.85–1.0
   • mid-level → 0.65–0.80
   • junior / intern → 0.05–0.25
   • director / VP / C-level → 0.05–0.25
   Do NOT score a manager or lead role below 0.85.
-- The candidate's commute has been pre-verified — do not re-evaluate geography. Score purely on skills/tools/seniority/industry fit.
+
+HARD REQUIREMENTS (hardRequirementsMet):
+- Scan the JD for words: "required", "must have", "essential", "mandatory", "you have".
+- If the candidate clearly lacks ANY of these stated requirements, set hardRequirementsMet=false.
+- When in doubt, set true.
+
+DUTCH LANGUAGE (dutchLanguageRequired):
+- Set true ONLY when Dutch fluency is an explicit hard requirement.
+- "Nice to have Dutch", "Dutch is a plus", or no language mention → false.
+
+- The candidate's commute has been pre-verified — do not re-evaluate geography.
 - Keep strengths/gaps concrete, not generic.
-- Recommendation will be derived from the overall fit score — you only need to populate components and strengths/gaps honestly.
+- Recommendation will be derived from the overall fit score.
 
 Return ONLY via the structured response tool.`;
 
@@ -104,7 +158,7 @@ export async function assessJob(params: {
   });
 
   const components = res.data.components;
-  const fitScore = blendFitScore(components);
+  const fitScore = blendFitScore(components, { hardRequirementsMet: res.data.hardRequirementsMet });
   // Deterministic recommendation from fit score, independent of Haiku's judgment.
   // Thresholds align with tier boundaries so tier + recommendation stay consistent.
   const recommendation = recommendationFromFit(fitScore);

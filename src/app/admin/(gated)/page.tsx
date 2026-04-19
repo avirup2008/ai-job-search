@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db, schema } from "@/db";
 import { desc, sql } from "drizzle-orm";
 import TriggerRunButton from "./TriggerRunClient";
+import { getFeedbackInsights } from "@/lib/pipeline/feedback";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ async function summary() {
 }
 
 export default async function AdminHome() {
-  const s = await summary();
+  const [s, insights] = await Promise.all([summary(), getFeedbackInsights()]);
   return (
     <main style={{ fontFamily: "system-ui, sans-serif", padding: 16 }}>
       <h1 style={{ fontSize: 22, marginBottom: 16 }}>AI Job Search — Admin</h1>
@@ -42,6 +43,29 @@ export default async function AdminHome() {
 
       <h2 style={{ fontSize: 16, marginTop: 24, marginBottom: 8 }}>Actions</h2>
       <TriggerRunButton />
+
+      <h2 style={{ fontSize: 16, marginTop: 24, marginBottom: 8 }}>Feedback Insights</h2>
+      <div style={{ fontSize: 13, background: "#f7f7f7", borderRadius: 6, padding: 12 }}>
+        <div style={{ marginBottom: 8, color: "#333" }}>{insights.calibrationNote}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8 }}>
+          <Stat label="Applied / Interview" value={String(insights.positiveCount)} />
+          <Stat label="Flagged" value={String(insights.negativeCount)} />
+          {insights.positiveAvgScore != null && (
+            <Stat label="Avg score (applied)" value={String(insights.positiveAvgScore)} />
+          )}
+          {insights.t1ConversionRate != null && (
+            <Stat label="T1 apply rate" value={`${insights.t1ConversionRate}%`} />
+          )}
+          {insights.t2ConversionRate != null && (
+            <Stat label="T2 apply rate" value={`${insights.t2ConversionRate}%`} />
+          )}
+        </div>
+        {insights.positiveComponents && (
+          <div style={{ marginTop: 8, fontSize: 12, color: "#666", fontFamily: "monospace" }}>
+            Applied job avg components — skills: {insights.positiveComponents.skills} · tools: {insights.positiveComponents.tools} · seniority: {insights.positiveComponents.seniority} · industry: {insights.positiveComponents.industry}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
