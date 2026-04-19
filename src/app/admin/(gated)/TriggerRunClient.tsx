@@ -67,8 +67,8 @@ export default function TriggerRunClient() {
         }
       />
       <ActionButton
-        label="Rescore next 15 jobs"
-        runningLabel="Rescoring batch… (~15s)"
+        label="Rescore next 12 jobs"
+        runningLabel="Rescoring batch… (~30s)"
         endpoint="/api/admin/rescore-all"
         formatResult={(body) => {
           const b = body as { updated?: number; costEur?: number; ms?: number; profileFound?: boolean; jobCount?: number; remaining?: number; firstError?: string };

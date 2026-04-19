@@ -6,9 +6,10 @@ import { assignTier } from "@/lib/pipeline/tier";
 import { getBudget } from "@/lib/llm/budget";
 import type { Profile } from "@/lib/profile/types";
 
-const RESCORE_CONCURRENCY = 3;
-// Vercel Hobby cap is 60s. Each Haiku call ~2-3s, 3 concurrent → 15 jobs ≈ 15s. Safe.
-const BATCH_SIZE = 15;
+// Sequential (concurrency=1) to stay under 50k input tokens/min rate limit.
+// Each Haiku call ~2-3s → 12 jobs ≈ 30s. Well within Vercel Hobby 60s cap.
+const RESCORE_CONCURRENCY = 1;
+const BATCH_SIZE = 12;
 
 export interface RescoreResult {
   updated: number;
