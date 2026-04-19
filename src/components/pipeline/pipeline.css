@@ -170,18 +170,23 @@
 .pipe-select {
   font-size: 12px;
   font-family: var(--font-body);
+  font-weight: 500;
   color: var(--text-2);
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 3px 6px;
+  border-radius: var(--r-pill);
+  padding: 4px 24px 4px 10px;
   cursor: pointer;
-  transition: border-color var(--dur-150) var(--ease-io),
-              color var(--dur-150) var(--ease-io);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color var(--dur-150) var(--ease-io), color var(--dur-150) var(--ease-io);
 }
 .pipe-select:hover {
-  border-color: var(--border-h);
-  color: var(--text-1);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .pipe-select:focus {
   outline: 2px solid var(--accent);
@@ -190,10 +195,15 @@
 
 /* ── Progress panel ── */
 .pipe-progress {
+  display: flex;
+  flex-direction: column;
+}
+.pipe-progress-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
   padding: 24px 28px;
+  flex: 1;
 }
 .pipe-stats {
   display: grid;
@@ -346,11 +356,13 @@
   border-radius: var(--r-lg);
   overflow: hidden;
   transition: border-color var(--dur-150) var(--ease-io),
-              box-shadow var(--dur-150) var(--ease-io);
+              box-shadow var(--dur-150) var(--ease-io),
+              transform var(--dur-150) var(--ease-io);
 }
 .pipe-row:hover {
-  border-color: var(--border-h);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .pipe-row-rail {

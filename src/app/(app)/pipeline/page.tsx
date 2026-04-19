@@ -218,39 +218,41 @@ export default async function PipelinePage() {
         {/* Progress panel */}
         <section className="pipe-progress" aria-label="Your progress">
           <span className="pipe-section-label">Your progress</span>
-          <div className="pipe-stats">
-            <div className="pipe-stat">
-              <span className="pipe-stat-num mono">{saved.length + applied.length + interviews.length + offers.length}</span>
-              <span className="pipe-stat-label">roles saved</span>
+          <div className="pipe-progress-card">
+            <div className="pipe-stats">
+              <div className="pipe-stat">
+                <span className="pipe-stat-num mono">{saved.length + applied.length + interviews.length + offers.length}</span>
+                <span className="pipe-stat-label">roles saved</span>
+              </div>
+              <div className="pipe-stat">
+                <span className="pipe-stat-num mono">{totalDocs}</span>
+                <span className="pipe-stat-label">docs generated</span>
+              </div>
+              <div className="pipe-stat">
+                <span className="pipe-stat-num mono">{applied.length}</span>
+                <span className="pipe-stat-label">applied</span>
+              </div>
+              <div className="pipe-stat">
+                <span className="pipe-stat-num mono">{interviews.length}</span>
+                <span className="pipe-stat-label">interviews</span>
+                {interviews.length > 0 && (
+                  <span className="pipe-stat-sub">it&apos;s working &#x2726;</span>
+                )}
+              </div>
             </div>
-            <div className="pipe-stat">
-              <span className="pipe-stat-num mono">{totalDocs}</span>
-              <span className="pipe-stat-label">docs generated</span>
-            </div>
-            <div className="pipe-stat">
-              <span className="pipe-stat-num mono">{applied.length}</span>
-              <span className="pipe-stat-label">applied</span>
-            </div>
-            <div className="pipe-stat">
-              <span className="pipe-stat-num mono">{interviews.length}</span>
-              <span className="pipe-stat-label">interviews</span>
-              {interviews.length > 0 && (
-                <span className="pipe-stat-sub">it&apos;s working &#x2726;</span>
-              )}
-            </div>
-          </div>
 
-          {timeline.length > 0 && (
-            <div className="pipe-timeline">
-              {timeline.map((ev, i) => (
-                <div key={i} className="pipe-timeline-event">
-                  <span className={`pipe-timeline-dot pipe-timeline-dot--${ev.color}`} aria-hidden="true" />
-                  <span className="pipe-timeline-desc">{ev.description}</span>
-                  <span className="pipe-timeline-time mono">{ev.relativeTime}</span>
-                </div>
-              ))}
-            </div>
-          )}
+            {timeline.length > 0 && (
+              <div className="pipe-timeline">
+                {timeline.map((ev, i) => (
+                  <div key={i} className="pipe-timeline-event">
+                    <span className={`pipe-timeline-dot pipe-timeline-dot--${ev.color}`} aria-hidden="true" />
+                    <span className="pipe-timeline-desc">{ev.description}</span>
+                    <span className="pipe-timeline-time mono">{ev.relativeTime}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </div>
 
