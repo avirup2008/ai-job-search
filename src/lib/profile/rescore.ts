@@ -54,13 +54,13 @@ export async function rescoreMatchedJobs(): Promise<RescoreResult> {
 
   const remaining = Math.max(0, Number(unscoredTotal) - BATCH_SIZE);
 
-  // Fetch next batch: unscored jobs first, then oldest discovered.
+  // Fetch next batch: unscored jobs first, then newest discovered.
   const jobs = await db
     .select({ id: schema.jobs.id, jdText: schema.jobs.jdText, title: schema.jobs.title })
     .from(schema.jobs)
     .orderBy(
       sql`${schema.jobs.fitScore} IS NOT NULL`,  // nulls (unscored) first
-      schema.jobs.discoveredAt,
+      sql`${schema.jobs.discoveredAt} DESC`,      // newest postings first
     )
     .limit(BATCH_SIZE);
 
