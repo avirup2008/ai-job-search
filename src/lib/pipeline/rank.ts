@@ -78,8 +78,8 @@ const FitAssessmentSchema = z.object({
     industry: z.number().min(0).max(1).describe("Industry overlap with candidate's background."),
   }),
   // Explanations
-  strengths: z.array(z.string()).max(4).describe("What the candidate should lead with for this role"),
-  gaps: z.array(z.string()).max(4).describe("Gaps weighted by JD emphasis"),
+  strengths: z.array(z.string()).describe("What the candidate should lead with for this role"),
+  gaps: z.array(z.string()).describe("Gaps weighted by JD emphasis"),
   recommendation: z.enum(["strong_apply", "apply_with_caveat", "stretch", "skip"]),
   recommendationReason: z.string().describe("1-2 sentences explaining the recommendation"),
 });
