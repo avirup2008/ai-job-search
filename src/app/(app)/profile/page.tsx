@@ -8,6 +8,7 @@ import { addTool, removeTool, addAchievement, removeAchievement } from "./action
 import { StarStoriesPanel } from "@/components/profile/StarStoriesPanel";
 import { EditableHero } from "@/components/profile/EditableHero";
 import { EditableSearchPrefs } from "@/components/profile/EditableSearchPrefs";
+import { EditableEducation } from "@/components/profile/EditableEducation";
 import LinkedinPage from "./linkedin/page";
 
 type StarStory = {
@@ -137,6 +138,8 @@ export default async function ProfilePage({
   const roles = (row.roles ?? []) as Role[];
   const achievements = (row.achievements ?? []) as Achievement[];
   const stories = (row.stories ?? []) as StarStory[];
+  type EducationData = { degrees: Array<{ degree: string; institution: string; year: string }>; certifications: Array<{ name: string; status?: string }> };
+  const educationData = (row.education ?? { degrees: [], certifications: [] }) as EducationData;
   const toolStack = (row.toolStack ?? {}) as Record<string, string>;
   const constraints = (row.constraints ?? {}) as Record<string, unknown>;
   const preferences = (row.preferences ?? {}) as Record<string, unknown>;
@@ -220,30 +223,7 @@ export default async function ProfilePage({
           <StarStoriesPanel stories={stories} />
 
           {/* Education + certifications */}
-          <div className="profile-education-card">
-            <h2 className="profile-section-title" style={{ marginBottom: "12px" }}>Education</h2>
-            <div className="profile-edu-row">
-              <div>
-                <div className="profile-edu-degree">MA Political Science</div>
-                <div className="profile-edu-institution">University of Delhi</div>
-              </div>
-              <div className="profile-edu-year">2012</div>
-            </div>
-            <div className="profile-edu-row">
-              <div>
-                <div className="profile-edu-degree">BA Political Science (Hons)</div>
-                <div className="profile-edu-institution">University of Delhi</div>
-              </div>
-              <div className="profile-edu-year">2010</div>
-            </div>
-            <div className="profile-education-divider" />
-            <h2 className="profile-section-title" style={{ marginBottom: "10px" }}>Certifications</h2>
-            <div className="profile-cert-chips">
-              <span className="profile-chip">HubSpot Marketing Hub</span>
-              <span className="profile-chip">Google Ads — in progress</span>
-              <span className="profile-chip">Meta Blueprint</span>
-            </div>
-          </div>
+          <EditableEducation data={educationData} />
         </div>
 
         {/* Right sidebar */}

@@ -14,6 +14,7 @@ export const profile = pgTable("profile", {
   toolStack: jsonb("tool_stack").$type<unknown>().notNull().default({}),
   industries: jsonb("industries").$type<unknown>().notNull().default([]),
   stories: jsonb("stories").$type<unknown>().notNull().default([]),
+  education: jsonb("education").$type<unknown>().notNull().default([]),
   constraints: jsonb("constraints").$type<unknown>().notNull().default({}),
   preferences: jsonb("preferences").$type<unknown>().notNull().default({}),
   portfolioUrl: text("portfolio_url"),

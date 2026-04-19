@@ -189,6 +189,18 @@ Rules:
   revalidatePath("/profile");
 }
 
+export async function updateEducation(data: {
+  degrees: Array<{ degree: string; institution: string; year: string }>;
+  certifications: Array<{ name: string; status?: string }>;
+}): Promise<void> {
+  const row = await loadRow();
+  await db
+    .update(schema.profile)
+    .set({ education: data, updatedAt: new Date() })
+    .where(eq(schema.profile.id, row.id));
+  revalidatePath("/profile");
+}
+
 export async function updatePreferences(
   prefs: Partial<{
     salaryFloorEur: number;
