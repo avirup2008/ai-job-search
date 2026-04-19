@@ -8,6 +8,7 @@ import { ScoreBreakdown } from "@/components/job-detail/ScoreBreakdown";
 import { InterviewPromptPanel } from "@/components/job-detail/InterviewPromptPanel";
 import { InterviewBriefDownload } from "@/components/job-detail/InterviewBriefDownload";
 import { InterviewWeakPoints } from "@/components/job-detail/InterviewWeakPoints";
+import { DetailAsideActions } from "@/components/job-detail/DetailAsideActions";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
@@ -229,11 +230,12 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
         </div>
 
         <aside className="detail-col-aside">
-          {/* Sticky bottom bar within aside for now */}
-          <div className="sticky-pursue">
-            <p className="sticky-pursue-text">Ready to pursue this role?</p>
-            <button className="btn btn-ghost" disabled>Save to pipeline &rarr;</button>
-          </div>
+          <DetailAsideActions
+            jobId={jobId}
+            sourceUrl={job.sourceUrl}
+            source={job.source}
+            status={status}
+          />
         </aside>
       </div>
     </>

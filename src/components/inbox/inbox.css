@@ -228,83 +228,66 @@
   text-transform: capitalize;
 }
 
-/* Save button — appears on hover */
+/* Job card action column */
 .job-card-actions {
   display: flex;
   align-items: center;
   padding-right: 20px;
 }
 
-.job-card-btn-stack {
+.job-card-actions-col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
   align-items: stretch;
-  min-width: 148px;
+  gap: 8px;
+  min-width: 110px;
 }
 
-.save-btn {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  background: #eef5f1;
-  border: 1px solid #b8d5c6;
-  color: #1D4A35;
+.job-card-save-btn {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  background: var(--accent);
+  color: #fff;
+  border: none;
   border-radius: var(--r-md);
-  padding: 6px 12px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
-  text-align: center;
-}
-.save-btn:hover:not(:disabled) {
-  background: #d9ede4;
-  border-color: #8dbfaa;
-}
-.save-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.flag-btn {
-  background: #fef3f2;
-  border: 1px solid #f5c6c2;
-  color: #b54a42;
-  border-radius: var(--r-md);
-  padding: 6px 12px;
-  font-size: 0.8125rem;
+  padding: 8px 14px;
   cursor: pointer;
   white-space: nowrap;
   text-align: center;
-  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
+  transition: background var(--dur-150) var(--ease-io), transform var(--dur-150) var(--ease-io);
 }
-.flag-btn:hover:not(:disabled) {
-  background: #fde8e6;
-  border-color: #e8948e;
+.job-card-save-btn:hover:not(:disabled) {
+  background: var(--accent-h);
+  transform: translateY(-1px);
 }
-.flag-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.job-card-save-btn:disabled { opacity: 0.45; cursor: default; }
+
+.job-card-secondary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
-.expired-btn {
-  background: #f5f4f1;
-  border: 1px solid #d4cfc7;
-  color: #6b6560;
-  border-radius: var(--r-md);
-  padding: 6px 12px;
-  font-size: 0.8125rem;
+.job-card-ghost-btn {
+  font-size: 11px;
+  font-family: var(--font-body);
+  color: var(--text-3);
+  background: none;
+  border: none;
+  padding: 2px 0;
   cursor: pointer;
+  transition: color var(--dur-150) var(--ease-io);
   white-space: nowrap;
-  text-align: center;
-  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
 }
-.expired-btn:hover:not(:disabled) {
-  background: #eceae5;
-  border-color: #b8b0a6;
-}
-.expired-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.job-card-ghost-btn:hover:not(:disabled) { color: var(--text-2); }
+.job-card-ghost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.job-card-ghost-sep {
+  font-size: 11px;
+  color: var(--text-3);
+  user-select: none;
 }
 
 .inbox-empty {
