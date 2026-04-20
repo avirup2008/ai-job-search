@@ -4,6 +4,7 @@ import { sql, isNotNull } from "drizzle-orm";
 export const SOURCE_LABELS: Record<string, string> = {
   adzuna: "Adzuna",
   jooble: "Jooble",
+  linkedin: "LinkedIn",
   magnetme: "Magnet.me",
   nvb: "Nationale Vacaturebank",
   "indeed-nl": "Indeed NL",
