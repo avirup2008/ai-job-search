@@ -76,6 +76,17 @@ export default function TriggerRunClient() {
         }}
       />
       <ActionButton
+        label="Test LinkedIn source (1 keyword)"
+        runningLabel="Fetching from LinkedIn… (~45s)"
+        endpoint="/api/admin/test-linkedin"
+        formatResult={(body) => {
+          const b = body as { count?: number; sample?: string[] };
+          if (!b.count) return `No jobs returned — actor may be blocked or misconfigured`;
+          const preview = (b.sample ?? []).join(" · ");
+          return `Got ${b.count} jobs ✓ — ${preview}`;
+        }}
+      />
+      <ActionButton
         label="Rescore next 12 jobs"
         runningLabel="Rescoring batch… (~30s)"
         endpoint="/api/admin/rescore-all"
