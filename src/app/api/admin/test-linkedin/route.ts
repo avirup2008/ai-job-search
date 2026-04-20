@@ -13,10 +13,12 @@ export async function POST() {
   }
   try {
     const source = new ApifyLinkedInSource();
-    const jobs = await (source as unknown as {
-      fetchKeyword(kw: string): Promise<{ id: string; title: string; companyName: string | null }[]>
-    }).fetchKeyword("marketing automation");
+    const url = new URL("https://www.linkedin.com/jobs/search/");
+    url.searchParams.set("keywords", "marketing automation");
+    url.searchParams.set("location", "Netherlands");
+    url.searchParams.set("f_TPR", "r604800");
 
+    const jobs = await source.runActor([url.toString()]);
     const sample = jobs.slice(0, 5).map((j) => `${j.title} @ ${j.companyName ?? "?"}`);
     return NextResponse.json({ ok: true, count: jobs.length, sample });
   } catch (e) {
