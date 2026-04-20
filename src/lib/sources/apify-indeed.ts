@@ -16,7 +16,8 @@ const KEYWORDS = [
   "CRM marketing",
   "email marketing",
   "HubSpot",
-  "growth marketing",
+  "campaign manager",
+  "marketing operations",
 ] as const;
 
 const MAX_ITEMS_PER_KEYWORD = 10;
