@@ -66,6 +66,7 @@ export const config = {
     "/gap-coach/:path*",
     "/api/generate/:path*",
     "/api/download-pack/:path*",
+    "/api/download-doc/:path*",
     "/api/paste-role",
     "/api/admin/:path*",
     "/api/linkedin/:path*",

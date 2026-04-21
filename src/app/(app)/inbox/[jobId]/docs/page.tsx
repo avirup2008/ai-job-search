@@ -278,12 +278,10 @@ export default async function DocsPage({
             <div className="doc-toolbar">
               <span className="doc-toolbar-title">{docLabel(activeDoc)}</span>
               <div className="doc-toolbar-actions">
-                {/* TODO: private blobs 403 on direct href — route through a server download endpoint
-                    e.g. /api/download-doc/[docId] that fetches with Authorization: Bearer token */}
-                {(activeDoc.blobUrlDocx || activeDoc.blobUrlPdf) && (
+                  {(activeDoc.blobUrlDocx || activeDoc.blobUrlPdf) && (
                   <a
                     className="doc-toolbar-btn"
-                    href={activeDoc.blobUrlDocx ?? activeDoc.blobUrlPdf!}
+                    href={`/api/download-doc/${activeDoc.id}`}
                     download
                   >
                     Download
@@ -298,12 +296,10 @@ export default async function DocsPage({
                 <div className="doc-page">
                   <div className="doc-cv-fallback">
                     <p>CV is available as DOCX. Download to view.</p>
-                    {/* TODO: private blobs 403 on direct href — route through a server download endpoint
-                        e.g. /api/download-doc/[docId] that fetches with Authorization: Bearer token */}
                     {(activeDoc.blobUrlDocx || activeDoc.blobUrlPdf) && (
                       <a
                         className="doc-toolbar-btn"
-                        href={activeDoc.blobUrlDocx ?? activeDoc.blobUrlPdf!}
+                        href={`/api/download-doc/${activeDoc.id}`}
                         download
                       >
                         Download CV
