@@ -1,7 +1,7 @@
-import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { COOKIE_NAME } from "@/lib/auth/constants";
+import { computeSessionToken } from "@/lib/auth/session-token";
 import { db, schema } from "@/db";
 import { desc, eq, gte, inArray, sql, and } from "drizzle-orm";
 import { LoginCard } from "@/components/login/LoginCard";
@@ -11,15 +11,17 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // ── Auth check ───────────────────────────────────────────────────
+// Must use computeSessionToken (includes SESSION_NONCE) to match middleware's
+// hash computation — otherwise rotating the nonce causes a redirect loop.
 async function isAuthenticated(): Promise<boolean> {
   const pw = process.env.DISHA_PASSWORD;
   if (!pw) return false;
   const cookieStore = await cookies();
   const val = cookieStore.get(COOKIE_NAME)?.value;
   if (!val) return false;
-  const expected = crypto.createHash("sha256").update(pw).digest("hex");
+  const expected = computeSessionToken(pw);
   if (val.length !== expected.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(val), Buffer.from(expected));
+  return val === expected;
 }
 
 // ── Data helpers (same as today page) ───────────────────────────
