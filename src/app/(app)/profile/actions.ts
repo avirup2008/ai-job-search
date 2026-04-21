@@ -4,7 +4,7 @@ import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { rescoreMatchedJobs } from "@/lib/profile/rescore";
-import Anthropic from "@anthropic-ai/sdk";
+import { getLLM } from "@/lib/llm";
 
 type ProfileRow = typeof schema.profile.$inferSelect;
 
@@ -133,7 +133,7 @@ export async function generateStarStories(): Promise<void> {
   const roles = (row.roles ?? []) as Array<{ company: string; title: string; dates: string; achievements: string[] }>;
   const achievements = (row.achievements ?? []) as Array<{ description: string; metric?: string; context?: string }>;
 
-  const client = new Anthropic();
+  const llm = getLLM();
 
   const rolesText = roles
     .map((r) => `${r.company} — ${r.title} (${r.dates})\n${(r.achievements ?? []).map((a) => `• ${a}`).join("\n")}`)
@@ -171,19 +171,27 @@ Rules:
 - Do not invent numbers not in the source data
 - Return ONLY valid JSON, no markdown fences`;
 
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 2000,
-    messages: [{ role: "user", content: prompt }],
+  const response = await llm.complete({
+    model: "haiku",
+    prompt,
+    maxTokens: 2000,
   });
 
-  const text = message.content.find((b) => b.type === "text")?.text ?? "[]";
-  const cleaned = text
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-  const stories = JSON.parse(cleaned);
+  const text = response.text;
+
+  let stories: unknown[];
+  try {
+    const cleaned = text
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+    stories = JSON.parse(cleaned);
+    if (!Array.isArray(stories)) stories = [];
+  } catch {
+    console.warn("[generateStarStories] JSON.parse failed, storing empty stories");
+    stories = [];
+  }
 
   await db.update(schema.profile).set({ stories, updatedAt: new Date() }).where(eq(schema.profile.id, row.id));
   revalidatePath("/profile");

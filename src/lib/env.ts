@@ -30,6 +30,10 @@ const adminSchema = z.object({
   ADMIN_SECRET: z.string().min(32, "ADMIN_SECRET must be at least 32 characters"),
 });
 
+const dishaSchema = z.object({
+  DISHA_PASSWORD: z.string().min(8, "DISHA_PASSWORD must be at least 8 characters"),
+});
+
 const cronSchema = z.object({
   CRON_SECRET: z.string().min(32, "CRON_SECRET must be at least 32 characters"),
 });
@@ -53,6 +57,7 @@ export type LlmEnv = z.infer<typeof llmSchema>;
 export type SourcesEnv = z.infer<typeof sourcesSchema>;
 export type NotifyEnv = z.infer<typeof notifySchema>;
 export type AdminEnv = z.infer<typeof adminSchema>;
+export type DishaEnv = z.infer<typeof dishaSchema>;
 export type CronEnv = z.infer<typeof cronSchema>;
 export type BlobEnv = z.infer<typeof blobSchema>;
 export type GeneralEnv = z.infer<typeof generalSchema>;
@@ -74,6 +79,7 @@ let llmCache: unknown = null;
 let sourcesCache: unknown = null;
 let notifyCache: unknown = null;
 let adminCache: unknown = null;
+let dishaCache: unknown = null;
 let cronCache: unknown = null;
 let blobCache: unknown = null;
 let generalCache: unknown = null;
@@ -84,6 +90,7 @@ export function loadLlmEnv(): LlmEnv { return (llmCache as LlmEnv) ?? (llmCache 
 export function loadSourcesEnv(): SourcesEnv { return (sourcesCache as SourcesEnv) ?? (sourcesCache = load(sourcesSchema, "sources")) as SourcesEnv; }
 export function loadNotifyEnv(): NotifyEnv { return (notifyCache as NotifyEnv) ?? (notifyCache = load(notifySchema, "notify")) as NotifyEnv; }
 export function loadAdminEnv(): AdminEnv { return (adminCache as AdminEnv) ?? (adminCache = load(adminSchema, "admin")) as AdminEnv; }
+export function loadDishaEnv(): DishaEnv { return (dishaCache as DishaEnv) ?? (dishaCache = load(dishaSchema, "disha")) as DishaEnv; }
 export function loadCronEnv(): CronEnv { return (cronCache as CronEnv) ?? (cronCache = load(cronSchema, "cron")) as CronEnv; }
 export function loadBlobEnv(): BlobEnv { return (blobCache as BlobEnv) ?? (blobCache = load(blobSchema, "blob")) as BlobEnv; }
 export function loadGeneralEnv(): GeneralEnv { return (generalCache as GeneralEnv) ?? (generalCache = load(generalSchema, "general")) as GeneralEnv; }
@@ -93,5 +100,5 @@ export function loadRetentionEnv(): RetentionEnv { return (retentionCache as Ret
 export function _clearEnvCache(): void {
   dbCache = null; llmCache = null; sourcesCache = null; notifyCache = null;
   adminCache = null; cronCache = null; blobCache = null; generalCache = null;
-  retentionCache = null;
+  retentionCache = null; dishaCache = null;
 }
