@@ -6,6 +6,7 @@
 //
 // Actor docs: https://apify.com/misceres/indeed-scraper
 
+import pLimit from "p-limit";
 import type { JobSource, RawJob } from "./types";
 
 const ACTOR_ID = "misceres~indeed-scraper";
@@ -66,19 +67,30 @@ export class ApifyIndeedSource implements JobSource {
   }
 
   async fetch(): Promise<RawJob[]> {
-    const out: RawJob[] = [];
+    // Run up to 2 keyword actor runs in parallel (Apify free tier supports 2 concurrent actors).
+    // 6 keywords / 2 concurrent = 3 rounds × ~30s = ~90s instead of ~180s sequential.
+    const limit = pLimit(2);
     const seen = new Set<string>();
+    const out: RawJob[] = [];
 
-    for (const keyword of KEYWORDS) {
-      try {
-        const items = await this.fetchKeyword(keyword);
-        for (const item of items) {
-          if (seen.has(item.id)) continue;
-          seen.add(item.id);
-          out.push(mapApifyItem(item));
-        }
-      } catch (err) {
-        console.warn(`[apify-indeed] error for "${keyword}":`, err);
+    const results = await Promise.all(
+      KEYWORDS.map((keyword) =>
+        limit(async () => {
+          try {
+            return await this.fetchKeyword(keyword);
+          } catch (err) {
+            console.warn(`[apify-indeed] error for "${keyword}":`, err);
+            return [] as ApifyIndeedItem[];
+          }
+        })
+      )
+    );
+
+    for (const items of results) {
+      for (const item of items) {
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        out.push(mapApifyItem(item));
       }
     }
 
