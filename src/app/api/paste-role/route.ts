@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { assessJob } from "@/lib/pipeline/rank";
 import { assignTier } from "@/lib/pipeline/tier";
 import { computeDedupeHash } from "@/lib/pipeline/dedupe";
+import { validateFetchUrl } from "@/lib/http/safe-fetch";
 import type { Profile } from "@/lib/profile/types";
 
 export const runtime = "nodejs";
@@ -104,6 +105,14 @@ export async function POST(req: Request) {
       if (rawText.includes("linkedin.com")) {
         return NextResponse.json(
           { ok: false, error: "LinkedIn requires login to view job listings. Please copy and paste the job description text directly instead of the URL." },
+          { status: 400 },
+        );
+      }
+      // SSRF prevention: only https, no internal hosts
+      const urlError = validateFetchUrl(rawText);
+      if (urlError) {
+        return NextResponse.json(
+          { ok: false, error: urlError },
           { status: 400 },
         );
       }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
 import { computeDedupeHash } from "@/lib/pipeline/dedupe";
+import { isBlockedHost } from "@/lib/http/safe-fetch";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -64,17 +65,6 @@ function normaliseUrl(raw: string): string {
   } catch {
     return raw.trim();
   }
-}
-
-function isBlockedHost(url: string): boolean {
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    if (host === "localhost" || host === "127.0.0.1") return true;
-    if (host.endsWith(".local") || host.endsWith(".internal")) return true;
-    if (/^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true;
-    if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) return true;
-    return false;
-  } catch { return true; }
 }
 
 // ---------------------------------------------------------------------------
