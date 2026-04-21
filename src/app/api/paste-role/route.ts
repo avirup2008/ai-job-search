@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { assessJob } from "@/lib/pipeline/rank";
@@ -212,6 +213,9 @@ export async function POST(req: Request) {
       jobId: job.id,
       status: "saved",
     });
+
+    // Invalidate pipeline cache so the job shows immediately on navigation
+    revalidatePath("/pipeline");
 
     // 9. Return result
     return NextResponse.json({
