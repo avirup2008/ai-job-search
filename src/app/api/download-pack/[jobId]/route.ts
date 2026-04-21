@@ -140,10 +140,13 @@ export async function GET(_req: Request, ctx: { params: Promise<{ jobId: string 
   const fitScore = job.fitScore == null ? null : Math.round(Number(job.fitScore));
 
   // Fetch all blobs in parallel
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
   const fetched = await Promise.all(
     packFiles.map(async (f) => {
       try {
-        const res = await fetch(f.url);
+        const res = await fetch(f.url, blobToken ? {
+          headers: { Authorization: `Bearer ${blobToken}` },
+        } : undefined);
         if (!res.ok) return null;
         if (f.binary) {
           const buf = Buffer.from(await res.arrayBuffer());

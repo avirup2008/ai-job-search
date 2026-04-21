@@ -72,7 +72,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ jobId: string 
   // 5. Fetch interview-prep markdown
   let prepMarkdown = "";
   try {
-    const res = await fetch(prepDoc.blobUrlDocx);
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    const res = await fetch(prepDoc.blobUrlDocx, blobToken ? {
+      headers: { Authorization: `Bearer ${blobToken}` },
+    } : undefined);
     if (res.ok) prepMarkdown = await res.text();
   } catch {
     // leave empty — PDF builder will insert placeholder

@@ -45,7 +45,11 @@ function docLabel(d: DocRow): string {
 
 async function fetchDocContent(url: string): Promise<string> {
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    const res = await fetch(url, {
+      next: { revalidate: 3600 },
+      ...(blobToken ? { headers: { Authorization: `Bearer ${blobToken}` } } : {}),
+    });
     if (!res.ok) return "";
     return await res.text();
   } catch {
@@ -158,7 +162,11 @@ export default async function DocsPage({
     if (isCv && url) {
       // CV is DOCX — convert to HTML with mammoth
       try {
-        const docxRes = await fetch(url, { next: { revalidate: 3600 } });
+        const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+        const docxRes = await fetch(url, {
+          next: { revalidate: 3600 },
+          ...(blobToken ? { headers: { Authorization: `Bearer ${blobToken}` } } : {}),
+        });
         if (docxRes.ok) {
           const buffer = Buffer.from(await docxRes.arrayBuffer());
           const result = await mammoth.convertToHtml({ buffer });
@@ -270,6 +278,8 @@ export default async function DocsPage({
             <div className="doc-toolbar">
               <span className="doc-toolbar-title">{docLabel(activeDoc)}</span>
               <div className="doc-toolbar-actions">
+                {/* TODO: private blobs 403 on direct href — route through a server download endpoint
+                    e.g. /api/download-doc/[docId] that fetches with Authorization: Bearer token */}
                 {(activeDoc.blobUrlDocx || activeDoc.blobUrlPdf) && (
                   <a
                     className="doc-toolbar-btn"
@@ -288,6 +298,8 @@ export default async function DocsPage({
                 <div className="doc-page">
                   <div className="doc-cv-fallback">
                     <p>CV is available as DOCX. Download to view.</p>
+                    {/* TODO: private blobs 403 on direct href — route through a server download endpoint
+                        e.g. /api/download-doc/[docId] that fetches with Authorization: Bearer token */}
                     {(activeDoc.blobUrlDocx || activeDoc.blobUrlPdf) && (
                       <a
                         className="doc-toolbar-btn"
