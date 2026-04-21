@@ -65,3 +65,45 @@ describe("discover", () => {
     expect(r.errors).toBeDefined();
   });
 });
+
+describe("discover timeout", () => {
+  it("resolves timed-out sources to [] and records error", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/sources", () => ({
+      allSources: () => [
+        {
+          name: "fast",
+          fetch: async () => [
+            {
+              source: "fast",
+              sourceExternalId: "1",
+              sourceUrl: "http://a.com",
+              title: "Fast Job",
+              jdText: "",
+              companyName: null,
+              companyDomain: null,
+              location: null,
+              postedAt: null,
+            },
+          ],
+        },
+        {
+          name: "slow",
+          // never resolves — simulates a hung Apify actor
+          fetch: () => new Promise(() => {}),
+        },
+      ],
+    }));
+
+    const { discover } = await import("@/lib/pipeline/discover");
+    const result = await discover({ sourceTimeoutMs: 50 });
+
+    expect(result.jobs).toHaveLength(1);
+    expect(result.jobs[0].source).toBe("fast");
+    expect(result.errors["slow"]).toMatch(/timeout/i);
+    expect(result.perSource["slow"]).toBe(0);
+    expect(result.perSource["fast"]).toBe(1);
+
+    vi.doUnmock("@/lib/sources");
+  });
+});
