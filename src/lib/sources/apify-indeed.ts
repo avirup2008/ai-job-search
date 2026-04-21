@@ -8,18 +8,10 @@
 
 import pLimit from "p-limit";
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 const ACTOR_ID = "misceres~indeed-scraper";
 const APIFY_BASE = "https://api.apify.com/v2";
-
-const KEYWORDS = [
-  "marketing automation",
-  "CRM marketing",
-  "email marketing",
-  "HubSpot",
-  "campaign manager",
-  "marketing operations",
-] as const;
 
 const MAX_ITEMS_PER_KEYWORD = 10;
 const POLL_INTERVAL_MS = 5_000;
@@ -74,7 +66,7 @@ export class ApifyIndeedSource implements JobSource {
     const out: RawJob[] = [];
 
     const results = await Promise.all(
-      KEYWORDS.map((keyword) =>
+      SEARCH_KEYWORDS.map((keyword) =>
         limit(async () => {
           try {
             return await this.fetchKeyword(keyword);

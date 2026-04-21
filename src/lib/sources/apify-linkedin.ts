@@ -9,6 +9,7 @@
 // scrapeCompany: false — saves credits, we only need the job listing data.
 
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 const ACTOR_ID = "curious_coder~linkedin-jobs-scraper";
 const APIFY_BASE = "https://api.apify.com/v2";
@@ -22,16 +23,6 @@ function buildLinkedInUrl(keyword: string): string {
   url.searchParams.set("f_TPR", "r604800"); // past week
   return url.toString();
 }
-
-// Targeted at Upashana's profile: marketing ops / CRM / campaign management.
-// Avoid broad terms ("marketing") that pull in data analyst / research roles.
-const KEYWORDS = [
-  "marketing automation",
-  "CRM specialist",
-  "HubSpot",
-  "campaign manager",
-  "email marketing manager",
-] as const;
 
 const MAX_ITEMS_PER_URL = 10;
 const POLL_INTERVAL_MS = 5_000;
@@ -82,7 +73,7 @@ export class ApifyLinkedInSource implements JobSource {
   }
 
   async fetch(): Promise<RawJob[]> {
-    const urls = KEYWORDS.map(buildLinkedInUrl);
+    const urls = SEARCH_KEYWORDS.map(buildLinkedInUrl);
     let items: ApifyLinkedInItem[];
     try {
       items = await this.runActor(urls);
