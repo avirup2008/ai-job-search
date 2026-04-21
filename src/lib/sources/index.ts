@@ -8,6 +8,7 @@ import { ApifyLinkedInSource } from "./apify-linkedin";
 import { JoobleSource } from "./jooble";
 import { MagnetmeSource } from "./magnetme";
 import { NvbSource } from "./nvb";
+import { WttjSource } from "./wttj";
 
 export type { JobSource, RawJob };
 
@@ -19,5 +20,6 @@ export function allSources(): JobSource[] {
     new JoobleSource(),
     new MagnetmeSource(),
     new NvbSource(),
+    new WttjSource(),
   ];
 }

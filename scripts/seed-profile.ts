@@ -118,7 +118,7 @@ const PROFILE: Profile = {
   },
 
   fullName: "Upashana Borpuzari",
-  headline: "Marketing Operations & Campaign Specialist | HubSpot Automation | Landing Page Design | Paid Media",
+  headline: "Marketing Automation & CRM Specialist | HubSpot | Email Marketing | Campaign Operations",
   portfolioUrl: "https://upashana.online",
   linkedinUrl: "https://www.linkedin.com/in/upashana-borpuzari/",
   contactEmail: "upashana1910@gmail.com",
