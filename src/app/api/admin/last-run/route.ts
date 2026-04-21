@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { desc } from "drizzle-orm";
+import { isAdmin } from "@/lib/auth/admin";
 
 export async function GET() {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+  }
+
   const [run] = await db
     .select({
       id: schema.runs.id,

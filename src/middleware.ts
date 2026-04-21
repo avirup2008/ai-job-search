@@ -61,9 +61,12 @@ export const config = {
     "/analytics/:path*",
     "/profile/:path*",
     "/paste/:path*",
+    "/gap-coach/:path*",
     "/api/generate/:path*",
     "/api/download-pack/:path*",
     "/api/paste-role",
+    "/api/admin/:path*",
+    "/api/linkedin/:path*",
     "/budget/:path*",
   ],
 };
