@@ -1,6 +1,7 @@
 import { put, del } from "@vercel/blob";
 import { db, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
+import { sanitizeArtifactHtml } from "@/lib/html/sanitize";
 
 export async function storeArtifact(params: {
   applicationId: string;
@@ -20,9 +21,11 @@ export async function storeArtifact(params: {
   const nextVersion = existing.length === 0 ? 1 : Math.max(...existing.map((r) => r.version)) + 1;
   const slug = `${params.artifactType}-${params.applicationId.slice(0, 8)}-v${nextVersion}-${Date.now().toString(36)}`;
 
+  const safeHtml = sanitizeArtifactHtml(params.html);
+
   const blob = await put(
     `artifacts/${slug}.html`,
-    params.html,
+    safeHtml,
     { access: "private", contentType: "text/html; charset=utf-8", addRandomSuffix: false },
   );
 

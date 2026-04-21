@@ -38,6 +38,7 @@
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "resend": "^4.0.0",
+    "sanitize-html": "^2.17.3",
     "zod": "^3.23.0",
     "zod-to-json-schema": "^3.25.2"
   },
@@ -47,6 +48,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/sanitize-html": "^2.16.1",
     "@vitest/ui": "^2.1.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.0.0",
