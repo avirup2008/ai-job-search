@@ -104,6 +104,5 @@ describe("discover timeout", () => {
     expect(result.perSource["slow"]).toBe(0);
     expect(result.perSource["fast"]).toBe(1);
 
-    vi.doUnmock("@/lib/sources");
   });
 });
