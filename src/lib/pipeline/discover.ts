@@ -16,7 +16,7 @@ export interface DiscoverResult {
  */
 export async function discover(): Promise<DiscoverResult> {
   const started = Date.now();
-  const limit = pLimit(2);
+  const limit = pLimit(6); // one slot per source — all fan out in parallel
   const sources = allSources();
   const perSource: Record<string, number> = {};
   const errors: Record<string, string> = {};
