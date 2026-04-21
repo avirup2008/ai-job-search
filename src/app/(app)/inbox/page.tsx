@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import { db, schema } from "@/db";
-import { and, desc, gte, inArray, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 import { JobCard, type JobCardData } from "@/components/inbox/JobCard";
 import { QueueUrlForm } from "@/components/inbox/QueueUrlForm";
+import { WeeklyBriefBanner } from "@/components/inbox/WeeklyBriefBanner";
+import type { WeeklyBrief } from "@/lib/analytics/weekly-brief";
 import { LastVisitUpdater } from "./LastVisitUpdater";
 import "@/components/inbox/inbox.css";
 
@@ -160,7 +162,30 @@ export default async function InboxPage({
   const lastVisitRaw = cookieStore.get("disha_last_visit")?.value ?? null;
   const lastVisit = lastVisitRaw ? new Date(lastVisitRaw) : null;
 
-  const [jobs, counts] = await Promise.all([loadJobs(band, lastVisit), loadBandCounts()]);
+  const [jobs, counts, briefRows] = await Promise.all([
+    loadJobs(band, lastVisit),
+    loadBandCounts(),
+    db
+      .select({ stageMetrics: schema.runs.stageMetrics, startedAt: schema.runs.startedAt })
+      .from(schema.runs)
+      .where(eq(schema.runs.status, "weekly-brief"))
+      .orderBy(desc(schema.runs.startedAt))
+      .limit(1),
+  ]);
+
+  const briefRow = briefRows[0];
+  const briefStartedAt =
+    briefRow?.startedAt == null
+      ? null
+      : typeof briefRow.startedAt === "string"
+        ? new Date(briefRow.startedAt)
+        : briefRow.startedAt;
+  const briefFresh =
+    briefStartedAt != null &&
+    briefStartedAt.getTime() >= Date.now() - 7 * 86400000;
+  const latestBrief: WeeklyBrief | null = briefFresh
+    ? ((briefRow?.stageMetrics ?? null) as WeeklyBrief | null)
+    : null;
 
   const tabs: Array<{ key: Band; label: string; count: number }> = [
     { key: "all", label: "All", count: counts.all },
@@ -181,6 +206,8 @@ export default async function InboxPage({
           <p className="inbox-subtitle">{counts.all} role{counts.all === 1 ? "" : "s"}, sorted by fit</p>
         </div>
       </header>
+
+      {latestBrief && <WeeklyBriefBanner brief={latestBrief} />}
 
       <div className="inbox-toolbar">
         <div className="tab-group" role="tablist" aria-label="Filter by score band">

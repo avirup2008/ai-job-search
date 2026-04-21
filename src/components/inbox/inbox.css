@@ -375,3 +375,59 @@
   line-height: 1;
   flex-shrink: 0;
 }
+
+/* ── Weekly strategy brief banner ───────────────────────────── */
+.weekly-brief-banner {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.weekly-brief-banner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.weekly-brief-banner-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.weekly-brief-banner-week {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.weekly-brief-banner-stats {
+  display: flex;
+  gap: var(--s-6);
+}
+.weekly-brief-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.weekly-brief-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1;
+}
+.weekly-brief-stat-label {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.weekly-brief-banner-callout {
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 0;
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
