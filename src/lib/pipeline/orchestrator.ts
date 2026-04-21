@@ -50,7 +50,9 @@ export interface RunSummary {
 // under the common 50K ITPM limit. Observed run at 10 concurrent had 73%
 // silent failure rate due to rate limits; 3 keeps ~100% success.
 const RANK_CONCURRENCY = 3;
-const MAX_CV_PER_RUN = 5;
+// CV generation disabled in nightly run — pipeline was hitting Vercel's 300s hard limit.
+// Generate CVs on-demand via the admin panel instead.
+const MAX_CV_PER_RUN = 0;
 const CV_CONCURRENCY = 2;
 
 interface ClassifiedJob {
