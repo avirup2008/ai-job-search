@@ -1,10 +1,29 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { COOKIE_NAME } from "@/lib/auth/constants";
+import { checkRateLimit } from "@/lib/auth/rate-limit";
 
 const sha256hex = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
 
 export async function POST(request: Request) {
+  // Rate limiting — 10 attempts per IP per 15 minutes
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
+
+  const rateLimit = checkRateLimit(ip);
+  if (!rateLimit.allowed) {
+    const retryAfterSec = Math.ceil(rateLimit.retryAfterMs / 1000);
+    return NextResponse.json(
+      { error: "Too many login attempts. Try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(retryAfterSec) },
+      },
+    );
+  }
+
   const pw = process.env.DISHA_PASSWORD;
   if (!pw) {
     return NextResponse.json({ error: "server misconfigured" }, { status: 503 });

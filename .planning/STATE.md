@@ -113,3 +113,19 @@ Last activity: 2026-04-18
 **2026-04-18** Diagnosed Indeed NL source failure: Cloudflare 403 on RSS endpoint. Replaced with Apify `misceres/indeed-scraper` actor (free tier, ~$4.50/mo). `APIFY_API_TOKEN` set in Vercel + GitHub secrets. 5 sources live again. v2.0 milestone confirmed complete.
 
 **2026-04-18 (session 2)** Bug fix sprint: (1) Inbox showing 0 jobs — LEFT JOIN was excluding status='new' apps created by generate routes; fixed with AND condition in JOIN. (2) Migration 0004 (storage_url/format/mime_type/render_kind columns) was recorded as applied in Drizzle journal but never actually ran against Neon — applied manually via node+neon SDK. (3) Proof artifacts 504 timeout — reduced anti-AI loop retries 5→2, disabled secondary artifact generation, added 10s total cap on company scraper. (4) GeneratePanel refactored from shared state to per-row GenRow components enabling parallel generation. (5) Inbox header alignment + QueueUrlForm fixed width. (6) TopBar Paste a role button grouped with nav links. (7) Not a fit option added to pipeline stage dropdown (same flagged status as inbox button). v3 brainstorm completed: LinkedIn Profile Optimizer spec written and approved. **260418-dd27 SHIPPED** — LinkedIn Profile Optimizer: `linkedin_optimizations` table + PDF upload → single Sonnet call → rewrites (headline, about, experience, skills) with copy buttons + reasoning. Tab A within /profile page (`?tab=linkedin`). Verified. Commit 72c2509 pushed to main.
+
+
+---
+**Pre-compact 2026-04-19T12:50:09+02:00**
+
+
+---
+**Pre-compact 2026-04-19T18:48:26+02:00**
+
+
+---
+**Pre-compact 2026-04-20T22:04:09+02:00**
+
+
+---
+**Pre-compact 2026-04-21T12:44:25+02:00**
