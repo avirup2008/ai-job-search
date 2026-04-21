@@ -16,6 +16,7 @@ export interface JobCardData {
   strengths: string[] | null;
   gaps: string[] | null;
   dutchRequired: boolean;
+  isNew?: boolean;
 }
 
 function fmtDate(d: Date | string | null): string {
@@ -40,6 +41,7 @@ export function JobCard({ job }: { job: JobCardData }) {
       <Link href={`/inbox/${job.id}`} className="job-card-body">
         <div className="job-card-top">
           <span className="job-card-company">{job.companyName}</span>
+          {job.isNew && <span className="new-badge">New</span>}
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {job.previousTier != null && job.previousTier !== job.tier && (
               <span

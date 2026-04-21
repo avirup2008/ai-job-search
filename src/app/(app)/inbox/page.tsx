@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { db, schema } from "@/db";
 import { and, desc, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 import { JobCard, type JobCardData } from "@/components/inbox/JobCard";
 import { QueueUrlForm } from "@/components/inbox/QueueUrlForm";
+import { LastVisitUpdater } from "./LastVisitUpdater";
 import "@/components/inbox/inbox.css";
 
 type GapAnalysis = { strengths?: string[]; gaps?: string[] } | null;
@@ -30,7 +32,7 @@ function bandFilter(band: Band) {
   }
 }
 
-async function loadJobs(band: Band): Promise<JobCardData[]> {
+async function loadJobs(band: Band, lastVisit: Date | null): Promise<JobCardData[]> {
   const rows = await db
     .select({
       id: schema.jobs.id,
@@ -39,6 +41,7 @@ async function loadJobs(band: Band): Promise<JobCardData[]> {
       source: schema.jobs.source,
       sourceUrl: schema.jobs.sourceUrl,
       postedAt: schema.jobs.postedAt,
+      discoveredAt: schema.jobs.discoveredAt,
       tier: schema.jobs.tier,
       previousTier: schema.jobs.previousTier,
       fitScore: schema.jobs.fitScore,
@@ -56,6 +59,14 @@ async function loadJobs(band: Band): Promise<JobCardData[]> {
   return rows.map((r) => {
     const ga = (r.gapAnalysis ?? null) as GapAnalysis;
     const scoreNum = r.fitScore == null ? null : Number(r.fitScore);
+    const discoveredAt =
+      r.discoveredAt == null
+        ? null
+        : typeof r.discoveredAt === "string"
+          ? new Date(r.discoveredAt)
+          : r.discoveredAt;
+    const isNew =
+      lastVisit != null && discoveredAt != null && discoveredAt > lastVisit;
     return {
       id: r.id,
       title: r.title,
@@ -70,6 +81,7 @@ async function loadJobs(band: Band): Promise<JobCardData[]> {
       strengths: ga?.strengths ?? null,
       gaps: ga?.gaps ?? null,
       dutchRequired: r.dutchRequired,
+      isNew,
     };
   });
 }
@@ -143,7 +155,12 @@ export default async function InboxPage({
 
   const { band: bandRaw } = await searchParams;
   const band = parseBand(bandRaw);
-  const [jobs, counts] = await Promise.all([loadJobs(band), loadBandCounts()]);
+
+  const cookieStore = await cookies();
+  const lastVisitRaw = cookieStore.get("disha_last_visit")?.value ?? null;
+  const lastVisit = lastVisitRaw ? new Date(lastVisitRaw) : null;
+
+  const [jobs, counts] = await Promise.all([loadJobs(band, lastVisit), loadBandCounts()]);
 
   const tabs: Array<{ key: Band; label: string; count: number }> = [
     { key: "all", label: "All", count: counts.all },
@@ -157,6 +174,7 @@ export default async function InboxPage({
 
   return (
     <>
+      <LastVisitUpdater />
       <header className="app-header">
         <div>
           <h1 className="inbox-title">Your matches</h1>

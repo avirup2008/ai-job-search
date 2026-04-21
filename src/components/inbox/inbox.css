@@ -360,3 +360,18 @@
 }
 .drift-badge[data-direction="up"]   { background: rgba(10, 123, 52, 0.12); color: #0a7b34; }
 .drift-badge[data-direction="down"] { background: rgba(163, 75, 0, 0.12); color: #a34b00; }
+
+/* ── New-since-last-visit badge ─────────────────────────────── */
+.new-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-a15);
+  border-radius: var(--r-pill);
+  padding: 2px 6px;
+  line-height: 1;
+  flex-shrink: 0;
+}
