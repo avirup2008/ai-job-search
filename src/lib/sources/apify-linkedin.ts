@@ -35,7 +35,7 @@ const KEYWORDS = [
 
 const MAX_ITEMS_PER_URL = 10;
 const POLL_INTERVAL_MS = 5_000;
-const MAX_POLL_ATTEMPTS = 30; // 150s max — LinkedIn needs browser rendering
+const MAX_POLL_ATTEMPTS = 18; // 90s max — enough (~45s observed in test); fail gracefully if slower
 
 // ---------------------------------------------------------------------------
 // Data mapping — exported for unit testing.
