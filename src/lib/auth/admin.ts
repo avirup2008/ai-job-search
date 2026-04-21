@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
-import { createHash } from "node:crypto";
 import { COOKIE_NAME } from "@/lib/auth/constants";
+import { computeSessionToken } from "@/lib/auth/session-token";
 
 /**
  * Server-side auth check for Server Actions and API routes.
@@ -16,6 +16,6 @@ export async function isAdmin(): Promise<boolean> {
   const cookieValue = jar.get(COOKIE_NAME)?.value;
   if (!cookieValue) return false;
 
-  const expected = createHash("sha256").update(pw).digest("hex");
+  const expected = computeSessionToken(pw);
   return cookieValue === expected;
 }

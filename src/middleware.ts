@@ -23,8 +23,10 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
   const cookieValue = request.cookies.get(COOKIE_NAME)?.value;
   if (!cookieValue) return false;
 
-  // Edge runtime — uses Web Crypto; see src/lib/auth/constants.ts for Node runtime equivalent.
-  const encoded = new TextEncoder().encode(pw);
+  // Edge runtime — uses Web Crypto; see src/lib/auth/session-token.ts for Node runtime equivalent.
+  // SESSION_NONCE is appended so rotating it in Vercel env vars invalidates all active sessions.
+  const nonce = process.env.SESSION_NONCE ?? "";
+  const encoded = new TextEncoder().encode(pw + nonce);
   const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const expectedHex = hashArray

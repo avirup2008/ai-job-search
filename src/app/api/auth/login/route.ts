@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { COOKIE_NAME } from "@/lib/auth/constants";
+import { computeSessionToken } from "@/lib/auth/session-token";
 import { checkRateLimit } from "@/lib/auth/rate-limit";
 
-const sha256hex = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
 
 export async function POST(request: Request) {
   // Rate limiting — 10 attempts per IP per 15 minutes
@@ -36,8 +36,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid request" }, { status: 400 });
   }
 
-  const expectedHash = sha256hex(pw);
-  const submittedHash = sha256hex(body.password ?? "");
+  const expectedHash = computeSessionToken(pw);
+  const submittedHash = computeSessionToken(body.password ?? "");
 
   const match = crypto.timingSafeEqual(
     Buffer.from(expectedHash),
