@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq, and } from "drizzle-orm";
 import { computeDedupeHash } from "@/lib/pipeline/dedupe";
-import { isBlockedHost } from "@/lib/http/safe-fetch";
+import { validateFetchUrl } from "@/lib/http/safe-fetch";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -85,11 +85,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Missing required field: url" }, { status: 400 });
   }
 
-  if (!rawUrl.startsWith("http://") && !rawUrl.startsWith("https://")) {
-    return NextResponse.json(
-      { ok: false, error: "URL must start with http:// or https://" },
-      { status: 400 },
-    );
+  const urlValidationError = validateFetchUrl(rawUrl);
+  if (urlValidationError) {
+    return NextResponse.json({ ok: false, error: urlValidationError }, { status: 400 });
   }
 
   if (rawUrl.includes("linkedin.com")) {
@@ -97,10 +95,6 @@ export async function POST(req: Request) {
       { ok: false, error: "LinkedIn requires login to view job listings. Please copy and paste the job description text directly instead of the URL." },
       { status: 400 },
     );
-  }
-
-  if (isBlockedHost(rawUrl)) {
-    return NextResponse.json({ ok: false, error: "URL host is not allowed" }, { status: 400 });
   }
 
   try {
