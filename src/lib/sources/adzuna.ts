@@ -1,5 +1,6 @@
 import { loadSourcesEnv } from "@/lib/env";
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 interface AdzunaApiJob {
   id: string;
@@ -30,18 +31,6 @@ export function normalizeAdzuna(j: AdzunaApiJob): RawJob {
   };
 }
 
-// NL marketing keywords — can be extended later via profile.preferences.roleFamilies
-const KEYWORDS = [
-  "marketing automation",
-  "CRM marketing",
-  "email marketing",
-  "digital marketing",
-  "HubSpot",
-  "growth marketing",
-  "paid media",
-  "marketing manager",
-] as const;
-
 const MAX_PAGES = 2;        // 2 × 50 = 100 results per keyword
 const RESULTS_PER_PAGE = 50;
 const MAX_DAYS_OLD = 14;
@@ -54,7 +43,7 @@ export class AdzunaSource implements JobSource {
     const out: RawJob[] = [];
     const seen = new Set<string>();
 
-    for (const kw of KEYWORDS) {
+    for (const kw of SEARCH_KEYWORDS) {
       for (let page = 1; page <= MAX_PAGES; page++) {
         const url = new URL(`https://api.adzuna.com/v1/api/jobs/nl/search/${page}`);
         url.searchParams.set("app_id", env.ADZUNA_APP_ID);

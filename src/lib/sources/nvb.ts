@@ -4,6 +4,7 @@
 // Fixture at tests/fixtures/nvb-search.json (captured from ?query=marketing&limit=10).
 
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 const API_BASE =
   "https://api.nationalevacaturebank.nl/api/jobs/v3/sites/nationalevacaturebank.nl";
@@ -11,15 +12,6 @@ const SITE_BASE = "https://www.nationalevacaturebank.nl";
 
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
-
-const KEYWORDS = [
-  "marketing automation",
-  "CRM marketing",
-  "email marketing",
-  "HubSpot",
-  "growth marketing",
-  "digital marketing",
-] as const;
 
 const DELAY_MS = 1500;
 const PAGE_LIMIT = 20;
@@ -150,7 +142,7 @@ export class NvbSource implements JobSource {
     const out: RawJob[] = [];
     const seen = new Set<string>();
 
-    for (const kw of KEYWORDS) {
+    for (const kw of SEARCH_KEYWORDS) {
       const url = new URL(`${API_BASE}/jobs`);
       url.searchParams.set("query", kw);
       url.searchParams.set("limit", String(PAGE_LIMIT));

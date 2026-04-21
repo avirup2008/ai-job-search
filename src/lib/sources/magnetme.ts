@@ -4,19 +4,11 @@
 // Fixture at tests/fixtures/magnetme-search.html (captured from /en/opportunities?query=marketing).
 
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 const BASE = "https://magnet.me";
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
-
-const KEYWORDS = [
-  "marketing automation",
-  "CRM marketing",
-  "email marketing",
-  "HubSpot",
-  "growth marketing",
-  "digital marketing",
-] as const;
 
 const DELAY_MS = 1500;
 
@@ -245,7 +237,7 @@ export class MagnetmeSource implements JobSource {
     const out: RawJob[] = [];
     const seen = new Set<string>();
 
-    for (const kw of KEYWORDS) {
+    for (const kw of SEARCH_KEYWORDS) {
       const url = `${BASE}/en/opportunities?query=${encodeURIComponent(kw)}`;
       let res: Response;
       try {

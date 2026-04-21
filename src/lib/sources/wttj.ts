@@ -10,20 +10,12 @@
 // Budget: free (Algolia search hits the CDN edge, no account required).
 
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 const ALGOLIA_APP_ID = "CSEKHVMS53";
 const ALGOLIA_SEARCH_KEY = "4bd8f6215d0cc52b26430765769e65a0";
 const ALGOLIA_INDEX = "wttj_jobs_production_en";
 const ALGOLIA_URL = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOLIA_INDEX}/query`;
-
-const KEYWORDS = [
-  "marketing automation",
-  "CRM marketing",
-  "email marketing",
-  "HubSpot",
-  "campaign manager",
-  "marketing operations",
-] as const;
 
 const HITS_PER_PAGE = 20;
 const NL_FILTER = "offices.country_code:NL";
@@ -93,7 +85,7 @@ export class WttjSource implements JobSource {
     const out: RawJob[] = [];
     const seen = new Set<string>();
 
-    for (const keyword of KEYWORDS) {
+    for (const keyword of SEARCH_KEYWORDS) {
       try {
         const hits = await this.search(keyword);
         for (const hit of hits) {

@@ -1,5 +1,6 @@
 import { loadSourcesEnv } from "@/lib/env";
 import type { JobSource, RawJob } from "./types";
+import { SEARCH_KEYWORDS } from "./keywords";
 
 interface JoobleApiJob {
   id: number | string;
@@ -33,15 +34,6 @@ export function normalizeJooble(j: JoobleApiJob): RawJob {
   };
 }
 
-const KEYWORDS = [
-  "marketing automation",
-  "CRM marketing",
-  "email marketing",
-  "HubSpot",
-  "growth marketing",
-  "digital marketing",
-] as const;
-
 const RESULTS_PER_PAGE = 50;
 
 export class JoobleSource implements JobSource {
@@ -52,7 +44,7 @@ export class JoobleSource implements JobSource {
     const out: RawJob[] = [];
     const seen = new Set<string>();
 
-    for (const kw of KEYWORDS) {
+    for (const kw of SEARCH_KEYWORDS) {
       const res = await fetch(`https://jooble.org/api/${env.JOOBLE_API_KEY}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
