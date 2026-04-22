@@ -1,10 +1,12 @@
 import type { JobSource, RawJob } from "./types";
 import { AdzunaSource } from "./adzuna";
-import { ApifyIndeedSource } from "./apify-indeed";
-import { ApifyLinkedInSource } from "./apify-linkedin";
-// IndeedNlSource (RSS) disabled: Cloudflare blocks server-side fetches with 403.
-// Replaced by ApifyIndeedSource which bypasses via managed browser.
-// import { IndeedNlSource } from "./indeed-nl";
+// ApifyIndeedSource disabled: Apify free tier exhausted until 2026-05-18.
+// import { ApifyIndeedSource } from "./apify-indeed";
+// ApifyLinkedInSource disabled: Apify free tier exhausted until 2026-05-18.
+// import { ApifyLinkedInSource } from "./apify-linkedin";
+// IndeedNlSource (RSS) re-enabled as fallback while Apify is unavailable.
+// Was blocked by Cloudflare in Apr 2026 — worth retrying.
+import { IndeedNlSource } from "./indeed-nl";
 import { JoobleSource } from "./jooble";
 import { MagnetmeSource } from "./magnetme";
 import { NvbSource } from "./nvb";
@@ -15,8 +17,7 @@ export type { JobSource, RawJob };
 export function allSources(): JobSource[] {
   return [
     new AdzunaSource(),
-    new ApifyIndeedSource(),
-    new ApifyLinkedInSource(),
+    new IndeedNlSource(),
     new JoobleSource(),
     new MagnetmeSource(),
     new NvbSource(),
