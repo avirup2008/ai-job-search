@@ -11,6 +11,7 @@ import { JoobleSource } from "./jooble";
 import { MagnetmeSource } from "./magnetme";
 import { NvbSource } from "./nvb";
 import { WttjSource } from "./wttj";
+import { LinkedInGuestSource } from "./linkedin-guest";
 
 export type { JobSource, RawJob };
 
@@ -19,6 +20,7 @@ export function allSources(): JobSource[] {
     new AdzunaSource(),
     new IndeedNlSource(),
     new JoobleSource(),
+    new LinkedInGuestSource(),
     new MagnetmeSource(),
     new NvbSource(),
     new WttjSource(),
