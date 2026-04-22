@@ -26,7 +26,7 @@ export async function storeArtifact(params: {
   const blob = await put(
     `artifacts/${slug}.html`,
     safeHtml,
-    { access: "private", contentType: "text/html; charset=utf-8", addRandomSuffix: false },
+    { access: "public", contentType: "text/html; charset=utf-8", addRandomSuffix: false },
   );
 
   const [row] = await db
@@ -77,7 +77,7 @@ export async function storeCv(params: {
     `cvs/${slug}.docx`,
     params.docxBuffer,
     {
-      access: "private",
+      access: "public",
       contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       addRandomSuffix: false,
     },
@@ -138,7 +138,7 @@ export async function storeCoverLetter(params: {
     `covers/${slug}.md`,
     params.markdown,
     {
-      access: "private",
+      access: "public",
       contentType: "text/markdown; charset=utf-8",
       addRandomSuffix: false,
     },
@@ -192,7 +192,7 @@ export async function storeScreeningQA(params: {
     `screening-qa/${slug}.md`,
     params.markdown,
     {
-      access: "private",
+      access: "public",
       contentType: "text/markdown; charset=utf-8",
       addRandomSuffix: false,
     },
@@ -246,7 +246,7 @@ export async function storeInterviewPrep(params: {
     `interview-prep/${slug}.md`,
     params.markdown,
     {
-      access: "private",
+      access: "public",
       contentType: "text/markdown; charset=utf-8",
       addRandomSuffix: false,
     },
