@@ -1,6 +1,6 @@
 import pLimit from "p-limit";
 import { db, schema } from "@/db";
-import { eq, sql, inArray, and } from "drizzle-orm";
+import { eq, sql, inArray, and, isNotNull } from "drizzle-orm";
 import { discover } from "./discover";
 import { clusterJobs, computeDedupeHash } from "./dedupe";
 import { applyHardFilters, type FilterReason } from "./filters";
@@ -191,6 +191,14 @@ export async function runNightly(): Promise<RunSummary> {
       .from(schema.jobs);
     const existingSet = new Set(existingRows.map((r) => `${r.source}|${r.sourceExternalId ?? ""}`));
 
+    const existingHashRows = await db
+      .select({ dedupeHash: schema.jobs.dedupeHash })
+      .from(schema.jobs)
+      .where(isNotNull(schema.jobs.dedupeHash));
+    const existingHashSet = new Set(
+      existingHashRows.map((r) => r.dedupeHash).filter(Boolean) as string[]
+    );
+
     // 3. Pre-pass: upsert unique companies sequentially (avoids races)
     const companyNames = new Set<string>();
     for (const c of clusters) {
@@ -226,18 +234,23 @@ export async function runNightly(): Promise<RunSummary> {
 
     for (const cluster of clusters) {
       const j = cluster.canonical;
-      if (existingSet.has(`${j.source}|${j.sourceExternalId ?? ""}`)) {
-        skipped++;
-        continue;
-      }
 
-      const companyId = j.companyName ? companyIdByName.get(j.companyName) ?? null : null;
       const dedupeHash = computeDedupeHash({
         companyName: j.companyName,
         title: j.title,
         location: j.location,
         postedAt: j.postedAt,
       });
+
+      if (
+        existingSet.has(`${j.source}|${j.sourceExternalId ?? ""}`) ||
+        existingHashSet.has(dedupeHash)
+      ) {
+        skipped++;
+        continue;
+      }
+
+      const companyId = j.companyName ? companyIdByName.get(j.companyName) ?? null : null;
       const hardFilter = applyHardFilters({
         title: j.title,
         jdText: j.jdText,

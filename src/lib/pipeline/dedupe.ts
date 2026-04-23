@@ -59,10 +59,13 @@ export interface JobCluster {
 
 // Higher rank = preferred canonical. Order chosen by quality of JD text + API reliability.
 const SOURCE_RANK = new Map<string, number>([
+  ["linkedin-guest", 5], // LinkedIn JDs are typically complete
   ["adzuna", 4],
   ["nvb", 3],
   ["magnetme", 2],
+  ["wttj", 2],
   ["jooble", 1],
+  ["indeed-nl", 1],
 ]);
 
 export function clusterJobs(jobs: RawJob[]): JobCluster[] {
