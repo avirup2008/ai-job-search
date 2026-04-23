@@ -102,6 +102,16 @@ export default function TriggerRunClient() {
           return `Batch: ${b.updated ?? 0} scored — €${(b.costEur ?? 0).toFixed(4)} — ${secs}s — ${progress}${suffix}`;
         }}
       />
+      <ActionButton
+        label="Remove duplicate jobs"
+        runningLabel="Deduplicating…"
+        endpoint="/api/admin/dedup-cleanup"
+        formatResult={(body) => {
+          const b = body as { deleted?: number; duplicateGroups?: number };
+          if (!b.duplicateGroups) return `No duplicates found ✓`;
+          return `Removed ${b.deleted ?? 0} duplicate jobs across ${b.duplicateGroups} groups ✓`;
+        }}
+      />
     </div>
   );
 }
