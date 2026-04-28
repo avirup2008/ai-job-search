@@ -431,3 +431,57 @@
   border-top: 1px solid var(--border);
   line-height: 1.5;
 }
+
+/* ── Flag reason picker (inline on job cards) ────────────────── */
+.flag-reason-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+.flag-reason-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  margin: 0;
+}
+.flag-reason-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flag-reason-chip {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text-1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background var(--dur-150) var(--ease-io), border-color var(--dur-150) var(--ease-io);
+}
+.flag-reason-chip:hover:not(:disabled) {
+  background: var(--accent-wash);
+  border-color: var(--accent-a15);
+  color: var(--accent);
+}
+.flag-reason-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+.flag-reason-cancel {
+  font-size: 11px;
+  font-family: var(--font-body);
+  color: var(--text-3);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+}
+.flag-reason-cancel:hover { color: var(--text-2); }
