@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { saveJobToPipeline, flagJobAsBadMatch } from "@/app/(app)/pipeline/actions";
+import type { FlagReason } from "@/lib/scoring/multipliers";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
@@ -24,6 +25,15 @@ const STATUS_COLORS: Record<string, string> = {
   expired: "var(--text-3)",
 };
 
+const FLAG_REASON_LABELS: { value: FlagReason; label: string }[] = [
+  { value: "distance",           label: "Too far / wrong location" },
+  { value: "dutch_required",     label: "Dutch required" },
+  { value: "european_language",  label: "European language required" },
+  { value: "skill_mismatch",     label: "Wrong skill set" },
+  { value: "seniority_mismatch", label: "Too senior / too junior" },
+  { value: "other",              label: "Other" },
+];
+
 type Props = {
   jobId: string;
   sourceUrl: string;
@@ -34,9 +44,15 @@ type Props = {
 export function DetailAsideActions({ jobId, sourceUrl, source, status }: Props) {
   const [isSavePending, startSaveTransition] = useTransition();
   const [isFlagPending, startFlagTransition] = useTransition();
+  const [showReasonPicker, setShowReasonPicker] = useState(false);
   const anyPending = isSavePending || isFlagPending;
 
   const inPipeline = status != null && status !== "new";
+
+  function confirmFlag(reason: FlagReason) {
+    setShowReasonPicker(false);
+    startFlagTransition(() => flagJobAsBadMatch(jobId, reason));
+  }
 
   return (
     <div className="detail-aside-actions">
@@ -66,15 +82,40 @@ export function DetailAsideActions({ jobId, sourceUrl, source, status }: Props) 
         </button>
       )}
 
-      {/* Flag as not a fit — only when not already flagged/expired */}
-      {status == null && (
+      {/* Flag as not a fit — only when not already in pipeline */}
+      {status == null && !showReasonPicker && (
         <button
           className="detail-aside-flag-btn"
           disabled={anyPending}
-          onClick={() => startFlagTransition(() => flagJobAsBadMatch(jobId))}
+          onClick={() => setShowReasonPicker(true)}
         >
           {isFlagPending ? "…" : "Not a fit"}
         </button>
+      )}
+
+      {/* Inline reason picker */}
+      {showReasonPicker && (
+        <div className="detail-aside-reason-picker">
+          <p className="detail-aside-reason-label">Why isn&rsquo;t this a fit?</p>
+          <div className="detail-aside-reason-chips">
+            {FLAG_REASON_LABELS.map(({ value, label }) => (
+              <button
+                key={value}
+                className="detail-aside-reason-chip"
+                disabled={isFlagPending}
+                onClick={() => confirmFlag(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <button
+            className="detail-aside-reason-cancel"
+            onClick={() => setShowReasonPicker(false)}
+          >
+            Cancel
+          </button>
+        </div>
       )}
     </div>
   );

@@ -8,8 +8,10 @@ import { generateInterviewPrep } from "@/lib/generate/interview-prep";
 import { storeInterviewPrep } from "@/lib/generate/storage";
 import {
   applyOutcome,
+  applyFlaggedOutcome,
   readMultipliersFromProfile,
   writeMultipliersToProfile,
+  type FlagReason,
 } from "@/lib/scoring/multipliers";
 
 export async function updateApplicationStatus(applicationId: string, status: PipelineStage) {
@@ -129,7 +131,7 @@ export async function saveJobToPipeline(jobId: string) {
   revalidatePath(`/inbox/${jobId}`);
 }
 
-export async function flagJobAsBadMatch(jobId: string) {
+export async function flagJobAsBadMatch(jobId: string, reason?: FlagReason) {
   if (!(await isAdmin())) throw new Error("forbidden");
   const existing = await db
     .select()
@@ -139,14 +141,69 @@ export async function flagJobAsBadMatch(jobId: string) {
   if (existing.length > 0) {
     await db
       .update(schema.applications)
-      .set({ status: "flagged", lastEventAt: new Date() })
+      .set({ status: "flagged", flagReason: reason ?? null, lastEventAt: new Date() })
       .where(eq(schema.applications.id, existing[0].id));
   } else {
-    await db.insert(schema.applications).values({ jobId, status: "flagged" });
+    await db.insert(schema.applications).values({ jobId, status: "flagged", flagReason: reason ?? null });
   }
+
+  // Feedback learning: adjust multipliers for content-quality reasons
+  if (reason) {
+    try {
+      const [jobRow] = await db
+        .select({ seniority: schema.jobs.seniority, gapAnalysis: schema.jobs.gapAnalysis })
+        .from(schema.jobs)
+        .where(eq(schema.jobs.id, jobId))
+        .limit(1);
+      if (jobRow) {
+        const ga = jobRow.gapAnalysis as { industries?: unknown } | null;
+        const industries = Array.isArray(ga?.industries)
+          ? (ga!.industries as unknown[]).filter((s): s is string => typeof s === "string")
+          : [];
+        const [profileRow] = await db
+          .select({ id: schema.profile.id, preferences: schema.profile.preferences })
+          .from(schema.profile)
+          .limit(1);
+        if (profileRow) {
+          const current = readMultipliersFromProfile(profileRow.preferences);
+          const next = applyFlaggedOutcome(current, reason, industries, jobRow.seniority ?? "");
+          const updatedPrefs = writeMultipliersToProfile(profileRow.preferences, next);
+          await db
+            .update(schema.profile)
+            .set({ preferences: updatedPrefs })
+            .where(eq(schema.profile.id, profileRow.id));
+        }
+      }
+    } catch (err) {
+      console.error("[flag-multiplier-hook]", err);
+    }
+  }
+
   revalidatePath("/pipeline");
   revalidatePath("/inbox");
   revalidatePath(`/inbox/${jobId}`);
+}
+
+/**
+ * Paste or replace the job description for a job that had missing/thin JD text.
+ * Clears fitScore/tier/gap so the next rescore batch picks it up fresh.
+ */
+export async function patchJobJd(jobId: string, jdText: string) {
+  if (!(await isAdmin())) throw new Error("forbidden");
+  const trimmed = jdText.trim();
+  if (!trimmed) throw new Error("jdText is empty");
+  await db
+    .update(schema.jobs)
+    .set({
+      jdText: trimmed,
+      fitScore: null,
+      tier: null,
+      gapAnalysis: null,
+      fitBreakdown: null,
+    })
+    .where(eq(schema.jobs.id, jobId));
+  revalidatePath(`/inbox/${jobId}`);
+  revalidatePath("/inbox");
 }
 
 export async function markAsExpired(jobId: string) {

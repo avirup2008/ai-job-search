@@ -51,6 +51,33 @@ const STEP: Record<"rejected" | "interview" | "offer", number> = {
 };
 
 // --------------------------------------------------------------------------
+// Flag reason constants + learning config
+// --------------------------------------------------------------------------
+
+export const FLAG_REASONS = [
+  "distance",
+  "dutch_required",
+  "european_language",
+  "skill_mismatch",
+  "seniority_mismatch",
+  "other",
+] as const;
+
+export type FlagReason = typeof FLAG_REASONS[number];
+
+/**
+ * Multiplier delta applied when a job is flagged with a given reason.
+ * Hard-constraint reasons (distance, language) don't adjust the model —
+ * they should be hard-filtered upstream. Content reasons do.
+ */
+const FLAG_STEP: Partial<Record<FlagReason, number>> = {
+  skill_mismatch: -MULTIPLIER_STEP,         // −0.05: mild penalty
+  seniority_mismatch: -MULTIPLIER_STEP * 2,  // −0.10: stronger — seniority is very consistent
+  other: -MULTIPLIER_STEP,                   // −0.05: mild generic penalty
+  // distance / dutch_required / european_language → no multiplier change
+};
+
+// --------------------------------------------------------------------------
 // applyOutcome
 // --------------------------------------------------------------------------
 
@@ -75,6 +102,42 @@ export function applyOutcome(
 
   if (jobIndustries.length === 0 && jobSeniority) {
     // Fallback: seniority-only bucket
+    const key = bucketKey("", jobSeniority);
+    const prev = next.byIndustrySeniority[key] ?? 1.0;
+    next.byIndustrySeniority[key] = clamp(prev + delta, MULTIPLIER_MIN, MULTIPLIER_MAX);
+  } else {
+    for (const industry of jobIndustries) {
+      const key = bucketKey(industry, jobSeniority);
+      const prev = next.byIndustrySeniority[key] ?? 1.0;
+      next.byIndustrySeniority[key] = clamp(prev + delta, MULTIPLIER_MIN, MULTIPLIER_MAX);
+    }
+  }
+
+  return next;
+}
+
+// --------------------------------------------------------------------------
+// applyFlaggedOutcome
+// --------------------------------------------------------------------------
+
+/**
+ * Adjust multipliers when a job is flagged as "not a fit" with a reason.
+ * Only content-quality reasons (skill/seniority mismatch, other) update the
+ * scoring model. Hard-constraint reasons (distance, language) are a no-op
+ * here — they should be caught by hard filters upstream.
+ */
+export function applyFlaggedOutcome(
+  current: ScoringMultipliers,
+  reason: FlagReason,
+  jobIndustries: string[],
+  jobSeniority: string,
+): ScoringMultipliers {
+  const delta = FLAG_STEP[reason];
+  if (delta === undefined) return current; // hard-constraint reason — no scoring change
+
+  const next = structuredClone(current) as ScoringMultipliers;
+
+  if (jobIndustries.length === 0 && jobSeniority) {
     const key = bucketKey("", jobSeniority);
     const prev = next.byIndustrySeniority[key] ?? 1.0;
     next.byIndustrySeniority[key] = clamp(prev + delta, MULTIPLIER_MIN, MULTIPLIER_MAX);

@@ -15,8 +15,12 @@ export type PurgeResult = {
   elapsedMs: number;
 };
 
+/** Jobs in pipeline (saved/rejected/discarded) with no activity for 60 days. */
 const RETENTION_DAYS = 60;
-const ORPHAN_RETENTION_DAYS = 180;
+/** Jobs in inbox (status "new") with no action for 14 days — stale listings. */
+const STALE_NEW_DAYS = 14;
+/** Jobs never touched (no application row) expire after 14 days. */
+const ORPHAN_RETENTION_DAYS = 14;
 const PURGE_STATUSES = new Set(["new", "saved", "discarded", "rejected"]);
 // PROTECTED_STATUSES is implicit: any status NOT in PURGE_STATUSES protects its job forever.
 // Concretely those are: applied, interviewing, offered.
@@ -36,7 +40,8 @@ export async function selectPurgeCandidates(now: Date): Promise<{
   applicationIds: string[];
   documents: Array<{ id: string; blobUrlDocx: string | null; blobUrlPdf: string | null }>;
 }> {
-  const cutoff = new Date(now.getTime() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const retentionCutoff = new Date(now.getTime() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const staleNewCutoff  = new Date(now.getTime() - STALE_NEW_DAYS * 24 * 60 * 60 * 1000);
 
   // 1. Pull every application row's minimal state.
   const apps = await db
@@ -69,7 +74,13 @@ export async function selectPurgeCandidates(now: Date): Promise<{
   for (const [jobId, group] of byJob.entries()) {
     const allPurgeable = group.apps.every((a) => PURGE_STATUSES.has(a.status));
     if (!allPurgeable) continue;
+
+    // Jobs where every app is "new" (sitting in inbox untouched) → 14-day cutoff.
+    // All other purgeable statuses (saved, rejected, discarded) → 60-day cutoff.
+    const allNew = group.apps.every((a) => a.status === "new");
+    const cutoff = allNew ? staleNewCutoff : retentionCutoff;
     if (group.maxLastEventAt >= cutoff) continue;
+
     jobIds.push(jobId);
     for (const a of group.apps) applicationIds.push(a.id);
   }

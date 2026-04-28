@@ -72,6 +72,8 @@ export const applications = pgTable("applications", {
   appliedAt: timestamp("applied_at", { withTimezone: true }),
   lastEventAt: timestamp("last_event_at", { withTimezone: true }).defaultNow().notNull(),
   notes: text("notes"),
+  /** Why the user flagged this job as "not a fit". One of the FLAG_REASONS constants. */
+  flagReason: text("flag_reason"),
 });
 
 export const experiments = pgTable("experiments", {

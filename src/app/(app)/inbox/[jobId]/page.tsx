@@ -9,6 +9,7 @@ import { InterviewPromptPanel } from "@/components/job-detail/InterviewPromptPan
 import { InterviewBriefDownload } from "@/components/job-detail/InterviewBriefDownload";
 import { InterviewWeakPoints } from "@/components/job-detail/InterviewWeakPoints";
 import { DetailAsideActions } from "@/components/job-detail/DetailAsideActions";
+import { PasteJdPanel } from "@/components/job-detail/PasteJdPanel";
 import "@/components/job-detail/detail.css";
 
 type FitBreakdown = { skills?: number; tools?: number; seniority?: number; industry?: number } | null;
@@ -200,6 +201,7 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
             <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="jd-source-link">
               Read full listing on {job.source} &#8599;
             </a>
+            <PasteJdPanel jobId={jobId} jdText={job.jdText ?? ""} />
           </section>
 
           {/* 5. About the company — snapshot from cache only */}
